@@ -15,7 +15,7 @@ Se pretende propiciar el conocimiento requerido para que se pueda replicar el pr
 - Procesador con arquitectura x86
 - Memoria RAM de 1GB
 - Espacio libre en el disco duro de 2GB
-- Pantalla (opcional)
+- Pantalla
 - Teclado (opcional)
 ### Requisitos de Software 
 - Sistema Operativo compatible con Fortran
