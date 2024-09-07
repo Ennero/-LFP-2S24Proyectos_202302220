@@ -23,15 +23,23 @@ def abrir():
 
 
 def guardar(): #Probando nada más
+
+    #Esto lo ando usando para actualizar la bandera
     cambio=PhotoImage(file=rutaGrafica)
+    cambio=cambio.subsample(5,7)
     flag.config(image=cambio)
-    pass
+    flag.image=cambio
+    
+    
 
 def guardarComo():
     pass
 
 def analizar():
-    pass
+    
+
+
+
     """#agarra el dato que tiene el campo de entrada
     dato=entrada.get()
 
