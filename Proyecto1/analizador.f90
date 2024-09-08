@@ -7,6 +7,10 @@ program procesando
 
 
 
+
+
+
+    
     !Imprimo los resultados delimitados por una coma para que los lea phyton
     print *, rutaGrafica,',',rutaBandera,',', pais, ',', entero_a_cadena(poblacion)
 contains

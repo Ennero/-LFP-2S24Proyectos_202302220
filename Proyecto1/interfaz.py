@@ -13,16 +13,15 @@ rutaBandera="C:/banderas/ohio.png"
 guardado=False
 
 
-def acerca_de():
+def acerca_de(): #Función para mostrar la información del autor (la mia)
     messagebox.showinfo("Acerca de","Nombre: Enner Esaí Mendizabal Castro; Carné: 202302220; Curso: Lenguajes Formales y de Programación; Sección: B+")
 
-
 def abrir():
-    global ruta, guardado
-    info.config(text="Abriendo archivo...", foreground="black")
+    global ruta, guardado #Uso las variables globales
+    info.config(text="Abriendo archivo...", foreground="black") #Mensaje que dice el proceso
     ruta=filedialog.askopenfilename(title="Abrir archivo", filetypes=(("Archivos .ORG", "*.org"),)) #Solo acepta archivos .org
     if ruta != "": #Si la ruta no está vacía
-        guardado=True
+        guardado=True #Cambio el estado de guardado
         try:
             with open(ruta, "r", encoding="utf-8") as archivo: #Abro el archivo
                 cuerpo=archivo.read() #Leo el archivo
@@ -34,51 +33,56 @@ def abrir():
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo abrir el archivo: {str(e)}")
     else:
-        info.config(text="No se seleccionó ningún archivo", foreground="red")
-        
+        info.config(text="No se seleccionó ningún archivo", foreground="red") #Mensaje de error
 
-
-def guardar(): #Probando nada más
-    global ruta, guardado
-    info.config(text="Guardando archivo...", foreground="black")
-    """#Esto lo ando usando para actualizar la bandera
-    cambio=PhotoImage(file=rutaGrafica)
-    cambio=cambio.subsample(5,7)
-    flag.config(image=cambio)
-    flag.image=cambio
-    #Esto lo ando usando para actualizar la información del país"""
+def guardar(): #Función para guardar el archivo
+    global ruta, guardado #Uso las variables globales
+    info.config(text="Guardando archivo...", foreground="black") #Mensaje que dice el proceso
     if guardado:
         try:
-            with open(ruta,"w", encoding="utf-8") as archivo:
-                archivo.write(entrada.get("1.0", tk.END))
-            info.config(text="Se guardó el archivo correctamente", foreground="green")
+            with open(ruta,"w", encoding="utf-8") as archivo: #Abro el archivo
+                archivo.write(entrada.get("1.0", tk.END)) #Escribo el contenido del editor de texto en el archivo
+            info.config(text="Se guardó el archivo correctamente", foreground="green") #Mensaje de éxito
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo guardar el archivo: {str(e)}")
-            info.config(text="No se pudo guardar el archivo", foreground="red")
+            info.config(text="No se pudo guardar el archivo", foreground="red") #Mensaje de error
     else:
-        guardarComo()
-    
+        guardarComo() #Si no se ha guardado, llamo a la función guardarComo
 
-def guardarComo():
-    global ruta, guardado
-    info.config(text="Guardando archivo como...", foreground="black")
-    ruta=filedialog.asksaveasfilename(title="Guardar archivo", filetypes=(("Archivos .ORG", "*.org"),)) #Solo acepta archivos .org
-    if ruta != "":
-        guardado=True
-        guardar()
+def guardarComo(): #Función para guardar el archivo como
+    global ruta, guardado #Uso las variables globales
+    info.config(text="Guardando archivo como...", foreground="black") #Mensaje que dice el proceso
+    ruta=filedialog.asksaveasfilename(title="Guardar archivo", filetypes=(("Archivos .ORG", "*.org"),))
+    if ruta != "": #Si la ruta no está vacía
+        guardado=True #Cambio el estado de guardado
+        guardar() #Llamo a la función guardar
     else:
-        info.config(text="No se guardó el archivo", foreground="red")
+        info.config(text="No se guardó el archivo", foreground="red") #Mensaje de error
     
+def actualizarInfo(): #Solo actualizo los datos de los labels y las rutas de las imagenes
+    global pais, poblacion, rutaGrafica, rutaBandera #Uso las variables globales
+    paistx.config(text=pais) #Actualizo el label del país
+    poblaciontx.config(text=poblacion) #Actualizo el label de la población
+    bandera=PhotoImage(file=rutaBandera) #Actualizo la bandera
+    bandera=bandera.subsample(14,17)
+    flag.config(image=bandera)
+    flag.image=bandera
+    grafica=PhotoImage(file=rutaGrafica) #Actualizo la gráfica
+    grafica=grafica.subsample(5,7)
+    gra.config(image=grafica)
+    gra.image=grafica
 
-def analizar():
+def analizar(): #Función para analizar el texto del editor
     global pais, poblacion, rutaGrafica, rutaBandera
     cuerpo=entrada.get("1.0", tk.END) #Obtengo el contenido del editor de texto
     lineas=cuerpo.splitlines() #Divido el contenido del editor de texto por líneas
     todasVacias=all(linea=="" or linea.isspace() for linea in lineas) #Verifico si todas las líneas estan vacias
     if todasVacias:
-        messagebox.showerror("Error", "No se ha ingresado información.")
+        messagebox.showerror("Error", "No se ha ingresado información.") #Mensaje de error
+        info.config(text="Ingrese Información en el editor de texto", foreground="red") #Mensaje de error
     else:
-
+        info.config(text="Analizando...", foreground="black")
+        
         """#agarra el dato que tiene el campo de entrada
         dato=entrada.get()
 
@@ -153,7 +157,7 @@ gra.pack()
 gra.pack(anchor="e")
 
 #Añado los labels que tendrán la información del pais
-paistxt=tk.Label(frame4,text="Pais: ")
+paistxt=tk.Label(frame4,text="Pais seleccionado:")
 paistxt.pack()
 paistxt.config(font=("Arial", 12, "bold"))
 paistx=tk.Label(frame4,text=pais)
