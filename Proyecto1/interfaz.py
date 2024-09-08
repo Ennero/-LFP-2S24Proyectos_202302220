@@ -7,9 +7,10 @@ import subprocess
 #Declarando mis variables globales
 poblacion="NA"
 pais="NA"
+ruta=""
 rutaGrafica="C:/banderas/duo.png"
 rutaBandera="C:/banderas/ohio.png"
-
+guardado=False
 
 
 def acerca_de():
@@ -17,38 +18,76 @@ def acerca_de():
 
 
 def abrir():
-    ruta=filedialog.askopenfilename(title="Abrir archivo", filetypes=(("Archivos .ORG", "*.org"),("Todos los archivos", "*.*")))
-    if ruta != "":
-        messagebox.showinfo("Abrir Archivo", "Se abrió el archivo: "+ruta+" exitosamente")
+    global ruta, guardado
+    info.config(text="Abriendo archivo...", foreground="black")
+    ruta=filedialog.askopenfilename(title="Abrir archivo", filetypes=(("Archivos .ORG", "*.org"),)) #Solo acepta archivos .org
+    if ruta != "": #Si la ruta no está vacía
+        guardado=True
+        try:
+            with open(ruta, "r", encoding="utf-8") as archivo: #Abro el archivo
+                cuerpo=archivo.read() #Leo el archivo
+                entrada.delete("1.0", tk.END) #Borro el contenido del editor de texto
+                entrada.insert("1.0", cuerpo) #Inserto el contenido del archivo en el editor de texto
+            info.config(text="Se abrió el archivo correctamente", foreground="green")
+        except FileNotFoundError:
+            messagebox.showerror("Error", "El archivo no se encontró o no se pudo abrir.")
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo abrir el archivo: {str(e)}")
+    else:
+        info.config(text="No se seleccionó ningún archivo", foreground="red")
+        
 
 
 def guardar(): #Probando nada más
-
-    #Esto lo ando usando para actualizar la bandera
+    global ruta, guardado
+    info.config(text="Guardando archivo...", foreground="black")
+    """#Esto lo ando usando para actualizar la bandera
     cambio=PhotoImage(file=rutaGrafica)
     cambio=cambio.subsample(5,7)
     flag.config(image=cambio)
     flag.image=cambio
-    
+    #Esto lo ando usando para actualizar la información del país"""
+    if guardado:
+        try:
+            with open(ruta,"w", encoding="utf-8") as archivo:
+                archivo.write(entrada.get("1.0", tk.END))
+            info.config(text="Se guardó el archivo correctamente", foreground="green")
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo guardar el archivo: {str(e)}")
+            info.config(text="No se pudo guardar el archivo", foreground="red")
+    else:
+        guardarComo()
     
 
 def guardarComo():
-    pass
-
-def analizar():
+    global ruta, guardado
+    info.config(text="Guardando archivo como...", foreground="black")
+    ruta=filedialog.asksaveasfilename(title="Guardar archivo", filetypes=(("Archivos .ORG", "*.org"),)) #Solo acepta archivos .org
+    if ruta != "":
+        guardado=True
+        guardar()
+    else:
+        info.config(text="No se guardó el archivo", foreground="red")
     
 
+def analizar():
+    global pais, poblacion, rutaGrafica, rutaBandera
+    cuerpo=entrada.get("1.0", tk.END) #Obtengo el contenido del editor de texto
+    lineas=cuerpo.splitlines() #Divido el contenido del editor de texto por líneas
+    todasVacias=all(linea=="" or linea.isspace() for linea in lineas) #Verifico si todas las líneas estan vacias
+    if todasVacias:
+        messagebox.showerror("Error", "No se ha ingresado información.")
+    else:
 
+        """#agarra el dato que tiene el campo de entrada
+        dato=entrada.get()
 
-    """#agarra el dato que tiene el campo de entrada
-    dato=entrada.get()
+        # Aquí ejecuta el .exe creado con fortran, envia el dato, lee la salida y lo toma como texto
+        resultado=subprocess.run(['analizador.exe'],input=dato, stdout=subprocess.PIPE,text=True)
 
-    # Aquí ejecuta el .exe creado con fortran, envia el dato, lee la salida y lo toma como texto
-    resultado=subprocess.run(['analizador.exe'],input=dato, stdout=subprocess.PIPE,text=True)
-
-    #Divido la salida de fortran por su comas
-    salida=resultado.stdout.strip()
-    partes=salida.split(",")"""
+        #Divido la salida de fortran por su comas
+        salida=resultado.stdout.strip()
+        partes=salida.split(",")"""
     
 #INTEFAZ GRÁFICAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 #----------------------------------------------------------------------------
@@ -70,14 +109,17 @@ frame5= tk.Frame(frame3)
 frame5.pack(side=tk.RIGHT)
 
 #Creo el editor de texto
+info=tk.Label(frame1,text=" ")
+info.pack()
+info.config(foreground="red", font=("Arial", 9, "italic"))
 edittxt=tk.Label(frame1, text="EDITOR DE TEXTO: Escriba aquí las instrucciones")
 edittxt.pack()
-edittxt.config(highlightbackground="red", foreground="black", font=("Arial", 11, "bold"))
-entrada = tk.Text(frame1, height=22, width=60)
+edittxt.config(foreground="black", font=("Arial", 14, "bold"))
+entrada = tk.Text(frame1, height=26, width=75)
 entrada.pack()
 
 scroll=tk.Scrollbar(ventana, orient="vertical", command=entrada.yview)
-entrada.config(font=("consolas", 9), yscrollcommand=scroll.set)
+entrada.config(font=("consolas", 11), yscrollcommand=scroll.set)
 scroll.pack(side="right", fill="y")
 
 
