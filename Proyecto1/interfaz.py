@@ -81,17 +81,25 @@ def analizar(): #Función para analizar el texto del editor
         messagebox.showerror("Error", "No se ha ingresado información.") #Mensaje de error
         info.config(text="Ingrese Información en el editor de texto", foreground="red") #Mensaje de error
     else:
-        info.config(text="Analizando...", foreground="black")
-        
-        """#agarra el dato que tiene el campo de entrada
-        dato=entrada.get()
+        info.config(text="Analizando...", foreground="black") #Mensaje que dice el proceso
+        herbert=entrada.get() #Obtengo el contenido del editor de texto
 
         # Aquí ejecuta el .exe creado con fortran, envia el dato, lee la salida y lo toma como texto
-        resultado=subprocess.run(['analizador.exe'],input=dato, stdout=subprocess.PIPE,text=True)
-
-        #Divido la salida de fortran por su comas
-        salida=resultado.stdout.strip()
-        partes=salida.split(",")"""
+        resultado=subprocess.run(['analizador.exe'],input=herbert, stdout=subprocess.PIPE,text=True)
+        salida=resultado.stdout.strip() #Quita los espacios en blanco
+        partes=salida.split(",") #Divido la salida por comas
+        # Viene con la siguiente estructura: [rutraGrafica, rutaBandera, pais, poblacion]
+        if len(partes)==3:
+            rutaGrafica=partes[0] #Actualizo la ruta de la gráfica
+            rutaBandera=partes[1]
+            pais=partes[2]
+            poblacion=partes[3]
+            actualizarInfo()
+            messagebox.showinfo("Analisis", "Analisis realizado con éxito.") #Mensaje de éxito 
+            info.config(text="Se analizó la información correctamente", foreground="green")
+        else:
+            messagebox.showerror("Error", "No se pudo analizar la información.")
+            info.config(text="No se pudo analizar la información", foreground="red") #Mensaje de error
     
 #INTEFAZ GRÁFICAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 #----------------------------------------------------------------------------
