@@ -83,16 +83,18 @@ def analizar(): #Función para analizar el texto del editor
         info.config(text="Ingrese Información en el editor de texto", foreground="red") #Mensaje de error
     else:
         info.config(text="Analizando...", foreground="black") #Mensaje que dice el proceso
-        herbert=entrada.get("1.0", tk.END) #Obtengo el contenido del editor de texto
-        with open("herbert.temp","w", encoding="utf-8") as archivo: #Abro el archivo
-                archivo.write(herbert) #Escribo el contenido del editor de texto en el archivo
-
+        
+        
+        dato=entrada.get("1.0","end-1c")
         # Aquí ejecuta el .exe creado con fortran, envia el dato, lee la salida y lo toma como texto
-        resultado=subprocess.run(['./analizador.exe'],input=herbert, stdout=subprocess.PIPE,text=True)
+        resultado=subprocess.run(['./Proyecto1/main.exe'],input=dato, stdout=subprocess.PIPE,text=True)
         salida=resultado.stdout.strip() #Quita los espacios en blanco
         partes=salida.split(",") #Divido la salida por comas
+        print(salida)
+        print(partes[0])
+
         # Viene con la siguiente estructura: [rutraGrafica, rutaBandera, pais, poblacion]
-        if len(partes)==3:
+        if len(partes)==4:
             rutaGrafica=partes[0] #Actualizo la ruta de la gráfica
             rutaBandera=partes[1] #Actualizo la ruta de la bandera
             pais=partes[2] #Actualizo el país
