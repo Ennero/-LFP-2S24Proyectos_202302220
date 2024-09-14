@@ -6,7 +6,7 @@ grafica: {
                 nombre: "Japon";
                 poblacion: 2352342;
                 saturacion: 80%;
-                bandera: "C:\imagen.jpg"
+                bandera: "C:\imagen.jpg";
         }
         pais: {
                 bandera: "C:\imagen.jpg"

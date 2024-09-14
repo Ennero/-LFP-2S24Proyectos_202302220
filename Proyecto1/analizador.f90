@@ -13,7 +13,7 @@ program procesando
     use globales !Se usa el modulo globales
     implicit none
     !Declaro las variables
-    cuenta1=0
+    cuenta1  =   0
     cuenta2=0
     cuenta3=0
     saturacion='0'
