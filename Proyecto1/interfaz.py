@@ -84,14 +84,11 @@ def analizar(): #Función para analizar el texto del editor
     else:
         info.config(text="Analizando...", foreground="black") #Mensaje que dice el proceso
         
-        
         dato=entrada.get("1.0","end-1c")
         # Aquí ejecuta el .exe creado con fortran, envia el dato, lee la salida y lo toma como texto
         resultado=subprocess.run(['./Proyecto1/main.exe'],input=dato, stdout=subprocess.PIPE,text=True)
         salida=resultado.stdout.strip() #Quita los espacios en blanco
         partes=salida.split(",") #Divido la salida por comas
-        print(salida)
-        print(partes[0])
 
         # Viene con la siguiente estructura: [rutraGrafica, rutaBandera, pais, poblacion]
         if len(partes)==4:
