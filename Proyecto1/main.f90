@@ -3,10 +3,12 @@ module globales
     implicit none
     character(len=100) :: rutaBandera, rutaGrafica, nPais, poblacion
     character(len=50) :: tempPais, tempSaturacion,tempPoblacion,tempContinente,auxPais,auxPoblacion,nGrafica, tempBandera
-    integer :: cuenta1, cuenta2,cuenta3,auxSatu,satu,caent
-    character(len=30), dimension(4,300)::tokens, errores,paises
-    integer, dimension(1:100)::saturaciones
+    integer :: cuentaT, cuentaE,cuentaP,auxSatu,satu,caent
+    character(len=30), dimension(4,500)::tokens, errores,paises
+    !La estructura de pais será: continente / nombre / población / bandera
+    integer, dimension(1:500)::saturaciones
     character(len=4000):: entrada
+    logical :: error
 end module globales
 
 program proceso 
@@ -16,9 +18,10 @@ character(len=200) :: linea
 integer :: ios
 !Inicializo todas las variables que voy a usar
 entrada=""
-cuenta1=1
-cuenta2=1
-cuenta3=1
+cuentaT=0
+cuentaE=0
+cuentaP=0
+error=.false.
 
 !PROBANDOOOOOOO
 open(10, file='entrada.org', status='old', action='read') !Abro el archivo de entrada
@@ -29,8 +32,14 @@ entrada = trim(entrada) // trim(linea) // char(10) ! Concatenar la línea leida 
 end do
 !PROBANDOOOOOOO
 
-call analizar()
-call html_bueno()
+call agregarToken(adjustl("grafica")//repeat(' ', 30-len_trim("grafica")), adjustl("Palabra reservada")//repeat(' ', 30-len_trim("Palabra reservada")), 1, 1)
+!call analizar()
+
+if (error) then !Si hay errores
+    call html_malo() !Llamo a la subrutina que genera el html con los errores
+else !Si no hay errores
+    call html_bueno() !Llamo a la subrutina que genera el html con los tokens
+end if
 
 !print *, trim(rutaGrafica)//","//trim(rutaBandera)//","//trim(nPais)//","//trim(poblacion)
 end program proceso
@@ -92,42 +101,44 @@ end subroutine analizar
 subroutine agregarPais(conti, pai, po, sar,ba)
     use globales
     implicit none
-    character(len=100) :: conti, pai, po,ba
+    character(len=30) :: conti, pai, po,ba
     integer :: sar
-    cuenta3=cuenta3+1
-    paises(1,cuenta3)=trim(conti)
-    paises(2,cuenta3)=trim(pai)
-    paises(3,cuenta3)=trim(po)
-    saturaciones(cuenta3)=sar
-    paises(4,cuenta3)=trim(ba)
+    cuentaP=cuentaP+1
+    paises(1,cuentaP)=trim(conti)
+    paises(2,cuentaP)=trim(pai)
+    paises(3,cuentaP)=trim(po)
+    saturaciones(cuentaP)=sar
+    paises(4,cuentaP)=trim(ba)
 end subroutine agregarPais
 
 subroutine agregarError(lexema, descrip, linea, columna) !Subrutina que agrega los errores
     use globales !Se usa el modulo globales
     implicit none
-    character(len=100) :: lexema, descrip, linea2,columna2
+    character(len=30) :: lexema, descrip, linea2,columna2
     integer :: linea, columna
-    cuenta2=cuenta2+1
-    errores(1,cuenta2)=trim(lexema)
-    errores(2,cuenta2)=trim(descrip)
+    error=.true. !Se cambia el valor de error a true (porque ya hay un error xd)
+    cuentaE=cuentaE+1
+    errores(1,cuentaE)=trim(lexema)
+    errores(2,cuentaE)=trim(descrip)
     write(linea2,'(I0)') linea !Probar nuevamente la forma en la que escribo estas cosas porque ODIO FORTRAAAAAN
     write(columna2,'(I0)') columna
-    errores(3,cuenta2)=trim(linea2)
-    errores(4,cuenta2)=trim(columna2)
+    errores(3,cuentaE)=trim(linea2)
+    errores(4,cuentaE)=trim(columna2)
 end subroutine agregarError
 
 subroutine agregarToken(lexema, descrip, linea, columna) !Subrutina que agrega los tokens
     use globales !Se usa el modulo globales
     implicit none
-    character(len=100) :: lexema, descrip, linea2,columna2 !Se declaran las variables
+    character(len=30) :: lexema, descrip, linea2,columna2 !Se declaran las variables
     integer :: linea, columna
-    cuenta1=cuenta1+1
-    tokens(1,cuenta1)=trim(lexema)
-    tokens(2,cuenta1)=trim(descrip)
+    cuentaT=cuentaT+1
+    tokens(1,cuentaT)=(lexema)
+    tokens(2,cuentaT)=(descrip)
     write(linea2,'(I0)') linea !Lo transfora a string
     write(columna2,'(I0)') columna !Lo transforma a string
-    tokens(3,cuenta1)=trim(linea2)
-    tokens(4,cuenta1)=trim(columna2)
+    tokens(3,cuentaT)=(linea2)
+    tokens(4,cuentaT)=(columna2)
+    print *, lexema, descrip, linea, columna
 end subroutine agregarToken
 
 subroutine html_bueno() !Subrutina que genera el html con los tokens encontrados
@@ -135,7 +146,7 @@ subroutine html_bueno() !Subrutina que genera el html con los tokens encontrados
     implicit none
     !Asigno las variables
     integer :: unit,i
-    character(len=100) :: cuento
+    character(len=4) :: cuento
     unit=2024 !Se asigna un numero de unidad
     open(unit, file='tabla.html', status='unknown', action='write') !Se abre el archivo para escribir
     write(unit, '(A)') "<!DOCTYPE html>"
@@ -152,8 +163,8 @@ subroutine html_bueno() !Subrutina que genera el html con los tokens encontrados
     write(unit, '(A)') "<h2>Tabla de Tokens</h2>"
     write(unit, '(A)') "<table>"
     write(unit, '(A)') "<tr><th>Número de Token</th><th>Lexema</th><th>Tipo</th><th>Fila</th><th>Columna</th></tr>"
-    do i=1,cuenta1
-        write(cuento,'(I0)') i
+    do i=1,cuentaT
+        write(cuento,'(I3)') i
         write(unit, '(A)') "<tr>"
         write(unit, '(A)') "<td>"//trim(cuento)//"</td>"
         write(unit, '(A)') "<td>"//trim(tokens(1,i))//"</td>"
@@ -170,7 +181,7 @@ subroutine html_malo () !Subrutina que genera el html con los errores encontrado
     implicit none
     !Asigno las variables
     integer :: unit,i
-    character(len=100) :: cuento
+    character(len=4) :: cuento
     unit=254 !Se asigna un numero de unidad
     open(unit, file='tabla.html', status='unknown', action='write') !Se abre el archivo para escribir
     write(unit, '(A)') "<!DOCTYPE html>"
@@ -187,7 +198,7 @@ subroutine html_malo () !Subrutina que genera el html con los errores encontrado
     write(unit, '(A)') "<h2>Tabla de Errores</h2>"
     write(unit, '(A)') "<table>"
     write(unit, '(A)') "<tr><th>Número de Error</th><th>Error</th><th>Descripción</th><th>Fila</th><th>Columna</th></tr>"
-    do i=1,cuenta1
+    do i=1,cuentaE
         write(cuento,'(I0)') i
         write(unit, '(A)') "<tr>"
         write(unit, '(A)') "<td>"//trim(cuento)//"</td>"
