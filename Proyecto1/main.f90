@@ -12,135 +12,162 @@ module globales
 end module globales
 
 program proceso 
-use globales
-implicit none
-character(len=200) :: linea
-integer :: ios
-!Inicializo todas las variables que voy a usar
-entrada=""
-cuentaT=0
-cuentaE=0
-cuentaP=0
-error=.false.
+    use globales
+    implicit none
+    character(len=200) :: linea
+    integer :: ios
+    !Inicializo todas las variables que voy a usar
+    entrada=""
+    cuentaT=0
+    cuentaE=0
+    cuentaP=0
+    error=.false.
 
-!PROBANDOOOOOOO
-open(10, file='entrada.org', status='old', action='read') !Abro el archivo de entrada
-do
-read(10, '(A)', iostat = ios) linea
-if (ios /= 0) exit   ! Se alcanzo el fin del archivo
-entrada = trim(entrada) // trim(linea) // char(10) ! Concatenar la línea leida al valor de entrada y agregar un salto de línea
-end do
-!PROBANDOOOOOOO
+    !PROBANDOOOOOOO
+    open(10, file='entrada.org', status='old', action='read') !Abro el archivo de entrada
+    do
+    read(10, '(A)', iostat = ios) linea
+    if (ios /= 0) exit   ! Se alcanzo el fin del archivo
+    entrada = trim(entrada) // trim(linea) // char(10) ! Concatenar la línea leida al valor de entrada y agregar un salto de línea
+    end do
+    !PROBANDOOOOOOO
 
-!call agregarToken(adjustl("grafica")//repeat(' ', 30-len_trim("grafica")), adjustl("Palabra reservada")//repeat(' ', 30-len_trim("Palabra reservada")), 1, 1)
-!call analizar()
-nGrafica="grafica"
+    !call agregarToken(adjustl("grafica")//repeat(' ', 30-len_trim("grafica")), adjustl("Palabra reservada")//repeat(' ', 30-len_trim("Palabra reservada")), 1, 1)
+    call analizar()
 
-call agregarPais(adjustl("Asia"//repeat(' ', 30-len_trim("Asia"))), &
-                adjustl("Japon"//repeat(' ', 30-len_trim("Japon"))), &
-                adjustl("2352342"//repeat(' ', 30-len_trim("2352342"))), &
-                80, &
-                adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
+    if (error) then !Si hay errores
+        call html_malo() !Llamo a la subrutina que genera el html con los errores
+    else !Si no hay errores
+        call html_bueno() !Llamo a la subrutina que genera el html con los tokens
+        call graficar() !Llamo a la subrutina que genera la grafica
+    end if
 
-call agregarPais(adjustl("Asia"//repeat(' ', 30-len_trim("Asia"))), &
-                adjustl("China"//repeat(' ', 30-len_trim("China"))), &
-                adjustl("1350000000"//repeat(' ', 30-len_trim("1350000000"))), &
-                95, &
-                adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
-
-call agregarPais(adjustl("Asia"//repeat(' ', 30-len_trim("Asia"))), &
-                adjustl("Korea"//repeat(' ', 30-len_trim("Korea"))), &
-                adjustl("2352342"//repeat(' ', 30-len_trim("2352342"))), &
-                40, &
-                adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
-
-call agregarPais(adjustl("America"//repeat(' ', 30-len_trim("America"))), &
-                adjustl("Canada"//repeat(' ', 30-len_trim("Canada"))), &
-                adjustl("23423423"//repeat(' ', 30-len_trim("23423423"))), &
-                65, &
-                adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
-
-call agregarPais(adjustl("America"//repeat(' ', 30-len_trim("America"))), &
-                adjustl("Guatemala"//repeat(' ', 30-len_trim("Guatemala"))), &
-                adjustl("17263239"//repeat(' ', 30-len_trim("17263239"))), &
-                40, &
-                adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
-
-call agregarPais(adjustl("America"//repeat(' ', 30-len_trim("America"))), &
-                adjustl("Chile"//repeat(' ', 30-len_trim("Chile"))), &
-                adjustl("235234234"//repeat(' ', 30-len_trim("235234234"))), &
-                60, &
-                adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
-
-call agregarPais(adjustl("Europa"//repeat(' ', 30-len_trim("Europa"))), &
-                adjustl("espana"//repeat(' ', 30-len_trim("espana"))), &
-                adjustl("345"//repeat(' ', 30-len_trim("345"))), &
-                2, &
-                adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
-
-
-
-if (error) then !Si hay errores
-    call html_malo() !Llamo a la subrutina que genera el html con los errores
-else !Si no hay errores
-    call html_bueno() !Llamo a la subrutina que genera el html con los tokens
-    call graficar() !Llamo a la subrutina que genera la grafica
-end if
-
-!print *, trim(rutaGrafica)//","//trim(rutaBandera)//","//trim(nPais)//","//trim(poblacion)
+    !print *, trim(rutaGrafica)//","//trim(rutaBandera)//","//trim(nPais)//","//trim(poblacion)
 end program proceso
 
 
 
 
 subroutine analizar()
-use globales
-implicit none
-character(len=40) :: lexema
-character(len=1) :: c
-integer:: posF, posC, largo, estado, i
-logical :: VContinente, VGrafica, VPaisNombre, VPaisPoblacion, VPaisSaturacion, VPaisBandera ,VPais,VEspacio
-!Inicializo las variables
-largo=len_trim(entrada)
-posF=1
-posC=1
-satu=100
-estado=0
-i=0
-VEspacio=.false.
-VContinente=.false.
-VGrafica=.false.
-VPaisNombre=.false.
-VPaisBandera=.false.
-VPaisPoblacion=.false.
-VPaisSaturacion=.false.
-VPais=.false.
+    use globales
+    implicit none
+    character(len=40) :: lexema
+    character(len=1) :: c
+    integer:: posF, posC, largo, estado, i
+    logical :: VContinente, VGrafica, VPaisNombre, VPaisPoblacion, VPaisSaturacion, VPaisBandera ,VPais,VEspacio
+    !Inicializo las variables
+    largo=len_trim(entrada)
+    posF=1
+    posC=1
+    satu=100
+    estado=0
+    i=0
+    VEspacio=.false.
+    VContinente=.false.
+    VGrafica=.false.
+    VPaisNombre=.false.
+    VPaisBandera=.false.
+    VPaisPoblacion=.false.
+    VPaisSaturacion=.false.
+    VPais=.false.
 
 
-!Agrego el caracter de fin de cadena (para saber cuando termina)
-entrada(largo+1:largo+1)="#"
-largo=largo+1
-do while (i<=largo)
-    i=i+1
-    if(c==char(10)) then !Si es un salto de línea
-            posC=0 !Reinicio la posición de la columna
-            posF=posF+1 !Aumento la posición de la fila
-    end if
-    posC=posC+1 !Aumento la posición de la columna
-    c=entrada(i:i) !Obtengo el caracter actual
-    !Comienzo con el selectCase
+    !Agrego el caracter de fin de cadena (para saber cuando termina)
+    entrada(largo+1:largo+1)="#"
+    largo=largo+1
+    do while (i<=largo)
+        i=i+1
+        if(c==char(10)) then !Si es un salto de línea
+                posC=0 !Reinicio la posición de la columna
+                posF=posF+1 !Aumento la posición de la fila
+        end if
+        posC=posC+1 !Aumento la posición de la columna
+        c=entrada(i:i) !Obtengo el caracter actual
+        !Comienzo con el selectCase
+        select case (estado)
+
+!El estado inicial
+        case(0)
+            if(c>='a' .and. c<='z') then
+                lexema=c
+                estado=1
 
 
-    
-    
+
+            end if
+        
+        case(1)
+
+
+        case(2)
+
+        case(3)
+
+        case(4)
+
+        case(5)
+
+        case(6)
+
+        case(7)
+
+        case(8)
+
+        case(9)
+
+        end select
 
 
 
-
-
-end do
+    end do
 end subroutine analizar
 
+subroutine probando() !Subrutina que agrega los paises para probar la grafica
+    use globales
+    implicit none
+    nGrafica="grafica"
+    call agregarPais(adjustl("Asia"//repeat(' ', 30-len_trim("Asia"))), &
+                    adjustl("Japon"//repeat(' ', 30-len_trim("Japon"))), &
+                    adjustl("2352342"//repeat(' ', 30-len_trim("2352342"))), &
+                    80, &
+                    adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
+
+    call agregarPais(adjustl("Asia"//repeat(' ', 30-len_trim("Asia"))), &
+                    adjustl("China"//repeat(' ', 30-len_trim("China"))), &
+                    adjustl("1350000000"//repeat(' ', 30-len_trim("1350000000"))), &
+                    95, &
+                    adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
+
+    call agregarPais(adjustl("Asia"//repeat(' ', 30-len_trim("Asia"))), &
+                    adjustl("Korea"//repeat(' ', 30-len_trim("Korea"))), &
+                    adjustl("2352342"//repeat(' ', 30-len_trim("2352342"))), &
+                    40, &
+                    adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
+
+    call agregarPais(adjustl("America"//repeat(' ', 30-len_trim("America"))), &
+                    adjustl("Canada"//repeat(' ', 30-len_trim("Canada"))), &
+                    adjustl("23423423"//repeat(' ', 30-len_trim("23423423"))), &
+                    65, &
+                    adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
+
+    call agregarPais(adjustl("America"//repeat(' ', 30-len_trim("America"))), &
+                    adjustl("Guatemala"//repeat(' ', 30-len_trim("Guatemala"))), &
+                    adjustl("17263239"//repeat(' ', 30-len_trim("17263239"))), &
+                    40, &
+                    adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
+
+    call agregarPais(adjustl("America"//repeat(' ', 30-len_trim("America"))), &
+                    adjustl("Chile"//repeat(' ', 30-len_trim("Chile"))), &
+                    adjustl("235234234"//repeat(' ', 30-len_trim("235234234"))), &
+                    60, &
+                    adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
+
+    call agregarPais(adjustl("Europa"//repeat(' ', 30-len_trim("Europa"))), &
+                    adjustl("espana"//repeat(' ', 30-len_trim("espana"))), &
+                    adjustl("345"//repeat(' ', 30-len_trim("345"))), &
+                    2, &
+                    adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
+end subroutine probando
 
 subroutine agregarPais(conti, pai, po, sar,ba)
     use globales
