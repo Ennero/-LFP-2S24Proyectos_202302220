@@ -32,13 +32,59 @@ entrada = trim(entrada) // trim(linea) // char(10) ! Concatenar la línea leida 
 end do
 !PROBANDOOOOOOO
 
-call agregarToken(adjustl("grafica")//repeat(' ', 30-len_trim("grafica")), adjustl("Palabra reservada")//repeat(' ', 30-len_trim("Palabra reservada")), 1, 1)
+!call agregarToken(adjustl("grafica")//repeat(' ', 30-len_trim("grafica")), adjustl("Palabra reservada")//repeat(' ', 30-len_trim("Palabra reservada")), 1, 1)
 !call analizar()
+nGrafica="grafica"
+
+call agregarPais(adjustl("Asia"//repeat(' ', 30-len_trim("Asia"))), &
+                adjustl("Japon"//repeat(' ', 30-len_trim("Japon"))), &
+                adjustl("2352342"//repeat(' ', 30-len_trim("2352342"))), &
+                80, &
+                adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
+
+call agregarPais(adjustl("Asia"//repeat(' ', 30-len_trim("Asia"))), &
+                adjustl("China"//repeat(' ', 30-len_trim("China"))), &
+                adjustl("1350000000"//repeat(' ', 30-len_trim("1350000000"))), &
+                95, &
+                adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
+
+call agregarPais(adjustl("Asia"//repeat(' ', 30-len_trim("Asia"))), &
+                adjustl("Korea"//repeat(' ', 30-len_trim("Korea"))), &
+                adjustl("2352342"//repeat(' ', 30-len_trim("2352342"))), &
+                40, &
+                adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
+
+call agregarPais(adjustl("America"//repeat(' ', 30-len_trim("America"))), &
+                adjustl("Canada"//repeat(' ', 30-len_trim("Canada"))), &
+                adjustl("23423423"//repeat(' ', 30-len_trim("23423423"))), &
+                65, &
+                adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
+
+call agregarPais(adjustl("America"//repeat(' ', 30-len_trim("America"))), &
+                adjustl("Guatemala"//repeat(' ', 30-len_trim("Guatemala"))), &
+                adjustl("17263239"//repeat(' ', 30-len_trim("17263239"))), &
+                40, &
+                adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
+
+call agregarPais(adjustl("America"//repeat(' ', 30-len_trim("America"))), &
+                adjustl("Chile"//repeat(' ', 30-len_trim("Chile"))), &
+                adjustl("235234234"//repeat(' ', 30-len_trim("235234234"))), &
+                60, &
+                adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
+
+call agregarPais(adjustl("Europa"//repeat(' ', 30-len_trim("Europa"))), &
+                adjustl("espana"//repeat(' ', 30-len_trim("espana"))), &
+                adjustl("345"//repeat(' ', 30-len_trim("345"))), &
+                2, &
+                adjustl("C:\imagen.jpg"//repeat(' ', 30-len_trim("C:\imagen.jpg"))))
+
+
 
 if (error) then !Si hay errores
     call html_malo() !Llamo a la subrutina que genera el html con los errores
 else !Si no hay errores
     call html_bueno() !Llamo a la subrutina que genera el html con los tokens
+    call graficar() !Llamo a la subrutina que genera la grafica
 end if
 
 !print *, trim(rutaGrafica)//","//trim(rutaBandera)//","//trim(nPais)//","//trim(poblacion)
@@ -90,11 +136,9 @@ do while (i<=largo)
 
 
 
+
+
 end do
-
-
-
-
 end subroutine analizar
 
 
@@ -222,3 +266,91 @@ subroutine leer() !Lee el archivo de entrada enviado por phyton
         entrada = trim(entrada) // trim(linea) // char(10) ! Concatenar la línea leida al valor de entrada y agregar un salto de línea
     end do
 end subroutine leer
+
+subroutine graficar() !Subrutina que genera la grafica con graphviz
+    use globales
+    implicit none
+    character(len=5000) :: grafica
+    character(len=30) :: temp,promSatu,satuPais
+    integer :: j,unit,pp,prom,herbert
+    unit=2021
+    j=1
+    grafica= "digraph Grafica {" // new_line('A') // "rankdir=TB;" // new_line('A') &
+                // "node [shape = record, style = filled];" // new_line('A')
+    pp=1
+    grafica=trim(grafica)//trim(nGrafica)//' [Label="{'//trim(nGrafica)//'}" fillcolor="purple"];'//new_line('A')
+    do while (j<=cuentaP)
+        prom=0
+        temp=trim(paises(1,j))
+        herbert=0
+        !Ciclo para encontrar la saturación promedio de los paises en el continente
+        do while (trim(temp) == trim(paises(1,pp)))
+            prom=prom+saturaciones(pp)
+            pp=pp+1
+            herbert=herbert+1
+        end do
+        prom=int(prom/herbert) !Termino de calcular el promedio
+
+        !Convierto el promedio a string
+        write(promSatu,'(I0)') prom !Lo convierto a string
+        grafica=trim(grafica)//trim(temp)//' [label="{'//trim(temp)//"|"//trim(promSatu)// '}"'
+
+        !Condicional para los colorcitos
+        if (prom>75) then
+            grafica=trim(grafica)//' fillcolor="red";'
+        else if (prom>60) then
+            grafica=trim(grafica)//' fillcolor="orange";'
+        else if (prom>45) then
+            grafica=trim(grafica)//' fillcolor="yellow";'
+        else if (prom>30) then
+            grafica=trim(grafica)//' fillcolor="green";'
+        else if (prom>15) then
+            grafica=trim(grafica)//' fillcolor="blue";'
+        else
+            grafica=trim(grafica)//' fillcolor="white";'
+        end if
+
+        !Cierro y grafico :)
+        grafica=trim(grafica)//'];'//new_line('A')
+        grafica=trim(grafica)//trim(nGrafica)//' -> ' //trim(temp)//';'//new_line('A')
+
+        !Ciclo para crear los nodos
+        do while (trim(temp) == trim(paises(1,j)))
+            write(satuPais, '(I0)') saturaciones(j) !Lo convierto a string
+
+            !Creo los nodos de los paises y los conecto con el continente
+            grafica=trim(grafica)//trim(paises(2,j))//' [label="{'//trim(paises(2,j))//"|"//trim(satuPais)//'}"'
+
+            !Condicional para los colorcitos
+            if (saturaciones(j)>75) then
+                grafica=trim(grafica)//' fillcolor="red";'
+            else if (saturaciones(j)>60) then
+                grafica=trim(grafica)//' fillcolor="orange";'
+            else if (saturaciones(j)>45) then
+                grafica=trim(grafica)//' fillcolor="yellow";'
+            else if (saturaciones(j)>30) then
+                grafica=trim(grafica)//' fillcolor="green";'
+            else if (saturaciones(j)>15) then
+                grafica=trim(grafica)//' fillcolor="blue";'
+            else
+                grafica=trim(grafica)//' fillcolor="white";'
+            end if
+
+            !Cierro y grafico :)
+            grafica=trim(grafica)//'];'//new_line('A')
+            grafica=trim(grafica)//trim(temp)//' -> '//trim(paises(2,j))//';'//new_line('A')
+            j=j+1
+        end do
+    end do
+    grafica=trim(grafica)//"}" !Cierro la grafica
+
+    !Creo el archivo .dot
+    open(unit, file='grafica.dot', status='unknown', action='write') !Se abre el archivo para escribir
+    write(unit, '(A)') trim(grafica)
+    close (unit) !Se cierra el archivo
+    
+    !Llamo a graphviz para que genere la imagen
+    call system("dot -Tpng grafica.dot -o grafica.png")
+    rutaGrafica="grafica.png"
+
+end subroutine graficar
