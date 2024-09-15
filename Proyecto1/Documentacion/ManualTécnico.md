@@ -22,3 +22,5 @@ Se pretende propiciar el conocimiento requerido para que se pueda replicar el pr
 - Editor de texto compatible con Fortran
 - Compilador de Fortran (GNU Fortran, Intel Fortran Compiles, etc)
 ## Lógica y descripción de la solución
+### Calculo del Autómata
+![Cálculo del autómata](./automata.png)

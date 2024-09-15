@@ -1,11 +1,11 @@
 grafica: {
     nombre:"nombre de grafico";
-    continente {
+    continente: {
     nombre: "Asia";
         pais: {
                 nombre: "Japon";
                 poblacion: 2352342;
-                saturacion: 80%;
+                saturacion: 80.60%;
                 bandera: "C:\imagen.jpg";
         }
         pais: {
@@ -18,7 +18,7 @@ grafica: {
                 saturacion: 40%;
                 poblacion: 2352342;
                 nombre: "Korea";
-                bandera:"C:\imagen.jpg"
+                bandera:"C:\imagen.jpg";
         }
     }
     continente {
@@ -27,19 +27,19 @@ grafica: {
                 nombre: "Canada";
                 poblacion: 23423423;
                 saturacion: 65%;
-                bandera: "C:\imagen.jpg"
+                bandera: "C:\imagen.jpg";
         }
         pais: {
                 poblacion: 17263239;
                 nombre: "Guatemala";
                 saturacion: 40%;
-                bandera: "C:\imagen.jpg"
+                bandera: "C:\imagen.jpg";
         }
         pais: {
                 saturacion: 60%;
                 nombre:"Chile";
                 poblacion: 235234234;
-                bandera: "C:\imagen.jpg"
+                bandera: "C:\imagen.jpg";
         }
     }
 }
