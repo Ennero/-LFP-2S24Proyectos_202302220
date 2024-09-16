@@ -34,9 +34,9 @@ program proceso
 
     print *, entrada
 
-    call analizar()
+    !call analizar()
 
-    !call probando()
+    call probando()
 
     if (error) then !Si hay errores
         call html_malo() !Llamo a la subrutina que genera el html con los errores
@@ -240,7 +240,7 @@ subroutine analizar()
             else if (lexema=='%') then !Si es un porcentaje
                 call agregarToken(adjustl("%" // repeat(' ', 30 - len_trim(lexema))), &
                                 adjustl("Porcentaje" // repeat(' ', 30 - len_trim("Porcentaje"))), &
-                                posF, posC)
+                                posF, posC-1)
 
             else if (lexema=='}') then !Si es una llave de cierre
                 call agregarToken(adjustl("}" // repeat(' ', 30 - len_trim(lexema))), &
@@ -270,7 +270,7 @@ subroutine analizar()
             if (c=='"') then !Si es el fin de la cadena
                 lexema=trim(lexema)//c
 
-                call agregarToken(adjustl('"'//trim(lexema)//'"'// repeat(' ', 28 - len_trim(lexema))), &
+                call agregarToken(adjustl(trim(lexema)// repeat(' ', 28 - len_trim(lexema))), &
                                 adjustl("Cadena" // repeat(' ', 30 - len_trim("Cadena"))), &
                                 posF, posC - len_trim(lexema)+1)
                 estado=6
@@ -491,14 +491,15 @@ subroutine graficar() !Subrutina que genera la grafica con graphviz
     use globales
     implicit none
     character(len=5000) :: grafica
-    character(len=30) :: temp,promSatu,satuPais
+    character(len=30) :: temp,promSatu,satuPais,nG,nP,nC
     integer :: j,unit,pp,prom,herbert
     unit=2021
     j=1
     grafica= "digraph Grafica {" // new_line('A') // "rankdir=TB;" // new_line('A') &
                 // "node [shape = record, style = filled];" // new_line('A')
     pp=1
-    grafica=trim(grafica)//trim(nGrafica)//' [Label="{'//trim(nGrafica)//'}" fillcolor="purple"];'//new_line('A')
+    nG=trim(nGrafica(2:len_trim(nGrafica)-1))
+    grafica=trim(grafica)//trim(nG)//' [Label="{'//trim(nG)//'}" fillcolor="purple"];'//new_line('A')
     do while (j<=cuentaP)
         prom=0
         temp=trim(paises(1,j))
@@ -513,7 +514,10 @@ subroutine graficar() !Subrutina que genera la grafica con graphviz
 
         !Convierto el promedio a string
         write(promSatu,'(I0)') prom !Lo convierto a string
-        grafica=trim(grafica)//trim(temp)//' [label="{'//trim(temp)//"|"//trim(promSatu)// '}"'
+
+        !Le quito las comillas dobles a los nombres
+        nC=trim(temp(2:len_trim(temp)-1))
+        grafica=trim(grafica)//trim(nC)//' [label="{'//trim(nC)//"|"//trim(promSatu)// '}"'
 
         !Condicional para los colorcitos
         if (prom>75) then
@@ -532,14 +536,15 @@ subroutine graficar() !Subrutina que genera la grafica con graphviz
 
         !Cierro y grafico :)
         grafica=trim(grafica)//'];'//new_line('A')
-        grafica=trim(grafica)//trim(nGrafica)//' -> ' //trim(temp)//';'//new_line('A')
+        grafica=trim(grafica)//trim(nG)//' -> ' //trim(nC)//';'//new_line('A')
 
         !Ciclo para crear los nodos
         do while (trim(temp) == trim(paises(1,j)))
             write(satuPais, '(I0)') saturaciones(j) !Lo convierto a string
 
             !Creo los nodos de los paises y los conecto con el continente
-            grafica=trim(grafica)//trim(paises(2,j))//' [label="{'//trim(paises(2,j))//"|"//trim(satuPais)//'}"'
+            nP=trim(paises(2,j)(2:len_trim(paises(2,j))-1))
+            grafica=trim(grafica)//trim(nP)//' [label="{'//trim(nP)//"|"//trim(satuPais)//'}"'
 
             !Condicional para los colorcitos
             if (saturaciones(j)>75) then
@@ -558,7 +563,7 @@ subroutine graficar() !Subrutina que genera la grafica con graphviz
 
             !Cierro y grafico :)
             grafica=trim(grafica)//'];'//new_line('A')
-            grafica=trim(grafica)//trim(temp)//' -> '//trim(paises(2,j))//';'//new_line('A')
+            grafica=trim(grafica)//trim(nC)//' -> '//trim(nP)//';'//new_line('A')
             j=j+1
         end do
     end do

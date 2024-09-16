@@ -1,0 +1,25 @@
+digraph Grafica {
+rankdir=TB;
+node [shape = record, style = filled];
+rafic [Label="{rafic}" fillcolor="purple"];
+si [label="{si|71}" fillcolor="orange";];
+rafic -> si;
+apo [label="{apo|80}" fillcolor="red";];
+si -> apo;
+hin [label="{hin|95}" fillcolor="red";];
+si -> hin;
+ore [label="{ore|40}" fillcolor="green";];
+si -> ore;
+meric [label="{meric|55}" fillcolor="yellow";];
+rafic -> meric;
+anad [label="{anad|65}" fillcolor="orange";];
+meric -> anad;
+uatemal [label="{uatemal|40}" fillcolor="green";];
+meric -> uatemal;
+hil [label="{hil|60}" fillcolor="yellow";];
+meric -> hil;
+urop [label="{urop|2}" fillcolor="white";];
+rafic -> urop;
+span [label="{span|2}" fillcolor="white";];
+urop -> span;
+}
