@@ -34,9 +34,9 @@ program proceso
 
     print *, entrada
 
-    !call agregarToken(adjustl("grafica")//repeat(' ', 30-len_trim("grafica")), adjustl("Palabra reservada")//repeat(' ', 30-len_trim("Palabra reservada")), 1, 1)
     call analizar()
 
+    !call probando()
 
     if (error) then !Si hay errores
         call html_malo() !Llamo a la subrutina que genera el html con los errores
@@ -58,7 +58,7 @@ subroutine analizar()
     character(len=40) :: lexema
     character(len=1) :: c
     integer:: posF, posC, largo, estado, i
-    logical :: VContinente, VGrafica, VPaisNombre, VPaisPoblacion, VPaisSaturacion, VPaisBandera
+    logical :: VContinente, VGrafica, VPaisNombre, VPaisPoblacion, VPaisSaturacion, VPaisBandera, VEspacio
     !Inicializo las variables
     largo=len_trim(entrada)
     posF=1
@@ -66,6 +66,7 @@ subroutine analizar()
     satu=100
     estado=0
     i=0
+    VEspacio=.false.
     VContinente=.false.
     VGrafica=.false.
     VPaisNombre=.false.
@@ -81,12 +82,7 @@ subroutine analizar()
     entrada(largo+1:largo+1)="#"
     largo=largo+1
     do while (i<=largo)
-
         i=i+1
-        if(c==char(10)) then !Si es un salto de línea
-                posC=0 !Reinicio la posición de la columna
-                posF=posF+1 !Aumento la posición de la fila
-        end if
         posC=posC+1 !Aumento la posición de la columna
         c=entrada(i:i) !Obtengo el caracter actual
         !Comienzo con el selectCase
@@ -103,8 +99,14 @@ subroutine analizar()
             else if (c=='"') then !Si es una cadena
                 lexema=c
                 estado=3
-            else if (c==' ' .or. c==char(10) .or. c==char(9)) then !Si es un espacio
-                cycle !Aquí no hago nada
+            else if (c==' ' .or. c==char(9)) then !Si es un espacio
+                !posC=posC+1
+            
+            else if (c==char(10)) then
+                posC=0
+                posF=posF+1
+                cycle
+
             else if (c=='#' .and. i==largo) then !Si es el fin de la cadena
                 exit !Salgo del ciclo
             else !Si es un símbolo
@@ -204,7 +206,6 @@ subroutine analizar()
 
     !Estado para la lectura de cadenas      
         case(3)
-            print *, lexema
             if(c=='"') then !Si no es el fin de la cadena
                 lexema=trim(lexema)//c
                 call agregarError(lexema, adjustl("Cadena vacia" // &
@@ -215,7 +216,6 @@ subroutine analizar()
                 i=i-1
                 posC=posC-1
                 estado=5
-                print *, lexema//"Hola"
             end if
     !Estado para la lectura de simbolos
         case(4)
@@ -225,27 +225,27 @@ subroutine analizar()
             if(lexema==';') then !Si es un punto y coma
                 call agregarToken(adjustl(";" // repeat(' ', 30 - len_trim(lexema))), &
                                 adjustl("Punto y coma" // repeat(' ', 30 - len_trim("Punto y coma"))), &
-                                posF, posC - len_trim(c))
+                                posF, posC-1)
 
             else if (lexema==':') then !Si es un dos puntos
                 call agregarToken(adjustl(":" // repeat(' ', 30 - len_trim(lexema))), &
                                 adjustl("Dos puntos" // repeat(' ', 30 - len_trim("Dos puntos"))), &
-                                posF, posC - len_trim(c))
+                                posF, posC)
 
             else if (lexema=='{') then !Si es una llave de apertura
                 call agregarToken(adjustl("{" // repeat(' ', 30 - len_trim(lexema))), &
                                 adjustl("Llave de apertura" // repeat(' ', 30 - len_trim("Llave de apertura"))), &
-                                posF, posC - len_trim(c))
+                                posF, posC)
 
             else if (lexema=='%') then !Si es un porcentaje
                 call agregarToken(adjustl("%" // repeat(' ', 30 - len_trim(lexema))), &
                                 adjustl("Porcentaje" // repeat(' ', 30 - len_trim("Porcentaje"))), &
-                                posF, posC - len_trim(c))
+                                posF, posC)
 
             else if (lexema=='}') then !Si es una llave de cierre
                 call agregarToken(adjustl("}" // repeat(' ', 30 - len_trim(lexema))), &
                                 adjustl("Llave de cierre" // repeat(' ', 30 - len_trim("Llave de cierre"))), &
-                                posF, posC - len_trim(c))
+                                posF, posC)
                 
                 !Agrego el pais a la grafica
                 call agregarPais(adjustl(tempContinente), adjustl(tempPais), adjustl(tempPoblacion), auxSatu, adjustl(auxBandera))
@@ -270,14 +270,22 @@ subroutine analizar()
             if (c=='"') then !Si es el fin de la cadena
                 lexema=trim(lexema)//c
 
-                call agregarToken(adjustl(lexema // repeat(' ', 30 - len_trim(lexema))), &
+                call agregarToken(adjustl('"'//trim(lexema)//'"'// repeat(' ', 28 - len_trim(lexema))), &
                                 adjustl("Cadena" // repeat(' ', 30 - len_trim("Cadena"))), &
-                                posF, posC - len_trim(lexema))
+                                posF, posC - len_trim(lexema)+1)
                 estado=6
 
             else !Si no es el fin de la cadena
-                lexema=trim(lexema)//c
 
+                if (VEspacio) then !Si hay un espacio
+                    lexema=trim(lexema)//' '//c !Concateno el espacio al lexema
+                    VEspacio=.false.
+                else
+                    lexema=trim(lexema)//c !Concateno el caracter al lexema
+                end if
+                if(c==' ' .or. c==char(9) .or. c==char(10)) then
+                    VEspacio=.true. !Si hay un espacio, lo agrego en el siguiente
+                end if
             end if
     !Estado de finalización de lectura de caracteres
         case(6)

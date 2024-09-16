@@ -1,9 +1,9 @@
 digraph Grafica {
 rankdir=TB;
 node [shape = record, style = filled];
-"nombredegrafico" [Label="{"nombredegrafico"}" fillcolor="purple"];
+"nombre de grafico" [Label="{"nombre de grafico"}" fillcolor="purple"];
 "Asia" [label="{"Asia"|63}" fillcolor="orange";];
-"nombredegrafico" -> "Asia";
+"nombre de grafico" -> "Asia";
 "Japon" [label="{"Japon"|80}" fillcolor="red";];
 "Asia" -> "Japon";
 "C:\imagen.jpg" [label="{"C:\imagen.jpg"|95}" fillcolor="red";];
@@ -13,7 +13,7 @@ node [shape = record, style = filled];
 "Korea" [label="{"Korea"|40}" fillcolor="green";];
 "Asia" -> "Korea";
 "America" [label="{"America"|57}" fillcolor="yellow";];
-"nombredegrafico" -> "America";
+"nombre de grafico" -> "America";
 "Canada" [label="{"Canada"|65}" fillcolor="orange";];
 "America" -> "Canada";
 "Guatemala" [label="{"Guatemala"|40}" fillcolor="green";];
