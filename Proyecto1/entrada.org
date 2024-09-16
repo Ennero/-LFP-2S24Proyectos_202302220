@@ -5,11 +5,11 @@ grafica: {
         pais: {
                 nombre: "Japon";
                 poblacion: 2352342;
-                saturacion: 80.60%;
+                saturacion: 80%;
                 bandera: "C:\imagen.jpg";
         }
         pais: {
-                bandera: "C:\imagen.jpg"
+                bandera: "C:\imagen.jpg";
                 nombre: "China";
                 poblacion: 1350000000;
                 saturacion: 95%;

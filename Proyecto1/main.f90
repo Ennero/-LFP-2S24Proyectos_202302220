@@ -2,12 +2,12 @@ module globales
     !Aquí declaro las variables globales que usaré
     implicit none
     character(len=100) :: rutaBandera, rutaGrafica, nPais, poblacion
-    character(len=50) :: tempPais, tempSaturacion,tempPoblacion,tempContinente,auxPais,auxPoblacion,nGrafica, tempBandera
-    integer :: cuentaT, cuentaE,cuentaP,auxSatu,satu,caent
+    character(len=50) :: tempPais, tempSaturacion,tempPoblacion,tempContinente,auxPais,auxPoblacion,auxBandera,nGrafica
+    integer :: cuentaT, cuentaE,cuentaP,auxSatu,satu
     character(len=30), dimension(4,500)::tokens, errores,paises
     !La estructura de pais será: continente / nombre / población / bandera
     integer, dimension(1:500)::saturaciones
-    character(len=4000):: entrada
+    character(len=4000):: entrada,encuentraErrores
     logical :: error
 end module globales
 
@@ -32,8 +32,11 @@ program proceso
     end do
     !PROBANDOOOOOOO
 
+    print *, entrada
+
     !call agregarToken(adjustl("grafica")//repeat(' ', 30-len_trim("grafica")), adjustl("Palabra reservada")//repeat(' ', 30-len_trim("Palabra reservada")), 1, 1)
     call analizar()
+
 
     if (error) then !Si hay errores
         call html_malo() !Llamo a la subrutina que genera el html con los errores
@@ -51,31 +54,34 @@ end program proceso
 subroutine analizar()
     use globales
     implicit none
+    !Declaro las variables que usaré
     character(len=40) :: lexema
     character(len=1) :: c
     integer:: posF, posC, largo, estado, i
-    logical :: VContinente, VGrafica, VPaisNombre, VPaisPoblacion, VPaisSaturacion, VPaisBandera ,VPais,VEspacio
+    logical :: VContinente, VGrafica, VPaisNombre, VPaisPoblacion, VPaisSaturacion, VPaisBandera
     !Inicializo las variables
     largo=len_trim(entrada)
     posF=1
-    posC=1
+    posC=0
     satu=100
     estado=0
     i=0
-    VEspacio=.false.
     VContinente=.false.
     VGrafica=.false.
     VPaisNombre=.false.
     VPaisBandera=.false.
     VPaisPoblacion=.false.
     VPaisSaturacion=.false.
-    VPais=.false.
 
+    !Inicializo las variables de los errores -------------------------------------------------------------
+    encuentraErrores=""
+    !Inicializo las variables de los errores -------------------------------------------------------------
 
     !Agrego el caracter de fin de cadena (para saber cuando termina)
     entrada(largo+1:largo+1)="#"
     largo=largo+1
     do while (i<=largo)
+
         i=i+1
         if(c==char(10)) then !Si es un salto de línea
                 posC=0 !Reinicio la posición de la columna
@@ -86,39 +92,218 @@ subroutine analizar()
         !Comienzo con el selectCase
         select case (estado)
 
-!El estado inicial
+    !El estado inicial (como el enrutador)
         case(0)
-            if(c>='a' .and. c<='z') then
+            if(c>='a' .and. c<='z') then !Si es una palabra reservada
                 lexema=c
                 estado=1
+            else if (c>='0' .and. c<='9') then !Si es un número
+                lexema=c
+                estado=2
+            else if (c=='"') then !Si es una cadena
+                lexema=c
+                estado=3
+            else if (c==' ' .or. c==char(10) .or. c==char(9)) then !Si es un espacio
+                cycle !Aquí no hago nada
+            else if (c=='#' .and. i==largo) then !Si es el fin de la cadena
+                exit !Salgo del ciclo
+            else !Si es un símbolo
+                lexema=c
+                estado=4
+            end if
+
+    !Estado para la lectura de palabras reservadas
+        case(1)
+            if(c>='a' .and. c<='z') then !Si son caracteres aceptados
+                lexema=trim(lexema)//c
+            else !Si ya no son caracteres aceptados
+                if (trim(lexema)=="grafica") then !Si es la palabra reservada GRAFICA
+                    call agregarToken(adjustl("grafica" // repeat(' ', 30 - len_trim("grafica"))), &
+                                    adjustl("Palabra reservada" // repeat(' ', 30 - len_trim("Palabra reservada"))), &
+                                    posF, posC - len_trim("grafica"))
+                    VGrafica=.true.
+                    
+                else if (trim(lexema)=="continente") then !Si es la palabra reservada CONTINENTE
+                    call agregarToken(adjustl("continente" // repeat(' ', 30 - len_trim("continente"))), &
+                                    adjustl("Palabra reservada" // repeat(' ', 30 - len_trim("Palabra reservada"))), &
+                                    posF, posC - len_trim("continente"))
+                    VContinente=.true.
+
+                else if(trim(lexema)=='pais') then !Si es la palabra reservada PAIS
+                    call agregarToken(adjustl("pais" // repeat(' ', 30 - len_trim("pais"))), &
+                                    adjustl("Palabra reservada" // repeat(' ', 30 - len_trim("Palabra reservada"))), &
+                                    posF, posC - len_trim("pais"))
+                    VPaisNombre=.true.
+
+                else if(trim(lexema)=='nombre') then !Si es la palabra reservada NOMBRE
+                    call agregarToken(adjustl("nombre" // repeat(' ', 30 - len_trim("nombre"))), &
+                                    adjustl("Palabra reservada" // repeat(' ', 30 - len_trim("Palabra reservada"))), &
+                                    posF, posC - len_trim("nombre"))
+
+                else if(trim(lexema)=='poblacion') then !Si es la palabra reservada POBLACION
+                    call agregarToken(adjustl("poblacion" // repeat(' ', 30 - len_trim("poblacion"))), &
+                                    adjustl("Palabra reservada" // repeat(' ', 30 - len_trim("Palabra reservada"))), &
+                                    posF, posC - len_trim("poblacion"))
+                    VPaisPoblacion=.true.
+                    VPaisSaturacion=.false. !Por cualquier cosita
+
+                else if(trim(lexema)=='saturacion') then !Si es la palabra reservada SATURACION
+                    call agregarToken(adjustl("saturacion" // repeat(' ', 30 - len_trim("saturacion"))), &
+                                    adjustl("Palabra reservada" // repeat(' ', 30 - len_trim("Palabra reservada"))), &
+                                    posF, posC - len_trim("saturacion"))
+                    VPaisSaturacion=.true.
+                    VPaisPoblacion=.false. !Por cualquier cosita
+
+                else if(trim(lexema)=='bandera') then !Si es la palabra reservada BANDERA
+                    call agregarToken(adjustl("bandera" // repeat(' ', 30 - len_trim("bandera"))), &
+                                    adjustl("Palabra reservada" // repeat(' ', 30 - len_trim("Palabra reservada"))), &
+                                    posF, posC - len_trim("bandera"))
+                    VPaisBandera=.true.
+
+                else !Si no es ninguna palabra reservada
+                    call agregarError(lexema, adjustl("Palabra reservada no aceptada" // & 
+                    repeat(' ', 30 - len_trim("Palabra reservada no aceptada"))), posF, posC - len_trim(lexema))
+                end if
+
+                estado=0
+                i=i-1
+                posC=posC-1
+            end if
+
+    !Estado para la lectura de numeros
+        case(2)
+            if(c>='0' .and. c<='9') then !Si son números
+                lexema=trim(lexema)//c
+
+            else !Si ya no son números
+                if (VPaisPoblacion) then !Si es la población del país
+                    call agregarToken(adjustl(lexema // repeat(' ', 30 - len_trim(lexema))), &
+                                    adjustl("Número" // repeat(' ', 30 - len_trim("Número"))), &
+                                    posF, posC - len_trim(lexema))
+                    VPaisPoblacion=.false.
+                    tempPoblacion=lexema
+
+                else if (VPaisSaturacion) then !Si es la saturación del país
+                    call agregarToken(adjustl(lexema // repeat(' ', 30 - len_trim(lexema))), &
+                                    adjustl("Número" // repeat(' ', 30 - len_trim("Número"))), &
+                                    posF, posC - len_trim(lexema))
+                    VPaisSaturacion=.false.
+                    tempSaturacion=lexema
+                    read(tempSaturacion,'(I10)') auxSatu !Lo convierto a int
+                    
+                else !Si ya se escribio saturacion o poblacion antes
+                    call agregarError(lexema, adjustl("Número ya leído" // & 
+                    repeat(' ', 30 - len_trim("Número ya leído"))), posF, posC - len_trim(lexema))
+                end if
+                
+                estado=0
+                i=i-1
+            end if
 
 
+
+    !Estado para la lectura de cadenas      
+        case(3)
+            print *, lexema
+            if(c=='"') then !Si no es el fin de la cadena
+                lexema=trim(lexema)//c
+                call agregarError(lexema, adjustl("Cadena vacia" // &
+                repeat(' ', 30 - len_trim("Cadena vacia"))), posF, posC - len_trim(lexema))
+                estado=0
+                
+            else !Si no el fin de la cadena
+                i=i-1
+                posC=posC-1
+                estado=5
+                print *, lexema//"Hola"
+            end if
+    !Estado para la lectura de simbolos
+        case(4)
+            estado=0
+            i=i-1
+            posC=posC-1
+            if(lexema==';') then !Si es un punto y coma
+                call agregarToken(adjustl(";" // repeat(' ', 30 - len_trim(lexema))), &
+                                adjustl("Punto y coma" // repeat(' ', 30 - len_trim("Punto y coma"))), &
+                                posF, posC - len_trim(c))
+
+            else if (lexema==':') then !Si es un dos puntos
+                call agregarToken(adjustl(":" // repeat(' ', 30 - len_trim(lexema))), &
+                                adjustl("Dos puntos" // repeat(' ', 30 - len_trim("Dos puntos"))), &
+                                posF, posC - len_trim(c))
+
+            else if (lexema=='{') then !Si es una llave de apertura
+                call agregarToken(adjustl("{" // repeat(' ', 30 - len_trim(lexema))), &
+                                adjustl("Llave de apertura" // repeat(' ', 30 - len_trim("Llave de apertura"))), &
+                                posF, posC - len_trim(c))
+
+            else if (lexema=='%') then !Si es un porcentaje
+                call agregarToken(adjustl("%" // repeat(' ', 30 - len_trim(lexema))), &
+                                adjustl("Porcentaje" // repeat(' ', 30 - len_trim("Porcentaje"))), &
+                                posF, posC - len_trim(c))
+
+            else if (lexema=='}') then !Si es una llave de cierre
+                call agregarToken(adjustl("}" // repeat(' ', 30 - len_trim(lexema))), &
+                                adjustl("Llave de cierre" // repeat(' ', 30 - len_trim("Llave de cierre"))), &
+                                posF, posC - len_trim(c))
+                
+                !Agrego el pais a la grafica
+                call agregarPais(adjustl(tempContinente), adjustl(tempPais), adjustl(tempPoblacion), auxSatu, adjustl(auxBandera))
+
+                VPaisNombre=.false. !Por cualquier cosa xd
+                !Actualizo los valores del menos saturado
+                if(auxSatu<satu) then
+                    satu=auxSatu
+                    rutaBandera=auxBandera
+                    nPais=tempPais
+                    poblacion=tempPoblacion   
+                end if
+
+            else !Si no es ningun simbolo aceptado
+                call agregarError(lexema, adjustl("Simbolo no aceptado" // & 
+                repeat(' ', 30 - len_trim("Simbolo no aceptado"))), posF, posC - len_trim(lexema))
+            end if
+
+
+    !Estado de lectura de cadena de caracteres
+        case(5)
+            if (c=='"') then !Si es el fin de la cadena
+                lexema=trim(lexema)//c
+
+                call agregarToken(adjustl(lexema // repeat(' ', 30 - len_trim(lexema))), &
+                                adjustl("Cadena" // repeat(' ', 30 - len_trim("Cadena"))), &
+                                posF, posC - len_trim(lexema))
+                estado=6
+
+            else !Si no es el fin de la cadena
+                lexema=trim(lexema)//c
 
             end if
-        
-        case(1)
-
-
-        case(2)
-
-        case(3)
-
-        case(4)
-
-        case(5)
-
+    !Estado de finalización de lectura de caracteres
         case(6)
-
-        case(7)
-
-        case(8)
-
-        case(9)
-
+            if(VGrafica) then !Si es el nombre de la grafica
+                VGrafica=.false.
+                nGrafica=lexema
+            
+            else if (VContinente) then !Si es el nombre del continente
+                VContinente=.false.
+                tempContinente=lexema
+            
+            else if (VPaisNombre) then !Si es el nombre del pais
+                VPaisNombre=.false.
+                tempPais=lexema
+            
+            else if (VPaisBandera) then !Si es la bandera del pais
+                VPaisBandera=.false.
+                auxBandera=lexema
+            
+            else !No sé que iría aquí xd
+                call agregarError(lexema, adjustl("Cadena sin palabra reservada" // & 
+                repeat(' ', 30 - len_trim("Cadena sin palabra reservada"))), posF, posC - len_trim(lexema))
+            end if
+            estado=0
+            i=i-1
         end select
-
-
-
     end do
 end subroutine analizar
 
@@ -192,7 +377,7 @@ subroutine agregarError(lexema, descrip, linea, columna) !Subrutina que agrega l
     errores(1,cuentaE)=trim(lexema)
     errores(2,cuentaE)=trim(descrip)
     write(linea2,'(I0)') linea !Probar nuevamente la forma en la que escribo estas cosas porque ODIO FORTRAAAAAN
-    write(columna2,'(I0)') columna
+    write(columna2,'(I0)') columna !Lo paso a string el int
     errores(3,cuentaE)=trim(linea2)
     errores(4,cuentaE)=trim(columna2)
 end subroutine agregarError
@@ -209,7 +394,7 @@ subroutine agregarToken(lexema, descrip, linea, columna) !Subrutina que agrega l
     write(columna2,'(I0)') columna !Lo transforma a string
     tokens(3,cuentaT)=(linea2)
     tokens(4,cuentaT)=(columna2)
-    print *, lexema, descrip, linea, columna
+    !print *, lexema, descrip, linea, columna
 end subroutine agregarToken
 
 subroutine html_bueno() !Subrutina que genera el html con los tokens encontrados
@@ -235,7 +420,7 @@ subroutine html_bueno() !Subrutina que genera el html con los tokens encontrados
     write(unit, '(A)') "<table>"
     write(unit, '(A)') "<tr><th>Número de Token</th><th>Lexema</th><th>Tipo</th><th>Fila</th><th>Columna</th></tr>"
     do i=1,cuentaT
-        write(cuento,'(I3)') i
+        write(cuento,'(I3)') i 
         write(unit, '(A)') "<tr>"
         write(unit, '(A)') "<td>"//trim(cuento)//"</td>"
         write(unit, '(A)') "<td>"//trim(tokens(1,i))//"</td>"
