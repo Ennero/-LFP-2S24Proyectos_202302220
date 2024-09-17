@@ -34,9 +34,9 @@ program proceso
 
     print *, entrada
 
-    !call analizar()
+    call analizar()
 
-    call probando()
+    !call probando()
 
     if (error) then !Si hay errores
         call html_malo() !Llamo a la subrutina que genera el html con los errores
@@ -58,7 +58,7 @@ subroutine analizar()
     character(len=40) :: lexema
     character(len=1) :: c
     integer:: posF, posC, largo, estado, i
-    logical :: VContinente, VGrafica, VPaisNombre, VPaisPoblacion, VPaisSaturacion, VPaisBandera, VEspacio
+    logical :: VGrafica, VEspacio
     !Inicializo las variables
     largo=len_trim(entrada)
     posF=1
@@ -67,12 +67,6 @@ subroutine analizar()
     estado=0
     i=0
     VEspacio=.false.
-    VContinente=.false.
-    VGrafica=.false.
-    VPaisNombre=.false.
-    VPaisBandera=.false.
-    VPaisPoblacion=.false.
-    VPaisSaturacion=.false.
 
     !Inicializo las variables de los errores -------------------------------------------------------------
     encuentraErrores=""
@@ -123,19 +117,16 @@ subroutine analizar()
                     call agregarToken(adjustl("grafica" // repeat(' ', 30 - len_trim("grafica"))), &
                                     adjustl("Palabra reservada" // repeat(' ', 30 - len_trim("Palabra reservada"))), &
                                     posF, posC - len_trim("grafica"))
-                    VGrafica=.true.
                     
                 else if (trim(lexema)=="continente") then !Si es la palabra reservada CONTINENTE
                     call agregarToken(adjustl("continente" // repeat(' ', 30 - len_trim("continente"))), &
                                     adjustl("Palabra reservada" // repeat(' ', 30 - len_trim("Palabra reservada"))), &
                                     posF, posC - len_trim("continente"))
-                    VContinente=.true.
 
                 else if(trim(lexema)=='pais') then !Si es la palabra reservada PAIS
                     call agregarToken(adjustl("pais" // repeat(' ', 30 - len_trim("pais"))), &
                                     adjustl("Palabra reservada" // repeat(' ', 30 - len_trim("Palabra reservada"))), &
                                     posF, posC - len_trim("pais"))
-                    VPaisNombre=.true.
 
                 else if(trim(lexema)=='nombre') then !Si es la palabra reservada NOMBRE
                     call agregarToken(adjustl("nombre" // repeat(' ', 30 - len_trim("nombre"))), &
@@ -146,21 +137,16 @@ subroutine analizar()
                     call agregarToken(adjustl("poblacion" // repeat(' ', 30 - len_trim("poblacion"))), &
                                     adjustl("Palabra reservada" // repeat(' ', 30 - len_trim("Palabra reservada"))), &
                                     posF, posC - len_trim("poblacion"))
-                    VPaisPoblacion=.true.
-                    VPaisSaturacion=.false. !Por cualquier cosita
 
                 else if(trim(lexema)=='saturacion') then !Si es la palabra reservada SATURACION
                     call agregarToken(adjustl("saturacion" // repeat(' ', 30 - len_trim("saturacion"))), &
                                     adjustl("Palabra reservada" // repeat(' ', 30 - len_trim("Palabra reservada"))), &
                                     posF, posC - len_trim("saturacion"))
-                    VPaisSaturacion=.true.
-                    VPaisPoblacion=.false. !Por cualquier cosita
 
                 else if(trim(lexema)=='bandera') then !Si es la palabra reservada BANDERA
                     call agregarToken(adjustl("bandera" // repeat(' ', 30 - len_trim("bandera"))), &
                                     adjustl("Palabra reservada" // repeat(' ', 30 - len_trim("Palabra reservada"))), &
                                     posF, posC - len_trim("bandera"))
-                    VPaisBandera=.true.
 
                 else !Si no es ninguna palabra reservada
                     call agregarError(lexema, adjustl("Palabra reservada no aceptada" // & 
@@ -178,31 +164,9 @@ subroutine analizar()
                 lexema=trim(lexema)//c
 
             else !Si ya no son números
-                if (VPaisPoblacion) then !Si es la población del país
-                    call agregarToken(adjustl(lexema // repeat(' ', 30 - len_trim(lexema))), &
-                                    adjustl("Número" // repeat(' ', 30 - len_trim("Número"))), &
-                                    posF, posC - len_trim(lexema))
-                    VPaisPoblacion=.false.
-                    tempPoblacion=lexema
-
-                else if (VPaisSaturacion) then !Si es la saturación del país
-                    call agregarToken(adjustl(lexema // repeat(' ', 30 - len_trim(lexema))), &
-                                    adjustl("Número" // repeat(' ', 30 - len_trim("Número"))), &
-                                    posF, posC - len_trim(lexema))
-                    VPaisSaturacion=.false.
-                    tempSaturacion=lexema
-                    read(tempSaturacion,'(I10)') auxSatu !Lo convierto a int
-                    
-                else !Si ya se escribio saturacion o poblacion antes
-                    call agregarError(lexema, adjustl("Número ya leído" // & 
-                    repeat(' ', 30 - len_trim("Número ya leído"))), posF, posC - len_trim(lexema))
-                end if
-                
                 estado=0
                 i=i-1
             end if
-
-
 
     !Estado para la lectura de cadenas      
         case(3)
@@ -247,18 +211,6 @@ subroutine analizar()
                                 adjustl("Llave de cierre" // repeat(' ', 30 - len_trim("Llave de cierre"))), &
                                 posF, posC)
                 
-                !Agrego el pais a la grafica
-                call agregarPais(adjustl(tempContinente), adjustl(tempPais), adjustl(tempPoblacion), auxSatu, adjustl(auxBandera))
-
-                VPaisNombre=.false. !Por cualquier cosa xd
-                !Actualizo los valores del menos saturado
-                if(auxSatu<satu) then
-                    satu=auxSatu
-                    rutaBandera=auxBandera
-                    nPais=tempPais
-                    poblacion=tempPoblacion   
-                end if
-
             else !Si no es ningun simbolo aceptado
                 call agregarError(lexema, adjustl("Simbolo no aceptado" // & 
                 repeat(' ', 30 - len_trim("Simbolo no aceptado"))), posF, posC - len_trim(lexema))
@@ -289,26 +241,6 @@ subroutine analizar()
             end if
     !Estado de finalización de lectura de caracteres
         case(6)
-            if(VGrafica) then !Si es el nombre de la grafica
-                VGrafica=.false.
-                nGrafica=lexema
-            
-            else if (VContinente) then !Si es el nombre del continente
-                VContinente=.false.
-                tempContinente=lexema
-            
-            else if (VPaisNombre) then !Si es el nombre del pais
-                VPaisNombre=.false.
-                tempPais=lexema
-            
-            else if (VPaisBandera) then !Si es la bandera del pais
-                VPaisBandera=.false.
-                auxBandera=lexema
-            
-            else !No sé que iría aquí xd
-                call agregarError(lexema, adjustl("Cadena sin palabra reservada" // & 
-                repeat(' ', 30 - len_trim("Cadena sin palabra reservada"))), posF, posC - len_trim(lexema))
-            end if
             estado=0
             i=i-1
         end select
@@ -495,6 +427,10 @@ subroutine graficar() !Subrutina que genera la grafica con graphviz
     integer :: j,unit,pp,prom,herbert
     unit=2021
     j=1
+
+    !Antes recolecto los paises de la tabla de tokens
+    call recolectarPaises()
+
     grafica= "digraph Grafica {" // new_line('A') // "rankdir=TB;" // new_line('A') &
                 // "node [shape = record, style = filled];" // new_line('A')
     pp=1
@@ -579,3 +515,11 @@ subroutine graficar() !Subrutina que genera la grafica con graphviz
     rutaGrafica="grafica.png"
 
 end subroutine graficar
+
+subroutine recolectarPaises() !Subrutina que recolecta los errores
+    use globales
+    implicit none
+
+
+    
+end subroutine recolectarPaises

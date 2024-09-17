@@ -3,12 +3,13 @@ grafica: {
     continente: {
     nombre: "Asia";
         pais: {
+                
                 nombre: "Japon";
                 poblacion: 2352342;
-                saturacion: 80%;
+                saturacion: 80%; 
                 bandera: "C:\imagen.jpg";
         }
-        pais: {
+        pais: { % 
                 bandera: "C:\imagen.jpg";
                 nombre: "China";
                 poblacion: 1350000000;
