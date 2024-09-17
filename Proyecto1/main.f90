@@ -1,9 +1,9 @@
 module globales
     !Aquí declaro las variables globales que usaré
     implicit none
-    character(len=100) :: rutaBandera, rutaGrafica, nPais, poblacion
-    character(len=50) :: tempPais, tempSaturacion,tempPoblacion,tempContinente,auxPais,auxPoblacion,auxBandera,nGrafica
-    integer :: cuentaT, cuentaE,cuentaP,auxSatu,satu
+    character(len=100) :: rutaBandera, rutaGrafica, nPais, poblacion, tempBandera
+    character(len=50) :: tempPais, tempSatu,tempPoblacion,tempContinente,auxPais,auxPoblacion,auxBandera,nGrafica
+    integer :: cuentaT, cuentaE,cuentaP,tempSaturacion,satu
     character(len=30), dimension(4,500)::tokens, errores,paises
     !La estructura de pais será: continente / nombre / población / bandera
     integer, dimension(1:500)::saturaciones
@@ -42,7 +42,7 @@ program proceso
         call html_malo() !Llamo a la subrutina que genera el html con los errores
     else !Si no hay errores
         call html_bueno() !Llamo a la subrutina que genera el html con los tokens
-        call graficar() !Llamo a la subrutina que genera la grafica
+        call recolectarPaises() !Llamo a la subrutina que genera la grafica
     end if
 
     !print *, trim(rutaGrafica)//","//trim(rutaBandera)//","//trim(nPais)//","//trim(poblacion)
@@ -58,7 +58,7 @@ subroutine analizar()
     character(len=40) :: lexema
     character(len=1) :: c
     integer:: posF, posC, largo, estado, i
-    logical :: VGrafica, VEspacio
+    logical :: VEspacio
     !Inicializo las variables
     largo=len_trim(entrada)
     posF=1
@@ -164,6 +164,9 @@ subroutine analizar()
                 lexema=trim(lexema)//c
 
             else !Si ya no son números
+                call agregarToken(adjustl(trim(lexema)// repeat(' ', 28 - len_trim(lexema))), &
+                                adjustl("Número" // repeat(' ', 30 - len_trim("Número"))), &
+                                posF, posC - len_trim(lexema)+1)
                 estado=0
                 i=i-1
             end if
@@ -429,13 +432,12 @@ subroutine graficar() !Subrutina que genera la grafica con graphviz
     j=1
 
     !Antes recolecto los paises de la tabla de tokens
-    call recolectarPaises()
 
     grafica= "digraph Grafica {" // new_line('A') // "rankdir=TB;" // new_line('A') &
                 // "node [shape = record, style = filled];" // new_line('A')
     pp=1
     nG=trim(nGrafica(2:len_trim(nGrafica)-1))
-    grafica=trim(grafica)//trim(nG)//' [Label="{'//trim(nG)//'}" fillcolor="purple"];'//new_line('A')
+    grafica=trim(grafica)//trim(nGrafica)//' [Label="{'//trim(nG)//'}" fillcolor="purple"];'//new_line('A')
     do while (j<=cuentaP)
         prom=0
         temp=trim(paises(1,j))
@@ -453,7 +455,7 @@ subroutine graficar() !Subrutina que genera la grafica con graphviz
 
         !Le quito las comillas dobles a los nombres
         nC=trim(temp(2:len_trim(temp)-1))
-        grafica=trim(grafica)//trim(nC)//' [label="{'//trim(nC)//"|"//trim(promSatu)// '}"'
+        grafica=trim(grafica)//trim(temp)//' [label="{'//trim(nC)//"|"//trim(promSatu)// '}"'
 
         !Condicional para los colorcitos
         if (prom>75) then
@@ -472,7 +474,7 @@ subroutine graficar() !Subrutina que genera la grafica con graphviz
 
         !Cierro y grafico :)
         grafica=trim(grafica)//'];'//new_line('A')
-        grafica=trim(grafica)//trim(nG)//' -> ' //trim(nC)//';'//new_line('A')
+        grafica=trim(grafica)//trim(nGrafica)//' -> ' //trim(temp)//';'//new_line('A')
 
         !Ciclo para crear los nodos
         do while (trim(temp) == trim(paises(1,j)))
@@ -480,7 +482,7 @@ subroutine graficar() !Subrutina que genera la grafica con graphviz
 
             !Creo los nodos de los paises y los conecto con el continente
             nP=trim(paises(2,j)(2:len_trim(paises(2,j))-1))
-            grafica=trim(grafica)//trim(nP)//' [label="{'//trim(nP)//"|"//trim(satuPais)//'}"'
+            grafica=trim(grafica)//trim(paises(2,j))//' [label="{'//trim(nP)//"|"//trim(satuPais)//'}"'
 
             !Condicional para los colorcitos
             if (saturaciones(j)>75) then
@@ -499,7 +501,7 @@ subroutine graficar() !Subrutina que genera la grafica con graphviz
 
             !Cierro y grafico :)
             grafica=trim(grafica)//'];'//new_line('A')
-            grafica=trim(grafica)//trim(nC)//' -> '//trim(nP)//';'//new_line('A')
+            grafica=trim(grafica)//trim(temp)//' -> '//trim(paises(2,j))//';'//new_line('A')
             j=j+1
         end do
     end do
@@ -519,7 +521,154 @@ end subroutine graficar
 subroutine recolectarPaises() !Subrutina que recolecta los errores
     use globales
     implicit none
+    integer :: i,j,cuentoGraficas, cuentoContinentes, cuentoPaises, &
+    cuentoPoblacion, cuentoSaturacion,cuentoBandera,cuentoNombre,cuentoAbre,cuentoCierra, &
+    cuentoDosPunto,cuentoPuntoYComa,cuentoPorcentaje,iostat
+    logical :: cuadra
+    i=0
+    j=0
+    cuentoGraficas=0
+    cuentoContinentes=0
+    cuentoPaises=0
+    cuentoPoblacion=0
+    cuentoSaturacion=0
+    cuentoBandera=0
+    cuentoNombre=0
+    cuentoAbre=0
+    cuentoCierra=0
+    cuentoDosPunto=0
+    cuentoPuntoYComa=0
+    cuentoPorcentaje=0
+    cuadra=.true.
 
+    !Ciclo para recorrer los tokens y contarlos para que cuadren
+    do while (i<=cuentaT)
+        i=i+1
+        if(trim(tokens(1,i))=="grafica") then
+            cuentoGraficas=cuentoGraficas+1
+        else if(trim(tokens(1,i))=="continente") then
+            cuentoContinentes=cuentoContinentes+1
+        else if(trim(tokens(1,i))=="pais") then
+            cuentoPaises=cuentoPaises+1
+        else if(trim(tokens(1,i))=="nombre") then
+            cuentoNombre=cuentoNombre+1
+        else if(trim(tokens(1,i))=="poblacion") then
+            cuentoPoblacion=cuentoPoblacion+1
+        else if(trim(tokens(1,i))=="saturacion") then
+            cuentoSaturacion=cuentoSaturacion+1
+        else if(trim(tokens(1,i))=="bandera") then
+            cuentoBandera=cuentoBandera+1
+        else if(trim(tokens(1,i))=="{") then
+            cuentoAbre=cuentoAbre+1
+        else if(trim(tokens(1,i))=="}") then
+            cuentoCierra=cuentoCierra+1
+        else if(trim(tokens(1,i))==":") then
+            cuentoDosPunto=cuentoDosPunto+1
+        else if(trim(tokens(1,i))==";") then
+            cuentoPuntoYComa=cuentoPuntoYComa+1
+        else if(trim(tokens(1,i))=="%") then
+            cuentoPorcentaje=cuentoPorcentaje+1
+        end if
+    end do
 
-    
+    !Condicional para que cuadren los tokens
+    if (cuentoGraficas/=1 ) then
+        cuadra=.false.
+    else if (cuentoAbre/=cuentoCierra) then
+        cuadra=.false.
+    else if(cuentoPaises/=cuentoPoblacion) then
+        cuadra=.false.
+    else if(cuentoPaises/=cuentoSaturacion) then
+        cuadra=.false.
+    else if(cuentoPaises/=cuentoBandera) then
+        cuadra=.false.
+    else if(cuentoNombre/=cuentoPaises+cuentoContinentes+cuentoGraficas) then
+        cuadra=.false.
+    else if(cuentoPaises/=cuentoPorcentaje) then
+        cuadra=.false.
+    else if(cuentoDosPunto/=cuentoNombre+cuentoPoblacion+cuentoSaturacion+cuentoBandera+cuentoGraficas+cuentoContinentes+cuentoPaises) then
+        cuadra=.false.
+    else if(cuentoPuntoYComa/=cuentoPoblacion+cuentoSaturacion+cuentoBandera+cuentoNombre) then
+        cuadra=.false.
+    else
+        cuadra=.true.
+    end if
+
+    i=0
+    !Si todo cuadra, entonces creo la matriz con los paises y lo grafico :)
+    if (cuadra) then
+        do while (i<=cuentaT)
+            i=i+1
+
+            !print *, trim(tokens(1,i))
+            !Aquí obtengo el nombre de la grafica
+            if (trim(tokens(1,i))=="grafica") then
+
+                do while (j<=cuentaT)
+                    j=j+1
+                    if (trim(tokens(1,j))=="nombre") then
+                        nGrafica=trim(tokens(1,j+2))
+                        exit
+                    end if
+                end do
+            end if
+
+            !Aquí obtengo el primer continente
+            if (trim(tokens(1,i))=="continente") then
+                do while (j<=cuentaT)
+                    j=j+1
+                    if (trim(tokens(1,j))=="nombre") then
+                        tempContinente=trim(tokens(1,j+2))
+                        exit
+                    end if
+                end do
+            end if
+
+            !Aquí obtengo la información de los paises
+            if (trim(tokens(1,i))=="pais") then
+                do while (j<=cuentaT)
+                    j=j+1
+                    if (trim(tokens(1,j))=="nombre") then
+                        tempPais=trim(tokens(1,j+2))
+                    else if (trim(tokens(1,j))=="poblacion") then
+                        tempPoblacion=trim(tokens(1,j+2))
+                        print *, tempPoblacion
+                    else if (trim(tokens(1,j))=="saturacion") then
+                        tempSatu=trim(tokens(1,j+2))
+                        read(tempSatu, '(I10)', iostat=iostat) tempSaturacion
+                    else if (trim(tokens(1,j))=="bandera") then
+                        tempBandera=trim(tokens(1,j+2))
+                    else if (trim(tokens(1,j))=="}") then
+                        call agregarPais(tempContinente,tempPais,tempPoblacion,tempSaturacion,tempBandera)
+                        exit
+                    end if
+                end do
+            end if
+        end do
+        call graficar() !Lo grafico
+    end if
+    print *, nGrafica
 end subroutine recolectarPaises
+
+
+
+
+!Lo dejo en standby xd
+subroutine buscoMenorSaturacion()
+    use globales
+    implicit none
+    integer :: i, menor, auxMenor
+    menor=100
+    i=0
+    auxMenor=0
+    do while (i<=cuentaP)
+        i=i+1
+        if (saturaciones(i)<menor) then
+            menor=saturaciones(i)
+            auxMenor=i
+        end if
+
+    end do
+
+
+end subroutine buscoMenorSaturacion

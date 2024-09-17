@@ -1,15 +1,14 @@
 grafica: {
     nombre:"nombre de grafico";
     continente: {
-    nombre: "Asia";
+    nombre: "America del Sur";
         pais: {
-                
-                nombre: "Japon";
+                nombre: "Estados Unidos";
                 poblacion: 2352342;
                 saturacion: 80%; 
                 bandera: "C:\imagen.jpg";
         }
-        pais: { % 
+        pais: {
                 bandera: "C:\imagen.jpg";
                 nombre: "China";
                 poblacion: 1350000000;
