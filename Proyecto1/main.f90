@@ -14,8 +14,12 @@ end module globales
 program proceso 
     use globales
     implicit none
+
+    !Probandooo
     character(len=200) :: linea
     integer :: ios
+    !Probandooo
+
     !Inicializo todas las variables que voy a usar
     entrada=""
     cuentaT=0
@@ -32,9 +36,9 @@ program proceso
     end do
     !PROBANDOOOOOOO
 
-    print *, entrada
-
-    call analizar()
+    !call leer() !Llamo a la subrutina que lee el archivo de entrada
+    print *, entrada !Me aseguro de que leyó lo que le pedí
+    call analizar() !Analizo la entrada
 
     !call probando()
 
@@ -45,7 +49,7 @@ program proceso
         call recolectarPaises() !Llamo a la subrutina que genera la grafica
     end if
 
-    !print *, trim(rutaGrafica)//","//trim(rutaBandera)//","//trim(nPais)//","//trim(poblacion)
+    print *, trim(rutaGrafica)//","//trim(rutaBandera)//","//trim(nPais)//","//trim(poblacion)
 end program proceso
 
 
@@ -63,7 +67,6 @@ subroutine analizar()
     largo=len_trim(entrada)
     posF=1
     posC=0
-    satu=100
     estado=0
     i=0
     VEspacio=.false.
@@ -166,7 +169,7 @@ subroutine analizar()
             else !Si ya no son números
                 call agregarToken(adjustl(trim(lexema)// repeat(' ', 28 - len_trim(lexema))), &
                                 adjustl("Número" // repeat(' ', 30 - len_trim("Número"))), &
-                                posF, posC - len_trim(lexema)+1)
+                                posF, posC - len_trim(lexema))
                 estado=0
                 i=i-1
             end if
@@ -192,7 +195,7 @@ subroutine analizar()
             if(lexema==';') then !Si es un punto y coma
                 call agregarToken(adjustl(";" // repeat(' ', 30 - len_trim(lexema))), &
                                 adjustl("Punto y coma" // repeat(' ', 30 - len_trim("Punto y coma"))), &
-                                posF, posC-1)
+                                posF, posC)
 
             else if (lexema==':') then !Si es un dos puntos
                 call agregarToken(adjustl(":" // repeat(' ', 30 - len_trim(lexema))), &
@@ -207,7 +210,7 @@ subroutine analizar()
             else if (lexema=='%') then !Si es un porcentaje
                 call agregarToken(adjustl("%" // repeat(' ', 30 - len_trim(lexema))), &
                                 adjustl("Porcentaje" // repeat(' ', 30 - len_trim("Porcentaje"))), &
-                                posF, posC-1)
+                                posF, posC)
 
             else if (lexema=='}') then !Si es una llave de cierre
                 call agregarToken(adjustl("}" // repeat(' ', 30 - len_trim(lexema))), &
@@ -540,6 +543,7 @@ subroutine recolectarPaises() !Subrutina que recolecta los errores
     cuentoPuntoYComa=0
     cuentoPorcentaje=0
     cuadra=.true.
+    satu=100
 
     !Ciclo para recorrer los tokens y contarlos para que cuadren
     do while (i<=cuentaT)
@@ -632,14 +636,22 @@ subroutine recolectarPaises() !Subrutina que recolecta los errores
                         tempPais=trim(tokens(1,j+2))
                     else if (trim(tokens(1,j))=="poblacion") then
                         tempPoblacion=trim(tokens(1,j+2))
-                        print *, tempPoblacion
                     else if (trim(tokens(1,j))=="saturacion") then
                         tempSatu=trim(tokens(1,j+2))
                         read(tempSatu, '(I10)', iostat=iostat) tempSaturacion
                     else if (trim(tokens(1,j))=="bandera") then
                         tempBandera=trim(tokens(1,j+2))
                     else if (trim(tokens(1,j))=="}") then
+                        !Aquí agrego el pais a la matriz
                         call agregarPais(tempContinente,tempPais,tempPoblacion,tempSaturacion,tempBandera)
+
+                        !Aquí hago la comparación para mostrar el país con menor saturación
+                        if (tempSaturacion<=satu) then
+                            satu=tempSaturacion
+                            rutaBandera=tempBandera
+                            nPais=tempPais
+                            poblacion=tempPoblacion
+                        end if
                         exit
                     end if
                 end do
@@ -647,28 +659,4 @@ subroutine recolectarPaises() !Subrutina que recolecta los errores
         end do
         call graficar() !Lo grafico
     end if
-    print *, nGrafica
 end subroutine recolectarPaises
-
-
-
-
-!Lo dejo en standby xd
-subroutine buscoMenorSaturacion()
-    use globales
-    implicit none
-    integer :: i, menor, auxMenor
-    menor=100
-    i=0
-    auxMenor=0
-    do while (i<=cuentaP)
-        i=i+1
-        if (saturaciones(i)<menor) then
-            menor=saturaciones(i)
-            auxMenor=i
-        end if
-
-    end do
-
-
-end subroutine buscoMenorSaturacion

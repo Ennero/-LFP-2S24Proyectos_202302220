@@ -86,7 +86,7 @@ def analizar(): #Función para analizar el texto del editor
         
         dato=entrada.get("1.0","end-1c")
         # Aquí ejecuta el .exe creado con fortran, envia el dato, lee la salida y lo toma como texto
-        resultado=subprocess.run(['./Proyecto1/main.exe'],input=dato, stdout=subprocess.PIPE,text=True)
+        resultado=subprocess.run(['./main.exe'],input=dato, stdout=subprocess.PIPE,text=True)
         salida=resultado.stdout.strip() #Quita los espacios en blanco
         partes=salida.split(",") #Divido la salida por comas
 
