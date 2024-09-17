@@ -1,0 +1,39 @@
+grafica: {
+    nombre: "Mundo";
+    continente: {
+        nombre: "Europa";
+        pais: {
+            poblacion: 46754903;
+            bandera: "C:\espana.jpg";
+            nombre: "Espana";
+            saturacion: 75%;
+        }
+        pais: {
+            saturacion: 82%;
+            nombre: "Francia";
+            bandera: "C:\francia.jpg";
+            poblacion: 67061539;
+        }
+        pais: {
+            bandera: "C:\alemania.jpg";
+            poblacion: 83019213;
+            saturacion: 78%;
+            nombre: "Alemania";
+        }
+    }
+    continente: {
+        nombre: "Africa";
+        pais: {
+            nombre: "Nigeria";
+            saturacion: 55%;
+            bandera: "Banderas\BanderaNigeria.png";
+            poblacion: 218541167;
+        }
+        pais: {
+            poblacion: 102334403;
+            bandera: "C:\egipto.jpg";
+            saturacion: 60%;
+            nombre: "Egipto";
+        }
+    }
+}

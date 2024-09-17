@@ -1,0 +1,78 @@
+grafica:{
+	nombre:"Modelo Continental beta";
+	continente:{
+	nombre: "Asia";
+		pais:{
+			nombre:"Japon";
+			poblacion: 2352342;
+			saturacion:60%;
+			bandera: "C:\ImagenesBanderas\bandera_Japon.jpg";
+		}
+		pais:{
+			bandera: "C:\ImagenesBanderas\bandera_China.png";
+			nombre:"China";
+			poblacion:1350000000 ;
+			saturacion:84%;
+		}
+		pais:{
+			saturacion:69%;
+			poblacion: 2352342;
+			nombre:"Korea";
+			bandera: "C:\ImagenesBanderas\bandera_Korea.jpg";
+		}
+	}
+	continente:{
+	nombre: "America";
+		pais:{
+			nombre:"Canada";
+			poblacion: 23423423;
+			saturacion:44%;
+			bandera: "C:\ImagenesBanderas\bandera_Canada.png";
+		}
+	}
+	continente:{
+	nombre: "Europa";
+		pais:{
+			nombre:"Alemania";
+			poblacion: 2352342;
+			saturacion:74%;
+			bandera: "C:\ImagenesBanderas\bandera_Alemania.jpg";
+		}
+		pais:{
+			bandera: "C:\ImagenesBanderas\bandera_Espana.png";
+			nombre:"Espana";
+			poblacion:1350000000 ;
+			saturacion:45%;
+		}
+		pais:{
+			saturacion:100%;
+			poblacion: 2352342;
+			nombre:"Inglaterra";
+			bandera: "C:\ImagenesBanderas\bandera_Inglaterra.png";
+		}
+	}
+	continente:{
+	nombre: "Oceania";
+		pais:{
+			nombre:"Islas Marshall";
+			poblacion: 2352342;
+			saturacion:8%;
+			bandera: "Banderas\BanderaIslasMarshall.png";
+     	}
+     	pais:{
+			nombre:"Islas Salomon";
+			poblacion: 45000;
+			saturacion:16%;
+			bandera: "C:\ImagenesBanderas\bandera_IslasSalmon.png";
+    	}
+	}
+	continente:{
+	nombre: "Africa";
+    	pais:{
+        	nombre:"Cabo Verde";
+        	poblacion: 35000;
+        	saturacion:43%;
+        	bandera: "C:\ImagenesBanderas\bandera_CaboVerde.png";
+    	}
+	}
+}

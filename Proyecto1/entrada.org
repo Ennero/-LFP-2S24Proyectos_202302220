@@ -2,7 +2,7 @@ grafica: {
     nombre:"nombre de grafico";
     continente: {
     nombre: "America del Sur";
-        pais: {
+        pais: {$
                 nombre: "Estados Unidos";
                 poblacion: 2352342;
                 saturacion: 80%; 
