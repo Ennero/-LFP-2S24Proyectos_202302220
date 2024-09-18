@@ -10,7 +10,7 @@ poblacion="NA"
 pais="NA"
 ruta=""
 rutaGrafica="C:/banderas/duo.png"
-rutaBandera="C:/banderas/ohio.png"
+rutaBandera="C:/banderas/nono.png"
 guardado=False
 
 
@@ -50,6 +50,24 @@ def guardar(): #Función para guardar el archivo
     else:
         guardarComo() #Si no se ha guardado, llamo a la función guardarComo
 
+
+def limpiar():
+    global pais, poblacion, rutaGrafica, rutaBandera #Uso las variables globales
+    rutaGrafica="C:/banderas/duo.png"
+    rutaBandera="C:/banderas/nono.png"
+    pais="NA"
+    poblacion="NA"
+    paistx.config(text=pais) #Actualizo el label del país
+    poblaciontx.config(text=poblacion) #Actualizo el label de la población
+    bandera=PhotoImage(file=rutaBandera) #Actualizo la bandera
+    bandera=bandera.subsample(3,3)
+    flag.config(image=bandera)
+    flag.image=bandera
+    grafica=PhotoImage(file=rutaGrafica) #Actualizo la gráfica
+    grafica=grafica.subsample(2,2)
+    gra.config(image=grafica)
+    gra.image=grafica
+
 def guardarComo(): #Función para guardar el archivo como
     global ruta, guardado #Uso las variables globales
     info.config(text="Guardando archivo como...", foreground="black") #Mensaje que dice el proceso
@@ -65,11 +83,11 @@ def actualizarInfo(): #Solo actualizo los datos de los labels y las rutas de las
     paistx.config(text=pais) #Actualizo el label del país
     poblaciontx.config(text=poblacion) #Actualizo el label de la población
     bandera=PhotoImage(file=rutaBandera) #Actualizo la bandera
-    bandera=bandera.subsample(14,17)
+    bandera=bandera.subsample(3,3)
     flag.config(image=bandera)
     flag.image=bandera
     grafica=PhotoImage(file=rutaGrafica) #Actualizo la gráfica
-    grafica=grafica.subsample(5,7)
+    grafica=grafica.subsample(1,1)
     gra.config(image=grafica)
     gra.image=grafica
 
@@ -78,6 +96,7 @@ def analizar(): #Función para analizar el texto del editor
     cuerpo=entrada.get("1.0", tk.END) #Obtengo el contenido del editor de texto
     lineas=cuerpo.splitlines() #Divido el contenido del editor de texto por líneas
     todasVacias=all(linea=="" or linea.isspace() for linea in lineas) #Verifico si todas las líneas estan vacias
+    limpiar()
     if todasVacias:
         messagebox.showerror("Error", "No se ha ingresado información.") #Mensaje de error
         info.config(text="Ingrese Información en el editor de texto", foreground="red") #Mensaje de error
@@ -90,6 +109,8 @@ def analizar(): #Función para analizar el texto del editor
         salida=resultado.stdout.strip() #Quita los espacios en blanco
         partes=salida.split(",") #Divido la salida por comas
 
+        print(salida)
+
         # Viene con la siguiente estructura: [rutraGrafica, rutaBandera, pais, poblacion]
         if len(partes)==4:
             rutaGrafica=partes[0] #Actualizo la ruta de la gráfica
@@ -99,11 +120,10 @@ def analizar(): #Función para analizar el texto del editor
             actualizarInfo() #Actualizo la información de la ventana
             messagebox.showinfo("Analisis", "Analisis realizado con éxito.") #Mensaje de éxito 
             info.config(text="Se analizó la información correctamente", foreground="green")
-            if os.path.exists("herbert.temp"): #Elimino el archivo temporal que creé
-                os.remove("herbert.temp")
+            entrada.delete("1.0", tk.END) #Borro el contenido del editor de texto
         else:
-            messagebox.showerror("Error", "No se pudo analizar la información.")
-            info.config(text="No se pudo analizar la información", foreground="red") #Mensaje de error
+            messagebox.showerror("Error", "No se pudo completar la operación")
+            info.config(text="No se pudo completar la operación", foreground="red") #Mensaje de error
     
 #INTEFAZ GRÁFICAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 #----------------------------------------------------------------------------
@@ -163,7 +183,7 @@ ventana.config(menu=barra)
 
 #Le coloco un path a la grafica
 grafica = PhotoImage(file=rutaGrafica)
-grafica = grafica.subsample(5,7)
+grafica = grafica.subsample(2,2)
 gra=tk.Label(frame2,image=grafica)
 gra.pack()
 gra.pack(anchor="e")
@@ -184,7 +204,7 @@ poblaciontx.config(font=("Arial", 12))
 
 #Añado la bandera
 bandera = PhotoImage(file=rutaBandera)
-bandera = bandera.subsample(14,17)
+bandera = bandera.subsample(3,3)
 flag=tk.Label(frame5,image=bandera)
 flag.pack()
 flag.pack(anchor="e")

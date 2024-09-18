@@ -1,7 +1,7 @@
 module globales
     !Aquí declaro las variables globales que usaré
     implicit none
-    character(len=100) :: rutaBandera, rutaGrafica, nPais, poblacion, tempBandera
+    character(len=100) :: rutaBandera, nPais, poblacion, tempBandera,rB,rP
     character(len=50) :: tempPais, tempSatu,tempPoblacion,tempContinente,auxPais,auxPoblacion,auxBandera,nGrafica
     integer :: cuentaT, cuentaE,cuentaP,tempSaturacion,satu
     character(len=100), dimension(4,500)::tokens, errores,paises
@@ -15,9 +15,10 @@ program proceso
     use globales
     implicit none
 
+
     !Probandooo
-    character(len=200) :: linea
-    integer :: ios
+    !character(len=200) :: linea
+    !integer :: ios
     !Probandooo
 
     !Inicializo todas las variables que voy a usar
@@ -28,28 +29,37 @@ program proceso
     error=.false.
 
     !PROBANDOOOOOOO
-    open(10, file='Prueba1.org', status='old', action='read') !Abro el archivo de entrada
-    do
-    read(10, '(A)', iostat = ios) linea
-    if (ios /= 0) exit   ! Se alcanzo el fin del archivo
-    entrada = trim(entrada) // trim(linea) // char(10) ! Concatenar la línea leida al valor de entrada y agregar un salto de línea
-    end do
+    !open(10, file='./ArchivosDePrueba/Mexico.org', status='old', action='read') !Abro el archivo de entrada
+    !do
+    !read(10, '(A)', iostat = ios) linea
+    !if (ios /= 0) exit   ! Se alcanzo el fin del archivo
+    !entrada = trim(entrada) // trim(linea) // char(10) ! Concatenar la línea leida al valor de entrada y agregar un salto de línea
+    !end do
     !PROBANDOOOOOOO
 
-    !call leer() !Llamo a la subrutina que lee el archivo de entrada
-    print *, entrada !Me aseguro de que leyó lo que le pedí
-    call analizar() !Analizo la entrada
 
-    !call probando()
+
+    call leer() !Llamo a la subrutina que lee el archivo
+    !print *, entrada !Me aseguro de que leyó lo que le pedí
+    call analizar() !Analizo la entrada
 
     if (error) then !Si hay errores
         call html_malo() !Llamo a la subrutina que genera el html con los errores
     else !Si no hay errores
         call html_bueno() !Llamo a la subrutina que genera el html con los tokens
         call recolectarPaises() !Llamo a la subrutina que genera la grafica
+
+        rB=trim(rutaBandera(2:len_trim(rutaBandera)-1))
+        rP=trim(nPais(2:len_trim(nPais)-1))
+        print *, trim("grafica.png")//","//trim(rB)//","//trim(rP)//","//trim(poblacion)
     end if
 
-    print *, trim(rutaGrafica)//","//trim(rutaBandera)//","//trim(nPais)//","//trim(poblacion)
+    
+
+
+
+
+
 end program proceso
 
 
@@ -87,7 +97,7 @@ subroutine analizar()
 
     !El estado inicial (como el enrutador)
         case(0)
-            if(c>='a' .and. c<='z') then !Si es una palabra reservada
+            if(c>='A' .and. c<='z') then !Si es una palabra reservada
                 lexema=c
                 estado=1
             else if (c>='0' .and. c<='9') then !Si es un número
@@ -113,7 +123,7 @@ subroutine analizar()
 
     !Estado para la lectura de palabras reservadas
         case(1)
-            if(c>='a' .and. c<='z') then !Si son caracteres aceptados
+            if(c>='A' .and. c<='z') then !Si son caracteres aceptados
                 lexema=trim(lexema)//c
             else !Si ya no son caracteres aceptados
                 if (trim(lexema)=="grafica") then !Si es la palabra reservada GRAFICA
@@ -152,8 +162,8 @@ subroutine analizar()
                                     posF, posC - len_trim("bandera"))
 
                 else !Si no es ninguna palabra reservada
-                    call agregarError(trim(lexema), adjustl("Palabra reservada no reconocida" // & 
-                    repeat(' ', 100 - len_trim("Palabra reservada no reconocida"))), posF, posC - len_trim(lexema))
+                    call agregarError(trim(lexema)// repeat(' ', 100 - len_trim("bandera")), adjustl("Error Léxico - Palabra reservada no reconocida" // & 
+                    repeat(' ', 100 - len_trim("Error Léxico - Palabra reservada no reconocida"))), posF, posC - len_trim(lexema))
                 end if
 
                 estado=0
@@ -179,7 +189,7 @@ subroutine analizar()
         case(3)
             if(c=='"') then !Si no es el fin de la cadena
                 lexema=trim(lexema)//c
-                call agregarError(trim(lexema), adjustl("Cadena vacia" // &
+                call agregarError(trim(lexema)// repeat(' ', 100 - len_trim(lexema)), adjustl("Cadena vacia" // &
                 repeat(' ', 100 - len_trim("Cadena vacia"))), posF, posC - len_trim(lexema))
                 estado=0
                 
@@ -219,8 +229,8 @@ subroutine analizar()
                                 posF, posC)
                 
             else !Si no es ningun simbolo aceptado
-                call agregarError(trim(lexema), adjustl("Simbolo no aceptado" // & 
-                repeat(' ', 100 - len_trim("Simbolo no aceptado"))), posF, posC - len_trim(lexema))
+                call agregarError(trim(lexema)// repeat(' ', 100 - len_trim(lexema)), adjustl("Error Léxico - Simbolo no aceptado" // & 
+                repeat(' ', 100 - len_trim("Error Léxico - Simbolo no aceptado"))), posF, posC)
             end if
 
 
@@ -360,7 +370,7 @@ subroutine html_bueno() !Subrutina que genera el html con los tokens encontrados
     write(unit, '(A)') "<style>"
     write(unit, '(A)') "table {width: 50%; border-collapse: collapse;}"
     write(unit, '(A)') "th, td {border: 1px solid black; padding: 8px; text-align: left;}"
-    write(unit, '(A)') "th {background-color: #f2f2f2;}"
+    write(unit, '(A)') "th {background-color: #1fc738;}"
     write(unit, '(A)') "</style>"
     write(unit, '(A)') "</head>"
     write(unit, '(A)') "<body>"
@@ -395,7 +405,7 @@ subroutine html_malo () !Subrutina que genera el html con los errores encontrado
     write(unit, '(A)') "<style>"
     write(unit, '(A)') "table {width: 50%; border-collapse: collapse;}"
     write(unit, '(A)') "th, td {border: 1px solid black; padding: 8px; text-align: left;}"
-    write(unit, '(A)') "th {background-color: #f2f2f2;}"
+    write(unit, '(A)') "th {background-color: #f84545;}"
     write(unit, '(A)') "</style>"
     write(unit, '(A)') "</head>"
     write(unit, '(A)') "<body>"
@@ -403,7 +413,7 @@ subroutine html_malo () !Subrutina que genera el html con los errores encontrado
     write(unit, '(A)') "<table>"
     write(unit, '(A)') "<tr><th>Número de Error</th><th>Error</th><th>Descripción</th><th>Fila</th><th>Columna</th></tr>"
     do i=1,cuentaE
-        write(cuento,'(I0)') i
+        write(cuento,'(I3)') i
         write(unit, '(A)') "<tr>"
         write(unit, '(A)') "<td>"//trim(cuento)//"</td>"
         write(unit, '(A)') "<td>"//trim(errores(1,i))//"</td>"
@@ -519,7 +529,6 @@ subroutine graficar() !Subrutina que genera la grafica con graphviz
     
     !Llamo a graphviz para que genere la imagen
     call system("dot -Tpng grafica.dot -o grafica.png")
-    rutaGrafica="grafica.png"
 
 end subroutine graficar
 
