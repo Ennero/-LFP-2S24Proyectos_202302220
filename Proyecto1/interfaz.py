@@ -3,7 +3,6 @@ from tkinter import messagebox
 from tkinter import PhotoImage
 from tkinter import filedialog
 import subprocess
-import os
 
 #Declarando mis variables globales
 poblacion="NA"
