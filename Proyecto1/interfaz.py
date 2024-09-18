@@ -121,6 +121,9 @@ def analizar(): #Función para analizar el texto del editor
             messagebox.showinfo("Analisis", "Analisis realizado con éxito.") #Mensaje de éxito 
             info.config(text="Se analizó la información correctamente", foreground="green")
             entrada.delete("1.0", tk.END) #Borro el contenido del editor de texto
+        elif len(partes)==1:
+            messagebox.showerror("Error", "No se pudo completar la operación")
+            info.config(text="No se pudo completar la operación", foreground="red") #Mensaje de error
         else:
             messagebox.showerror("Error", "No se pudo completar la operación")
             info.config(text="No se pudo completar la operación", foreground="red") #Mensaje de error

@@ -8,13 +8,13 @@ module globales
     !La estructura de pais será: continente / nombre / población / bandera
     integer, dimension(1:500)::saturaciones
     character(len=4000):: entrada,encuentraErrores
-    logical :: error
+    logical :: error, e
 end module globales
 
 program proceso 
     use globales
     implicit none
-
+    e=.false.
 
     !Probandooo
     !character(len=200) :: linea
@@ -51,9 +51,13 @@ program proceso
 
         rB=trim(rutaBandera(2:len_trim(rutaBandera)-1))
         rP=trim(nPais(2:len_trim(nPais)-1))
-        print *, trim("grafica.png")//","//trim(rB)//","//trim(rP)//","//trim(poblacion)
-    end if
+        if (e) then
+            print *, trim("grafica.png")//","//trim(rB)//","//trim(rP)//","//trim(poblacion)
+        else
+            print *, "error"
 
+        end if
+    end if
     
 
 
@@ -607,6 +611,7 @@ subroutine recolectarPaises() !Subrutina que recolecta los errores
         cuadra=.false.
     else
         cuadra=.true.
+        e=.true.
     end if
 
     i=0

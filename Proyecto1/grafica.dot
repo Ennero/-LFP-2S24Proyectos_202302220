@@ -1,0 +1,21 @@
+digraph Grafica {
+rankdir=TB;
+node [shape = record, style = filled];
+"Corto #1" [Label="{Corto #1}" fillcolor="purple"];
+"America del Norte" [label="{America del Norte|61}" fillcolor="orange";];
+"Corto #1" -> "America del Norte";
+"Canada" [label="{Canada|75}" fillcolor="orange";];
+"America del Norte" -> "Canada";
+"Mexico" [label="{Mexico|35}" fillcolor="green";];
+"America del Norte" -> "Mexico";
+"Estados unidos" [label="{Estados unidos|73}" fillcolor="orange";];
+"America del Norte" -> "Estados unidos";
+"America del Sur" [label="{America del Sur|99}" fillcolor="red";];
+"Corto #1" -> "America del Sur";
+"Cabo verde" [label="{Cabo verde|99}" fillcolor="red";];
+"America del Sur" -> "Cabo verde";
+"Oceania" [label="{Oceania|74}" fillcolor="orange";];
+"Corto #1" -> "Oceania";
+"Indonesia" [label="{Indonesia|74}" fillcolor="orange";];
+"Oceania" -> "Indonesia";
+}
