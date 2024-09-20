@@ -3,22 +3,22 @@ grafica: {
     continente: {
     nombre: "America del Sur";
         pais: {
-                nombre: "Estados Unidos";
+                nombre: "Brasil";
                 poblacion: 2352342;
                 saturacion: 80%; 
-                bandera: "C:\imagen.jpg";
+                bandera: "C:\imagenes\br.png";
         }
         pais: {
-                bandera: "C:\imagen.jpg";
-                nombre: "China";
+                bandera: "C:\imagen.png";
+                nombre: "Bolivia";
                 poblacion: 1350000000;
                 saturacion: 95%;
         }
         pais: {
                 saturacion: 40%;
                 poblacion: 2352342;
-                nombre: "Korea";
-                bandera:"C:\imagen.jpg";
+                nombre: "argentina";
+                bandera:"C:\imagen.png";
         }
     }
     continente: {
@@ -27,20 +27,165 @@ grafica: {
                 nombre: "Canada";
                 poblacion: 23423423;
                 saturacion: 65%;
-                bandera: "C:\imagen.jpg";
+                bandera: "C:\imagen.png";
         }
         pais: {
                 poblacion: 17263239;
                 nombre: "Guatemala";
                 saturacion: 40%;        
-                bandera: "C:\banderas\guate.jpg";
+                bandera: "C:\gt.png";
         }
         pais: {
                 saturacion: 60%;
                 nombre:"Chile";
                 poblacion: 235234234;
-                bandera: "C:\imagen.jpg";
+                bandera: "C:\imagen.png";
         }
     }
+    continente: {
+    nombre: "África";
+        pais: {
+                nombre: "Nigeria";
+                poblacion: 216113147;
+                saturacion: 75%;
+                bandera: "C:\flags\nigeria.png";
+        }
+        pais: {
+                nombre: "Etiopía";
+                poblacion: 115032575;
+                saturacion: 60%;
+                bandera: "C:\ng.png";
+        }
+        pais: {
+                nombre: "Egipto";
+                poblacion: 102334403;
+                saturacion: 80%;
+                bandera: "C:\eg.png";
+        }
+        pais: {
+                nombre: "Nigeria";
+                poblacion: 216113147;
+                saturacion: 75%;
+                bandera: "C:\banderas\nigeria.png";
+        }
+        pais: {
+                nombre: "Sudáfrica";
+                poblacion: 60142978;
+                saturacion: 70%;
+                bandera: "C:\sf.png";
+        }
+        pais: {
+                nombre: "Congo ";
+                poblacion: 89561403;
+                saturacion: 55%;
+                bandera: "C:\cg.png";
+        }
+    }
+    continente: {
+    nombre: "Oceanía";
+        pais: {
+                nombre: "Australia";
+                poblacion: 25499881;
+                saturacion: 3%;
+                bandera: "C:\banderas\au.png";
+        }
+        pais: {
+                nombre: "Nueva Zelanda";
+                poblacion: 5102225;
+                saturacion: 18%;
+                bandera: "C:\Nz.png";
+        }
+        pais: {
+                nombre: "Papúa Nueva Guinea";
+                poblacion: 8947027;
+                saturacion: 18%;
+                bandera: "C:\papu.png";
+        }
+        pais: {
+                nombre: "Fiyi";
+                poblacion: 922444;
+                saturacion: 53%;
+                bandera: "C:\banderas\fiji.png";
+        }
+    }
+    continente: {
+    nombre: "Europa";
+        pais: {
+                nombre: "Alemania";
+                poblacion: 83019213;
+                saturacion: 33%;
+                bandera: "C:\flags\alemania.png";
+        }
+        pais: {
+                nombre: "Francia";
+                poblacion: 67081000;
+                saturacion: 53%;
+                bandera: "C:\flags\francia.png";
+        }
+        pais: {
+                nombre: "Reino Unido";
+                poblacion: 68210895;
+                saturacion: 97%;
+                bandera: "C:\flags\reino_unido.png";
+        }
+        pais: {
+                nombre: "Espana";
+                poblacion: 47354103;
+                saturacion: 93%;
+                bandera: "C:\flags\espana.png";
+        }
+        pais: {
+                nombre: "Italia";
+                poblacion: 60243829;
+                saturacion: 98%;
+                bandera: "C:\flags\italia.png";
+        }
+        pais: {
+                nombre: "Rusia";
+                poblacion: 145934462;
+                saturacion: 9%;
+                bandera: "C:\flags\rusia.png";
+        }
+    }
+    continente: {
+    nombre: "Asia";
+        pais: {
+                nombre: "China";
+                poblacion: 1411778000;
+                saturacion: 95%;
+                bandera: "C:\flags\china.png";
+        }
+        pais: {
+                nombre: "India";
+                poblacion: 1380004385;
+                saturacion: 80%;
+                bandera: "C:\flags\india.png";
+        }
+        pais: {
+                nombre: "Japón";
+                poblacion: 126508470;
+                saturacion: 85%;
+                bandera: "C:\flags\japon.png";
+        }
+        pais: {
+                nombre: "Indonesia";
+                poblacion: 273523615;
+                saturacion: 97%;
+                bandera: "C:\flags\indonesia.png";
+        }
+        pais: {
+                nombre: "Pakistán";
+                poblacion: 220892340;
+                saturacion: 65%;
+                bandera: "C:\flags\pakistan.png";
+        }
+        pais: {
+                nombre: "Bangladés";
+                poblacion: 164689060;
+                saturacion: 65%;
+                bandera: "C:\flags\bangladesh.png";
+        }
+    }
+
 }
 

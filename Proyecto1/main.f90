@@ -4,22 +4,16 @@ module globales
     character(len=100) :: rutaBandera, nPais, poblacion, tempBandera,rB,rP
     character(len=50) :: tempPais, tempSatu,tempPoblacion,tempContinente,auxPais,auxPoblacion,auxBandera,nGrafica
     integer :: cuentaT, cuentaE,cuentaP,tempSaturacion,satu
-    character(len=100), dimension(4,500)::tokens, errores,paises
+    character(len=100), dimension(4,1500)::tokens, errores,paises
     !La estructura de pais será: continente / nombre / población / bandera
-    integer, dimension(1:500)::saturaciones
-    character(len=4000):: entrada,encuentraErrores
+    integer, dimension(1:1500)::saturaciones
+    character(len=12000):: entrada,encuentraErrores
     logical :: error, e
 end module globales
 
 program proceso 
     use globales
     implicit none
-    e=.false.
-
-    !Probandooo
-    !character(len=200) :: linea
-    !integer :: ios
-    !Probandooo
 
     !Inicializo todas las variables que voy a usar
     entrada=""
@@ -27,20 +21,9 @@ program proceso
     cuentaE=0
     cuentaP=0
     error=.false.
-
-    !PROBANDOOOOOOO
-    !open(10, file='./ArchivosDePrueba/Mexico.org', status='old', action='read') !Abro el archivo de entrada
-    !do
-    !read(10, '(A)', iostat = ios) linea
-    !if (ios /= 0) exit   ! Se alcanzo el fin del archivo
-    !entrada = trim(entrada) // trim(linea) // char(10) ! Concatenar la línea leida al valor de entrada y agregar un salto de línea
-    !end do
-    !PROBANDOOOOOOO
-
-
+    e=.false.
 
     call leer() !Llamo a la subrutina que lee el archivo
-    !print *, entrada !Me aseguro de que leyó lo que le pedí
     call analizar() !Analizo la entrada
 
     if (error) then !Si hay errores
@@ -55,19 +38,10 @@ program proceso
             print *, trim("grafica.png")//","//trim(rB)//","//trim(rP)//","//trim(poblacion)
         else
             print *, "error"
-
         end if
     end if
-    
-
-
-
-
 
 end program proceso
-
-
-
 
 subroutine analizar()
     use globales
@@ -97,7 +71,7 @@ subroutine analizar()
         posC=posC+1 !Aumento la posición de la columna
         c=entrada(i:i) !Obtengo el caracter actual
         !Comienzo con el selectCase
-        select case (estado)
+    select case (estado)
 
     !El estado inicial (como el enrutador)
         case(0)
@@ -444,7 +418,7 @@ end subroutine leer
 subroutine graficar() !Subrutina que genera la grafica con graphviz
     use globales
     implicit none
-    character(len=5000) :: grafica
+    character(len=10000) :: grafica
     character(len=50) :: temp,promSatu,satuPais,nG,nP,nC
     integer :: j,unit,pp,prom,herbert
     unit=2021
@@ -561,7 +535,7 @@ subroutine recolectarPaises() !Subrutina que recolecta los errores
     satu=100
 
     !Ciclo para recorrer los tokens y contarlos para que cuadren
-    do while (i<=cuentaT)
+    do while (i<=cuentaT)   
         i=i+1
         if(trim(tokens(1,i))=="grafica") then
             cuentoGraficas=cuentoGraficas+1

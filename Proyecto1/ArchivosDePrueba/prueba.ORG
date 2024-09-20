@@ -39,7 +39,7 @@ grafica:{
 			saturacion:13%;
 			nombre:"Chile";
 			poblacion: 235234234;
-			bandera: "C:\ImagenesBanderas\bandera_Chile.jpg";
+			bandera: "C:\banderas\bd.png";
 		}
 	}
 }

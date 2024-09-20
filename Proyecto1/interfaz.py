@@ -119,13 +119,12 @@ def analizar(): #Función para analizar el texto del editor
             actualizarInfo() #Actualizo la información de la ventana
             messagebox.showinfo("Analisis", "Analisis realizado con éxito.") #Mensaje de éxito 
             info.config(text="Se analizó la información correctamente", foreground="green")
-            entrada.delete("1.0", tk.END) #Borro el contenido del editor de texto
         elif len(partes)==1:
-            messagebox.showerror("Error", "No se pudo completar la operación")
-            info.config(text="No se pudo completar la operación", foreground="red") #Mensaje de error
+            messagebox.showerror("Error", "No se pudo completar la operación por un error")
+            info.config(text="No se pudo completar la operación por un error", foreground="red") #Mensaje de error
         else:
-            messagebox.showerror("Error", "No se pudo completar la operación")
-            info.config(text="No se pudo completar la operación", foreground="red") #Mensaje de error
+            messagebox.showerror("Error", "No se pudo completar la operación por un error")
+            info.config(text="No se pudo completar la operación por un error", foreground="red") #Mensaje de error
     
 #INTEFAZ GRÁFICAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 #----------------------------------------------------------------------------
@@ -133,6 +132,7 @@ def analizar(): #Función para analizar el texto del editor
 #Creo la ventana principal
 ventana = tk.Tk()
 ventana.title("Proyecto 1 LFP")
+
 
 # Creación de los frames para la interfaz
 frame1 = tk.Frame(ventana)
@@ -187,6 +187,7 @@ ventana.config(menu=barra)
 grafica = PhotoImage(file=rutaGrafica)
 grafica = grafica.subsample(2,2)
 gra=tk.Label(frame2,image=grafica)
+gra.config(width="800", height="350")
 gra.pack()
 gra.pack(anchor="e")
 
