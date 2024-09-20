@@ -8,7 +8,7 @@ import subprocess
 poblacion="NA"
 pais="NA"
 ruta=""
-rutaGrafica="C:/banderas/duo.png"
+rutaGrafica="C:/banderas/nono.png"
 rutaBandera="C:/banderas/nono.png"
 guardado=False
 
@@ -52,7 +52,7 @@ def guardar(): #Función para guardar el archivo
 
 def limpiar():
     global pais, poblacion, rutaGrafica, rutaBandera #Uso las variables globales
-    rutaGrafica="C:/banderas/duo.png"
+    rutaGrafica="C:/banderas/nono.png"
     rutaBandera="C:/banderas/nono.png"
     pais="NA"
     poblacion="NA"
