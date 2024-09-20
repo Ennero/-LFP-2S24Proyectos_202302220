@@ -26,19 +26,19 @@ Se pretende propiciar el conocimiento requerido para que se pueda replicar el pr
 
 Para realizar el cálculo del autómata mediante el método del arbol, se comenzó realizando la expresión regular sobre la cual crearíamos el arbol.
 
-![Expresión Regular](./expresion.png)
+![Expresión Regular](./img/expresion.png)
 
 Esta expresión regular sobre la cual se realizó el árbol, se hizo de tal manera que aceptara las palabras reservadas, símbolos, cadenas entre comillas y números. Después de haber creado la expresión regular, se creó el arbol para hacer los cálculos para obtener el autómata finito
 
-![Arbol](./arbol.png)
+![Arbol](./img/arbol.png)
 
 Ya teniendo los cálculos del árbol realizado, se realizó la última parte previa a la creación del autómata, que eran los cálculos, para los cuales se necesitaba el arbol ya realizado.
 
-![Calculos](./Calculos.png)
+![Calculos](./img/Calculos.png)
 
 Por último, con todo lo previo, se creó el autómata
 
-![Automata](./automata.png)
+![Automata](./img/automata.png)
 
 ## Lógica de la Descripción
 
