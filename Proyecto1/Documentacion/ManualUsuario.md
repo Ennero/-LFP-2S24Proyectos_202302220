@@ -23,7 +23,7 @@ Este programa es capaz de leer la estructura de un archivo con extensión .org c
 
 ## Flujo de las funcionalidades del programa
 1. Para iniciar el programa, es necesario que se abra desde un editor de código y que se tenga python instalado, una vez se tiene esto, se corre el programa
-![1](.\Documentacion\imgManual\1.png)
+![1](.\Proyecto1\Documentacion\imgManual\1.png)
 2. Una vez se ejecuta el programa, aparecerá la siguiente ventana. 
 ![2](.\imgManual\2.png)
 3. En esa ventana aparecen varias funciones, entre las cuales están el poder abrir un documento .org ya existente, lo cual se realizará para el siguiente ejemplo.
