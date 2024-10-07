@@ -1,9 +1,9 @@
 grafica:{
-nombre: "5rchiv0 d3 3ntr4d4 #2 ;
+nombre: "5rchiv0 d3 3ntr4d4 #2";
 	continente:{
 		nombre: "Europa";
 			pais:{
-				 nombre: "Belgica". 
+				 nombre: "Belgica" 
 				 poblacion: 11132269; 
 				 saturacion: 23%; 
 				 bandera: "C:\banderas\be.png";
@@ -15,7 +15,7 @@ nombre: "5rchiv0 d3 3ntr4d4 #2 ;
 				 bandera: "C:\banderas\dk.png";
 			}
 			pais:{
-				 error_nombre: "Alemania"; 
+				 nombre: "Alemania"; 
 				 poblacion: 80619000; 
 				 saturacion: 93%; 
 				 bandera: "C:\banderas\de.png";
@@ -39,7 +39,7 @@ nombre: "5rchiv0 d3 3ntr4d4 #2 ;
 				 bandera: "C:\banderas\at.png";
 			}
 	}
-	Continente:{
+	continente:{
 		nombre: "Asia";
 			pais:{
 				 nombre: "Armenia"; 
@@ -77,7 +77,7 @@ nombre: "5rchiv0 d3 3ntr4d4 #2 ;
 			pais:{
 				 nombre: "Islas Salomon"; 
 				 poblacion: 581344; 
-				 saturacion: 89#; 
+				 saturacion: 89; 
 				 bandera: "C:\banderas\sb.png";
 			}
 			pais:{
@@ -98,11 +98,11 @@ nombre: "5rchiv0 d3 3ntr4d4 #2 ;
 				 saturacion: 66%; 
 				 bandera: "C:\banderas\nr.png";
 			}
-			paises:{
+			pais:{
 				 nombre: "Kiribati"; 
 				 poblacion: 106461; 
 				 saturacion: 25%; 
 				 bandera: "C:\banderas\ki.png";
 			}
 	}
-}()
+}
