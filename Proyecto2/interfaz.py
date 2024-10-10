@@ -23,8 +23,8 @@ def analizar():
 
         datos=entrada.get("1.0","end-1c")
         resultado=subprocess.run(['./main.exe'],input=datos, stdout=subprocess.PIPE,text=True)
-        #salida=resultado.stdout.strip()
-        print(resultado.stdout)
+        salida=resultado.stdout.strip() #Aquí obtengo la salida del análisis
+        print(salida)
         #Aquí coloco todo lo demás del análisis
         
 
@@ -59,7 +59,7 @@ def posicion(event):
 def abro(): #Función para abrir un archivo
     global ruta, guardado,preguntar #Uso las variables globales
     info.config(text="Abriendo archivo...", foreground="black") #Mensaje que dice el proceso
-    ruta=filedialog.askopenfilename(title="Abrir archivo",filetypes=(("Archivos .ORG", "*.org"),)) #Solo acepta archivos .org
+    ruta=filedialog.askopenfilename(title="Abrir archivo",filetypes=(("Archivos .LFP", "*.LFP"),)) #Solo acepta archivos .LFP
     if ruta != "": #Si la ruta no está vacía
         guardado=True #Cambio el estado de guardado
         preguntar=False
