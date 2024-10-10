@@ -1,5 +1,5 @@
-<!--Controles
-    // Este bloque tambien puede recibir comentarios
+<!-- Controles
+    // Este                             bloque tambien puede recibir comentarios
     Contenedor contlogin;
     Contenedor contFondo;
     Boton cmdIngresar;
@@ -7,6 +7,7 @@
     Etiqueta passw;
     Etiqueta Nombre;
     Texto Texto0;
+    /* lds           fkjsñdlkfjsd */
     Contenedor contlogo2;
     Contenedor ContLogo1;
     Contenedor ContBody;

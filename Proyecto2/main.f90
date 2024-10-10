@@ -34,9 +34,15 @@ program proceso
 
 
     !call leer() !Llamo a la subrutina leer
-    print *, entrada !Imprimo la variable entrada
+    !print *, entrada !Imprimo la variable entrada
     call analizar ()
-
+    if (eLexico) then
+        call html_malo()
+        print *, "Se encontraron errores lexicos"
+    else
+        call html_bueno()
+        print *, "No se encontraron errores lexicos"
+    end if
 
 
 end program proceso
@@ -49,8 +55,7 @@ subroutine analizar()
     !Declaración de variables
     character(len=200)::lexema
     character(len=1) :: c
-    integer::posF, posC,estado,i,largo
-    logical :: VEspacio
+    integer::posF, posC,estado,i,largo,VEspacio
 
     !Inicialización de las variables
     largo=len_trim(entrada)
@@ -58,7 +63,7 @@ subroutine analizar()
     posC=0
     estado=0
     i=0
-    VEspacio=.false.
+    VEspacio=0
 
     !Agrego el caracter del final 
     entrada(largo+1:largo+1)="#"
@@ -70,7 +75,6 @@ subroutine analizar()
         i=i+1 !Aumento la posición del caracter
         posC=posC+1 !Aumento la posición de la columna
         c=entrada(i:i) !Tomo el caracter de la posición
-        print *, c
 
         !Comienzo con el automata
         select case (estado)
@@ -90,7 +94,7 @@ subroutine analizar()
                 estado=3
                 lexema=c
 
-            else if (c>= '0' .or. c<='9') then !Si es un número
+            else if (c>= '0' .and. c<='9') then !Si es un número
                 estado=4
                 lexema=c
 
@@ -125,74 +129,74 @@ subroutine analizar()
                 lexema=trim(lexema)//c
             else 
             !Estas serán las palabras reservadas
-
-                if (lexema=="Controles") then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
-                else if (lexema=="Propiedades") then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
-                else if (lexema=="Colocacion") then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                
+                if (trim(lexema)=="Controles") then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=="Propiedades") then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=="Colocacion") then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
 
                 !Lo que contiene contenedor
-                else if (lexema=="Etiqueta") then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
-                else if (lexema=='Boton') then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
-                else if (lexema=='Check') then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
-                else if (lexema=='RadioBoton') then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
-                else if (lexema=='Texto') then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
-                else if (lexema=='AreaTexto') then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
-                else if (lexema=='Clave') then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
-                else if (lexema=='Contenedor') then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=="Etiqueta") then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=='Boton') then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=='Check') then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=='RadioBoton') then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=='Texto') then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=='AreaTexto') then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=='Clave') then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=='Contenedor') then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
 
                 !Lo que contiene propiedades
-                else if (lexema=='setColorLetra') then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
-                else if (lexema=='setAncho') then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
-                else if (lexema=='setAlto') then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
-                else if (lexema=='setTexto') then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
-                else if (lexema=='setColorFondo') then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
-                else if (lexema=='setAlineacion') then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
-                else if ( lexema=='setMarcado' ) then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
-                else if (lexema=='setGrupo') then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=='setColorLetra') then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=='setAncho') then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=='setAlto') then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=='setTexto') then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=='setColorFondo') then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=='setAlineacion') then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if ( trim(lexema)=='setMarcado' ) then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=='setGrupo') then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
 
                 !Lo que contiene colocacion
-                else if (lexema=='add') then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
-                else if (lexema=='setPosicion') then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
-                else if (lexema=='this') then
-                    call agregarToken(trim(lexema), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=='add') then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=='setPosicion') then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
+                else if (trim(lexema)=='this') then
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
 
             !Si es simplemente un identificador
                 else
-                    call agregarToken(trim(lexema), "Identificador" // repeat(' ', 200-len_trim("Identificador")), posF, posC-len_trim(lexema))
+                    call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Identificador" // repeat(' ', 200-len_trim("Identificador")), posF, posC-len_trim(lexema))
                 end if
                 estado=0
                 i=i-1
+                posC=posC-1
             end if
 
     !Estado de lectura de símbolos (parte 1) 2
         case (2)
             if (c == ';' .or. c=='.' .or. c=='(' .or. c==')') then
-                lexema=trim(lexema)//c
-                call agregarToken(trim(lexema), "Simbolo" // repeat(' ', 200-len_trim("Simbolo")), posF, posC-len_trim(lexema))
+                call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Simbolo" // repeat(' ', 200-len_trim("Simbolo")), posF, posC)
                 estado=0
             else
-                call agregarErrorLexico(trim(lexema), "Simbolo no reconocido" // repeat(' ', 200-len_trim("Simbolo no reconocido")), posF, posC-len_trim(lexema))
+                call agregarErrorLexico(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Simbolo no reconocido" // repeat(' ', 200-len_trim("Simbolo no reconocido")), posF, posC-len_trim(lexema))
                 estado=0
                 i=i-1
                 posC=posC-1
@@ -207,7 +211,7 @@ subroutine analizar()
                 lexema=trim(lexema)//c
                 estado=9
             else
-                call agregarErrorLexico(trim(lexema), "Comentario no reconocido" // repeat(' ', 200-len_trim("Comentario no reconocido")), posF, posC-len_trim(lexema))
+                call agregarErrorLexico(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Comentario no reconocido" // repeat(' ', 200-len_trim("Comentario no reconocido")), posF, posC-len_trim(lexema))
                 estado=0
                 i=i-1
                 posC=posC-1
@@ -218,7 +222,7 @@ subroutine analizar()
             if (c>='0' .and. c<='9') then
                 lexema=trim(lexema)//c
             else
-                call agregarToken(trim(lexema), "Numero" // repeat(' ', 200-len_trim("Numero")), posF, posC-len_trim(lexema))
+                call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Numero" // repeat(' ', 200-len_trim("Numero")), posF, posC-len_trim(lexema))
                 estado=0
                 i=i-1
                 posC=posC-1
@@ -228,7 +232,7 @@ subroutine analizar()
         case (5)
             if (c=='"') then
                 lexema=trim(lexema)//c
-                call agregarToken(trim(lexema), "Cadena" // repeat(' ', 200-len_trim("Cadena")), posF, posC-len_trim(lexema))
+                call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Cadena" // repeat(' ', 200-len_trim("Cadena")), posF, posC-len_trim(lexema))
                 estado=0
             else if (c==char(10)) then
                 call agregarErrorLexico(trim(lexema), "Cadena no cerrada" // repeat(' ', 200-len_trim("Cadena no cerrada")), posF, posC-len_trim(lexema))
@@ -236,6 +240,7 @@ subroutine analizar()
                 i=i-1
                 posC=posC-1
             else
+
                 lexema=trim(lexema)//c !Concateno cualquier cosa que no sea comillas
             end if
 
@@ -255,8 +260,9 @@ subroutine analizar()
             if (c=='-') then
                 lexema=trim(lexema)//c
                 estado=11
+                !print *, lexema
             else
-                call agregarErrorLexico(trim(lexema), "Cerradura de control no reconocida" // repeat(' ', 200-len_trim("Cerradura de control no reconocida")), posF, posC)
+                call agregarErrorLexico(trim(lexema), "Cerradura de control no reconocida" // repeat(' ', 200-len_trim("Cerradura de control no reconocida")), posF, posC-len_trim(lexema))
                 estado=0
                 i=i-1
                 posC=posC-1
@@ -264,26 +270,47 @@ subroutine analizar()
     !Estado de lectura de comentarios de una línea (parte 1) 3->8
         case (8)
             if (c==char(10)) then
-                lexema=trim(lexema)//c
-                call agregarToken(trim(lexema), "Comentario de una línea" // repeat(' ', 200-len_trim("Comentario de una línea")), posF, posC)
+                call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Comentario de una línea" // repeat(' ', 200-len_trim("Comentario de una línea")), posF, posC-len_trim(lexema))
                 estado=0
+                i=i-1
+                posC=posC-1
+                VEspacio=0
             else
-                lexema=trim(lexema)//c
+
+                !Si hay un espacio para que no lo elimine con el trim
+                if(c==' ' .or. c==char(9)) then
+                    VEspacio=VEspacio+1 !Si hay un espacio, lo agrego en el siguiente
+                    !print *, VEspacio
+                else
+                    print *, VEspacio
+                    lexema=trim(lexema)//repeat(char(32),VEspacio)//c !Concateno el espacio al lexema
+                    VEspacio=0
+                end if
+
             end if
     !Estado de lectura de comentario de varias lineas (parte 1) 3->9
         case (9)
             if (c=='*') then
                 lexema=trim(lexema)//c
                 estado=12
+                VEspacio=0
             else
-                lexema=trim(lexema)//c
+
+                !Si hay un espacio para que no lo elimine con el trim
+                if(c==' ' .or. c==char(9)) then
+                    VEspacio=VEspacio+1 !Si hay un espacio, lo agrego en el siguiente
+                    !print *, VEspacio
+                else
+                    print *, VEspacio
+                    lexema=trim(lexema)//repeat(char(32),VEspacio)//c !Concateno el espacio al lexema
+                    VEspacio=0
+                end if
             end if
-    !Estado de lectura de apertura de control (parte 2) 6->10
+    !Estado de lectura de apertura de control (parte 2) 7->10
         case (10)
             if (c=='-') then
                 lexema=trim(lexema)//c
-                call agregarToken(trim(lexema), "Apertura de control" // repeat(' ', 200-len_trim("Apertura de control")), posF, posC-len_trim(lexema))
-                estado=0
+                estado=13
             else
                 call agregarErrorLexico(trim(lexema), "Apertura de control no reconocida" // repeat(' ', 200-len_trim("Apertura de control no reconocida")), posF, posC-len_trim(lexema))
                 estado=0
@@ -294,8 +321,9 @@ subroutine analizar()
         case (11)
             if (c=='>') then
                 lexema=trim(lexema)//c
-                call agregarToken(trim(lexema), "Cerradura de control" // repeat(' ', 200-len_trim("Cerradura de control")), posF, posC-len_trim(lexema))
+                call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Cerradura de control" // repeat(' ', 200-len_trim("Cerradura de control")), posF, posC-len_trim(lexema)+1)
                 estado=0
+                !print *, lexema
             else
                 call agregarErrorLexico(trim(lexema), "Cerradura de control no reconocida" // repeat(' ', 200-len_trim("Cerradura de control no reconocida")), posF, posC-len_trim(lexema))
                 estado=0
@@ -306,10 +334,24 @@ subroutine analizar()
         case (12)
             if (c=='/') then
                 lexema=trim(lexema)//c
-                call agregarToken(trim(lexema), "Comentario de varias líneas" // repeat(' ', 200-len_trim("Comentario de varias líneas")), posF, posC-len_trim(lexema))
+                call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Comentario de varias líneas" // repeat(' ', 200-len_trim("Comentario de varias líneas")), posF, posC-len_trim(lexema))
                 estado=0
             else
                 call agregarErrorLexico(trim(lexema), "Comentario de varias líneas no cerrado" // repeat(' ', 200-len_trim("Comentario de varias líneas no cerrado")), posF, posC-len_trim(lexema))
+                estado=0
+                i=i-1
+                posC=posC-1
+            end if
+
+    !Estado de lectura de apertura de control (parte 3) 10->13
+        case (13)
+            if (c=='-') then
+                lexema=trim(lexema)//c
+                call agregarToken(adjustl(trim(lexema)// repeat(' ', 200 - len_trim(lexema))), "Apertura de control" // repeat(' ', 200-len_trim("Apertura de control")), posF, posC-len_trim(lexema)+1)
+                estado=0
+                !print *, lexema
+            else
+                call agregarErrorLexico(trim(lexema), "Apertura de control no reconocida" // repeat(' ', 200-len_trim("Apertura de control no reconocida")), posF, posC-len_trim(lexema))
                 estado=0
                 i=i-1
                 posC=posC-1
@@ -319,6 +361,82 @@ subroutine analizar()
 
 
 end subroutine analizar
+
+subroutine html_bueno() !Subrutina que genera el html con los tokens encontrados
+    use globales
+    implicit none
+    !Asigno las variables
+    integer :: unit,i
+    character(len=4) :: cuento
+    unit=2024 !Se asigna un numero de unidad
+    open(unit, file='tabla.html', status='unknown', action='write') !Se abre el archivo para escribir
+    write(unit, '(A)') "<!DOCTYPE html>"
+    write(unit, '(A)') "<html>"
+    write(unit, '(A)') "<head>"
+    write(unit, '(A)') "<title>Tabla de Tokens</title>"
+    write(unit, '(A)') "<style>"
+    write(unit, '(A)') "table {width: 50%; border-collapse: collapse;}"
+    write(unit, '(A)') "th, td {border: 1px solid black; padding: 8px; text-align: left;}"
+    write(unit, '(A)') "th {background-color: #1fc738;}"
+    write(unit, '(A)') "</style>"
+    write(unit, '(A)') "</head>"
+    write(unit, '(A)') "<body>"
+    write(unit, '(A)') "<h2>Tabla de Tokens</h2>"
+    write(unit, '(A)') "<table>"
+    write(unit, '(A)') "<tr><th>Número de Token</th><th>Lexema</th><th>Tipo</th><th>Fila</th><th>Columna</th></tr>"
+    do i=1,cuentaT
+        write(cuento,'(I3)') i 
+        write(unit, '(A)') "<tr>"
+        write(unit, '(A)') "<td>"//trim(cuento)//"</td>"
+        if (trim(tokens(1,i))=="-->") then
+            write(unit, '(A)') "<td>--&gt;</td>"
+        else if (trim(tokens(1,i))=="<!--") then
+            write(unit, '(A)') "<td>&lt;!--</td>"
+        else
+            write(unit, '(A)') "<td>"//trim(tokens(1,i))//"</td>"
+        end if
+        write(unit, '(A)') "<td>"//trim(tokens(2,i))//"</td>"
+        write(unit, '(A)') "<td>"//trim(tokens(3,i))//"</td>"
+        write(unit, '(A)') "<td>"//trim(tokens(4,i))//"</td>"
+        write(unit, '(A)') "</tr>"
+    end do
+    close(unit) !Se cierra el archivo
+end subroutine html_bueno
+
+subroutine html_malo () !Subrutina que genera el html con los errores encontrados
+    use globales
+    implicit none
+    !Asigno las variables
+    integer :: unit,i
+    character(len=4) :: cuento
+    unit=254 !Se asigna un numero de unidad
+    open(unit, file='tabla.html', status='unknown', action='write') !Se abre el archivo para escribir
+    write(unit, '(A)') "<!DOCTYPE html>"
+    write(unit, '(A)') "<html>"
+    write(unit, '(A)') "<head>"
+    write(unit, '(A)') "<title>Tabla de Errores</title>"
+    write(unit, '(A)') "<style>"
+    write(unit, '(A)') "table {width: 50%; border-collapse: collapse;}"
+    write(unit, '(A)') "th, td {border: 1px solid black; padding: 8px; text-align: left;}"
+    write(unit, '(A)') "th {background-color: #f84545;}"
+    write(unit, '(A)') "</style>"
+    write(unit, '(A)') "</head>"
+    write(unit, '(A)') "<body>"
+    write(unit, '(A)') "<h2>Tabla de Errores</h2>"
+    write(unit, '(A)') "<table>"
+    write(unit, '(A)') "<tr><th>Número de Error</th><th>Error</th><th>Descripción</th><th>Fila</th><th>Columna</th></tr>"
+    do i=1,cuentaE
+        write(cuento,'(I3)') i
+        write(unit, '(A)') "<tr>"
+        write(unit, '(A)') "<td>"//trim(cuento)//"</td>"
+        write(unit, '(A)') "<td>"//trim(erroresLexicos(1,i))//"</td>"
+        write(unit, '(A)') "<td>"//trim(erroresLexicos(2,i))//"</td>"
+        write(unit, '(A)') "<td>"//trim(erroresLexicos(3,i))//"</td>"
+        write(unit, '(A)') "<td>"//trim(erroresLexicos(4,i))//"</td>"
+        write(unit, '(A)') "</tr>"
+    end do
+    close(unit) !Se cierra el archivo
+end subroutine html_malo
 
 subroutine leer() !Lee el archivo de entrada enviado por phyton
     use globales
