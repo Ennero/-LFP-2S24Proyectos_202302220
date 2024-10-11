@@ -23,7 +23,7 @@ program proceso
 
 
     !PROBANDOOOOOOO
-    open(10, file='entrada.LFP', status='old', action='read') !Abro el archivo de entrada
+    open(10, file='Prueba.LFP', status='old', action='read') !Abro el archivo de entrada
     do
     read(10, '(A)', iostat = ios) linea
     if (ios /= 0) exit   ! Se alcanzo el fin del archivo
@@ -36,13 +36,11 @@ program proceso
     !call leer() !Llamo a la subrutina leer
     !print *, entrada !Imprimo la variable entrada
     call analizar ()
-    if (eLexico) then
-        call html_malo()
-        print *, "Se encontraron errores lexicos"
-    else
-        call html_bueno()
-        print *, "No se encontraron errores lexicos"
-    end if
+
+    !Genero los dos HTML
+    call html_malo()
+    call html_bueno()
+
 
 
 end program proceso
@@ -55,7 +53,7 @@ subroutine analizar()
     !Declaración de variables
     character(len=200)::lexema
     character(len=1) :: c
-    integer::posF, posC,estado,i,largo,VEspacio
+    integer::posF, posC,estado,i,largo,VEspacio,Saltos,tempPos
 
     !Inicialización de las variables
     largo=len_trim(entrada)
@@ -64,6 +62,8 @@ subroutine analizar()
     estado=0
     i=0
     VEspacio=0
+    Saltos=0
+    tempPos=0
 
     !Agrego el caracter del final 
     entrada(largo+1:largo+1)="#"
@@ -84,7 +84,7 @@ subroutine analizar()
                 estado=1
                 lexema=c
             
-            else if (c == ';' .or. c=='.' .or. c=='(' .or. c==')') then !Si es un simbolo
+            else if (c == ';' .or. c=='.' .or. c==',' .or. c=='(' .or. c==')') then !Si es un simbolo
                 estado=2
                 lexema=c
                 i=i-1
@@ -93,6 +93,7 @@ subroutine analizar()
             else if (c== '/') then !Si es un comentario
                 estado=3
                 lexema=c
+                tempPos=posC
 
             else if (c>= '0' .and. c<='9') then !Si es un número
                 estado=4
@@ -119,7 +120,8 @@ subroutine analizar()
             else if (c=='#' .and. i==largo) then !Si es el final
                 exit
             else
-                call agregarErrorLexico(trim(c), "Caracter no reconocido" // repeat(' ', 200-len_trim("Caracter no reconocido")), posF, posC)
+                call agregarErrorLexico(trim(c)// repeat(' ', 200 - len_trim(c)), "Caracter no reconocido" // repeat(' ', 200-len_trim("Caracter no reconocido")), posF, posC)
+                print*, c
                 cycle
             end if
 
@@ -192,7 +194,7 @@ subroutine analizar()
 
     !Estado de lectura de símbolos (parte 1) 2
         case (2)
-            if (c == ';' .or. c=='.' .or. c=='(' .or. c==')') then
+            if (c == ';' .or. c=='.' .or. c=='(' .or. c==')' .or. c==',') then
                 call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Simbolo" // repeat(' ', 200-len_trim("Simbolo")), posF, posC)
                 estado=0
             else
@@ -235,7 +237,7 @@ subroutine analizar()
                 call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Cadena" // repeat(' ', 200-len_trim("Cadena")), posF, posC-len_trim(lexema))
                 estado=0
             else if (c==char(10)) then
-                call agregarErrorLexico(trim(lexema), "Cadena no cerrada" // repeat(' ', 200-len_trim("Cadena no cerrada")), posF, posC-len_trim(lexema))
+                call agregarErrorLexico(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Cadena no cerrada" // repeat(' ', 200-len_trim("Cadena no cerrada")), posF, posC-len_trim(lexema))
                 estado=0
                 i=i-1
                 posC=posC-1
@@ -250,7 +252,7 @@ subroutine analizar()
                 lexema=trim(lexema)//c
                 estado=10
             else
-                call agregarErrorLexico(trim(lexema), "Apertura de control no reconocida" // repeat(' ', 200-len_trim("Apertura de control no reconocida")), posF, posC-len_trim(lexema))
+                call agregarErrorLexico(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Apertura de control no reconocida" // repeat(' ', 200-len_trim("Apertura de control no reconocida")), posF, posC-len_trim(lexema))
                 estado=0
                 i=i-1
                 posC=posC-1
@@ -262,7 +264,7 @@ subroutine analizar()
                 estado=11
                 !print *, lexema
             else
-                call agregarErrorLexico(trim(lexema), "Cerradura de control no reconocida" // repeat(' ', 200-len_trim("Cerradura de control no reconocida")), posF, posC-len_trim(lexema))
+                call agregarErrorLexico(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Cerradura de control no reconocida" // repeat(' ', 200-len_trim("Cerradura de control no reconocida")), posF, posC-len_trim(lexema))
                 estado=0
                 i=i-1
                 posC=posC-1
@@ -282,7 +284,7 @@ subroutine analizar()
                     VEspacio=VEspacio+1 !Si hay un espacio, lo agrego en el siguiente
                     !print *, VEspacio
                 else
-                    print *, VEspacio
+                    !print *, VEspacio
                     lexema=trim(lexema)//repeat(char(32),VEspacio)//c !Concateno el espacio al lexema
                     VEspacio=0
                 end if
@@ -295,15 +297,21 @@ subroutine analizar()
                 estado=12
                 VEspacio=0
             else
-
-                !Si hay un espacio para que no lo elimine con el trim
-                if(c==' ' .or. c==char(9)) then
-                    VEspacio=VEspacio+1 !Si hay un espacio, lo agrego en el siguiente
-                    !print *, VEspacio
+                if (c==char(10)) then
+                    posF=posF+1
+                    Saltos=Saltos+1
+                    !print *, Saltos
                 else
-                    print *, VEspacio
-                    lexema=trim(lexema)//repeat(char(32),VEspacio)//c !Concateno el espacio al lexema
-                    VEspacio=0
+                    !Si hay un espacio para que no lo elimine con el trim
+                    if(c==' ' .or. c==char(9)) then
+                        VEspacio=VEspacio+1 !Si hay un espacio, lo agrego en el siguiente
+                        !print *, VEspacio
+                    else
+                        !print *, VEspacio
+                        lexema=trim(lexema)//repeat(char(32),VEspacio)//c !Concateno el espacio al lexema
+                        VEspacio=0
+                    end if
+
                 end if
             end if
     !Estado de lectura de apertura de control (parte 2) 7->10
@@ -312,7 +320,7 @@ subroutine analizar()
                 lexema=trim(lexema)//c
                 estado=13
             else
-                call agregarErrorLexico(trim(lexema), "Apertura de control no reconocida" // repeat(' ', 200-len_trim("Apertura de control no reconocida")), posF, posC-len_trim(lexema))
+                call agregarErrorLexico(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Apertura de control no reconocida" // repeat(' ', 200-len_trim("Apertura de control no reconocida")), posF, posC-len_trim(lexema))
                 estado=0
                 i=i-1
                 posC=posC-1
@@ -325,7 +333,7 @@ subroutine analizar()
                 estado=0
                 !print *, lexema
             else
-                call agregarErrorLexico(trim(lexema), "Cerradura de control no reconocida" // repeat(' ', 200-len_trim("Cerradura de control no reconocida")), posF, posC-len_trim(lexema))
+                call agregarErrorLexico(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Cerradura de control no reconocida" // repeat(' ', 200-len_trim("Cerradura de control no reconocida")), posF, posC-len_trim(lexema))
                 estado=0
                 i=i-1
                 posC=posC-1
@@ -334,14 +342,15 @@ subroutine analizar()
         case (12)
             if (c=='/') then
                 lexema=trim(lexema)//c
-                call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Comentario de varias líneas" // repeat(' ', 200-len_trim("Comentario de varias líneas")), posF, posC-len_trim(lexema))
+                call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Comentario de varias líneas" // repeat(' ', 200-len_trim("Comentario de varias líneas")), posF-Saltos, tempPos)
                 estado=0
             else
-                call agregarErrorLexico(trim(lexema), "Comentario de varias líneas no cerrado" // repeat(' ', 200-len_trim("Comentario de varias líneas no cerrado")), posF, posC-len_trim(lexema))
+                call agregarErrorLexico(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Comentario de varias líneas no cerrado" // repeat(' ', 200-len_trim("Comentario de varias líneas no cerrado")), posF-Saltos, tempPos)
                 estado=0
                 i=i-1
                 posC=posC-1
             end if
+            Saltos=0 !Para poder llevar la cuenta de los saltos de línea
 
     !Estado de lectura de apertura de control (parte 3) 10->13
         case (13)
@@ -351,7 +360,7 @@ subroutine analizar()
                 estado=0
                 !print *, lexema
             else
-                call agregarErrorLexico(trim(lexema), "Apertura de control no reconocida" // repeat(' ', 200-len_trim("Apertura de control no reconocida")), posF, posC-len_trim(lexema))
+                call agregarErrorLexico(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Apertura de control no reconocida" // repeat(' ', 200-len_trim("Apertura de control no reconocida")), posF, posC-len_trim(lexema))
                 estado=0
                 i=i-1
                 posC=posC-1
@@ -369,7 +378,7 @@ subroutine html_bueno() !Subrutina que genera el html con los tokens encontrados
     integer :: unit,i
     character(len=4) :: cuento
     unit=2024 !Se asigna un numero de unidad
-    open(unit, file='tabla.html', status='unknown', action='write') !Se abre el archivo para escribir
+    open(unit, file='tablaTokens.html', status='unknown', action='write') !Se abre el archivo para escribir
     write(unit, '(A)') "<!DOCTYPE html>"
     write(unit, '(A)') "<html>"
     write(unit, '(A)') "<head>"
@@ -410,7 +419,7 @@ subroutine html_malo () !Subrutina que genera el html con los errores encontrado
     integer :: unit,i
     character(len=4) :: cuento
     unit=254 !Se asigna un numero de unidad
-    open(unit, file='tabla.html', status='unknown', action='write') !Se abre el archivo para escribir
+    open(unit, file='tablaErrores.html', status='unknown', action='write') !Se abre el archivo para escribir
     write(unit, '(A)') "<!DOCTYPE html>"
     write(unit, '(A)') "<html>"
     write(unit, '(A)') "<head>"
@@ -453,12 +462,15 @@ end subroutine leer
 subroutine agregarErrorLexico(lexema, descrip, linea, columna) !Subrutina que agrega los errores
     use globales !Se usa el modulo globales
     implicit none
-    character(len=100) :: lexema, descrip, linea2,columna2
+    character(len=200) :: lexema, descrip, linea2,columna2
     integer :: linea, columna
     eLexico=.true. !Se cambia el valor de error a true (porque ya hay un error xd)
     cuentaE=cuentaE+1
-    erroresLexicos(1,cuentaE)=trim(lexema)
-    erroresLexicos(2,cuentaE)=trim(descrip)
+    erroresLexicos(1,cuentaE)=(lexema)
+    erroresLexicos(2,cuentaE)=(descrip)
+
+    print *, lexema
+
     write(linea2,'(I0)') linea !Probar nuevamente la forma en la que escribo estas cosas porque ODIO FORTRAAAAAN
     write(columna2,'(I0)') columna !Lo paso a string el int
     erroresLexicos(3,cuentaE)=trim(linea2)

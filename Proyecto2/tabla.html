@@ -1,266 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Tabla de Tokens</title>
+<title>Tabla de Errores</title>
 <style>
 table {width: 50%; border-collapse: collapse;}
 th, td {border: 1px solid black; padding: 8px; text-align: left;}
-th {background-color: #1fc738;}
+th {background-color: #f84545;}
 </style>
 </head>
 <body>
-<h2>Tabla de Tokens</h2>
+<h2>Tabla de Errores</h2>
 <table>
-<tr><th>Número de Token</th><th>Lexema</th><th>Tipo</th><th>Fila</th><th>Columna</th></tr>
+<tr><th>Número de Error</th><th>Error</th><th>Descripción</th><th>Fila</th><th>Columna</th></tr>
 <tr>
 <td>  1</td>
-<td>&lt;!--</td>
-<td>Apertura de control</td>
-<td>1</td>
-<td>1</td>
+<td>/*    Definicion de propiedades*</td>
+<td>Comentario de varias líneas no cerrado</td>
+<td>16</td>
+<td>5</td>
 </tr>
 <tr>
 <td>  2</td>
-<td>Controles</td>
-<td>Palabra reservada</td>
-<td>1</td>
-<td>6</td>
+<td>/</td>
+<td>Comentario no reconocido</td>
+<td>24</td>
+<td>5</td>
 </tr>
 <tr>
 <td>  3</td>
-<td>// Este                             bloque tambien puede recibir comentarios</td>
-<td>Comentario de una línea</td>
-<td>2</td>
-<td>5</td>
+<td>#</td>
+<td>Caracter no reconocido</td>
+<td>24</td>
+<td>6</td>
 </tr>
 <tr>
 <td>  4</td>
-<td>Contenedor</td>
-<td>Palabra reservada</td>
-<td>3</td>
-<td>5</td>
-</tr>
-<tr>
-<td>  5</td>
-<td>contlogin</td>
-<td>Identificador</td>
-<td>3</td>
-<td>16</td>
-</tr>
-<tr>
-<td>  6</td>
-<td>;</td>
-<td>Simbolo</td>
-<td>3</td>
-<td>25</td>
-</tr>
-<tr>
-<td>  7</td>
-<td>Contenedor</td>
-<td>Palabra reservada</td>
-<td>4</td>
-<td>5</td>
-</tr>
-<tr>
-<td>  8</td>
-<td>contFondo</td>
-<td>Identificador</td>
-<td>4</td>
-<td>16</td>
-</tr>
-<tr>
-<td>  9</td>
-<td>;</td>
-<td>Simbolo</td>
-<td>4</td>
-<td>25</td>
-</tr>
-<tr>
-<td> 10</td>
-<td>Boton</td>
-<td>Palabra reservada</td>
-<td>5</td>
-<td>5</td>
-</tr>
-<tr>
-<td> 11</td>
-<td>cmdIngresar</td>
-<td>Identificador</td>
-<td>5</td>
-<td>11</td>
-</tr>
-<tr>
-<td> 12</td>
-<td>;</td>
-<td>Simbolo</td>
-<td>5</td>
-<td>22</td>
-</tr>
-<tr>
-<td> 13</td>
-<td>Clave</td>
-<td>Palabra reservada</td>
-<td>6</td>
-<td>5</td>
-</tr>
-<tr>
-<td> 14</td>
-<td>pswClave</td>
-<td>Identificador</td>
-<td>6</td>
-<td>11</td>
-</tr>
-<tr>
-<td> 15</td>
-<td>;</td>
-<td>Simbolo</td>
-<td>6</td>
-<td>19</td>
-</tr>
-<tr>
-<td> 16</td>
-<td>Etiqueta</td>
-<td>Palabra reservada</td>
-<td>7</td>
-<td>5</td>
-</tr>
-<tr>
-<td> 17</td>
-<td>passw</td>
-<td>Identificador</td>
-<td>7</td>
-<td>14</td>
-</tr>
-<tr>
-<td> 18</td>
-<td>;</td>
-<td>Simbolo</td>
-<td>7</td>
-<td>19</td>
-</tr>
-<tr>
-<td> 19</td>
-<td>Etiqueta</td>
-<td>Palabra reservada</td>
-<td>8</td>
-<td>5</td>
-</tr>
-<tr>
-<td> 20</td>
-<td>Nombre</td>
-<td>Identificador</td>
-<td>8</td>
-<td>14</td>
-</tr>
-<tr>
-<td> 21</td>
-<td>;</td>
-<td>Simbolo</td>
-<td>8</td>
-<td>20</td>
-</tr>
-<tr>
-<td> 22</td>
-<td>Texto</td>
-<td>Palabra reservada</td>
-<td>9</td>
-<td>5</td>
-</tr>
-<tr>
-<td> 23</td>
-<td>Texto0</td>
-<td>Identificador</td>
-<td>9</td>
-<td>11</td>
-</tr>
-<tr>
-<td> 24</td>
-<td>;</td>
-<td>Simbolo</td>
-<td>9</td>
-<td>17</td>
-</tr>
-<tr>
-<td> 25</td>
-<td>/* lds           fkjsñdlkfjsd*/</td>
-<td>Comentario de varias líneas</td>
-<td>10</td>
-<td>5</td>
-</tr>
-<tr>
-<td> 26</td>
-<td>Contenedor</td>
-<td>Palabra reservada</td>
-<td>11</td>
-<td>5</td>
-</tr>
-<tr>
-<td> 27</td>
-<td>contlogo2</td>
-<td>Identificador</td>
-<td>11</td>
-<td>16</td>
-</tr>
-<tr>
-<td> 28</td>
-<td>;</td>
-<td>Simbolo</td>
-<td>11</td>
-<td>25</td>
-</tr>
-<tr>
-<td> 29</td>
-<td>Contenedor</td>
-<td>Palabra reservada</td>
-<td>12</td>
-<td>5</td>
-</tr>
-<tr>
-<td> 30</td>
-<td>ContLogo1</td>
-<td>Identificador</td>
-<td>12</td>
-<td>16</td>
-</tr>
-<tr>
-<td> 31</td>
-<td>;</td>
-<td>Simbolo</td>
-<td>12</td>
-<td>25</td>
-</tr>
-<tr>
-<td> 32</td>
-<td>Contenedor</td>
-<td>Palabra reservada</td>
-<td>13</td>
-<td>5</td>
-</tr>
-<tr>
-<td> 33</td>
-<td>ContBody</td>
-<td>Identificador</td>
-<td>13</td>
-<td>16</td>
-</tr>
-<tr>
-<td> 34</td>
-<td>;</td>
-<td>Simbolo</td>
-<td>13</td>
+<td>$</td>
+<td>Caracter no reconocido</td>
 <td>24</td>
-</tr>
-<tr>
-<td> 35</td>
-<td>Controles</td>
-<td>Palabra reservada</td>
-<td>14</td>
-<td>1</td>
-</tr>
-<tr>
-<td> 36</td>
-<td>--&gt;</td>
-<td>Cerradura de control</td>
-<td>14</td>
-<td>10</td>
+<td>7</td>
 </tr>

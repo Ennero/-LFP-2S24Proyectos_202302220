@@ -2,16 +2,23 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import ttk as tkk
-
+import webbrowser
 import subprocess
 
+
+
+
+#Declarando unas variables globales
 errores=[]
+erroresLexicos=[]
+analizado=False
 
 
 
 # Función para analizar el texto
 def analizar():
-    #global pais, poblacion, rutaGrafica, rutaBandera
+    global analizado
+    analizado=True
     cuerpo=entrada.get("1.0", tk.END) #Obtengo el contenido del editor de texto
     lineas=cuerpo.splitlines() #Divido el contenido del editor de texto por líneas
     todasVacias=all(linea=="" or linea.isspace() for linea in lineas) #Verifico si todas las líneas estan vacias
@@ -32,10 +39,17 @@ def actualizarTabla(): #Función para actualizar la tabla de errores
     pass
 
 def tokens(): #Función para mostrar los tokens
+    global analizado
+    if analizado:
+
+        webbrowser.open("tablaTokens.html")
+    else:
+        messagebox.showerror("Error", "Primero debe analizar el texto.")
+        info.config(text="Primero debe analizar el texto", foreground="red")
 
 
 
-    pass
+
 
 
 

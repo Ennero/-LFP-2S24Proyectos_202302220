@@ -3,7 +3,10 @@
     Contenedor contlogin;
     Contenedor contFondo;
     Boton cmdIngresar;
+    #
     Clave pswClave;
+
+    "fdsfsdf
     Etiqueta passw;
     Etiqueta Nombre;
     Texto Texto0;
