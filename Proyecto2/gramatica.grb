@@ -1,0 +1,58 @@
+G = {E, N, I, P} donde:
+
+E = Conjunto de terminales
+N = Conjunto de no terminales
+I = Símbolo Inicial
+P = Producciones
+
+E = {
+    Controles
+    Propiedades
+    Colocacion
+    Etiqueta
+    Boton Check
+    RadioBoton
+    Texto
+    AreaTexto
+    Clave
+    Contenedor
+    setColorLetra
+    setAncho
+    setAlto
+    setTexto
+    setColorFondo
+    setAlineacion
+    setMarcado
+    setGrupo
+    add
+    setPosicion
+    this
+    ID
+    ;
+    .
+    (
+    )
+    ,
+    Numero
+    true
+    false
+    Cadena
+    <!--
+    -->
+}
+
+N = {
+    ReservadaControles
+    
+
+
+
+
+
+}
+
+# Representación de la gramática
+
+S ::= Block
+
+Block ::=
