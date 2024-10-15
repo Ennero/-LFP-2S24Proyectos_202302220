@@ -57,21 +57,21 @@ S ::= Block1 Block2 Block3
 
 -----------------------------------------------------------------------------------------------------------------------------------
 
-Block1 ::= '<!--' 'Controles' ControlLista 'Controles' '-->' | COMENTARIO_LINEA | COMENTARIO_MULTILINEA
+Block1 ::= '<!--' 'Controles' ControlLista 'Controles' '-->' | COMENTARIO
 
 ControlLista ::= Control ControlLista | ε
 
-Control ::= TIPO ID ';' | COMENTARIO_LINEA | COMENTARIO_MULTILINEA
+Control ::= TIPO ID ';' | COMENTARIO
 
 TIPO ::= 'Etiqueta' | 'Boton' | 'Check' | 'RadioBoton' | 'Texto' | 'AreaTexto' | 'Clave' | 'Contenedor'
 
 -----------------------------------------------------------------------------------------------------------------------------------
 
-Block2 ::= '<!--' 'Propiedades' PropiedadesLista 'Propiedades' '-->' | COMENTARIO_LINEA | COMENTARIO_MULTILINEA
+Block2 ::= '<!--' 'Propiedades' PropiedadesLista 'Propiedades' '-->' | COMENTARIO
 
 PropiedadesLista ::= Propiedad PropiedadesLista | ε
 
-Propiedad ::= ID '.' Funcion ';' | COMENTARIO_LINEA | COMENTARIO_MULTILINEA
+Propiedad ::= ID '.' Funcion ';' | COMENTARIO
 
 Funcion ::= Prop '('  ')'
 
