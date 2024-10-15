@@ -1,10 +1,10 @@
 module globales
 !Aquí ando declarando las variables globales que usaré
     character(len=15000)::entrada
-    integer::cuentaT, cuentaN, cuentaE, cuentaCT
-    character(len=200), dimension(4,2000)::tokens,erroresLexicos
+    integer::cuentaT, cuentaN, cuentaE, cuentaCT, cuentaConsumo
+    character(len=200), dimension(4,2000)::tokens,erroresLexicos,copiaTokens
     character(len=200), dimension(1,2000)::terminales
-    logical::eLexico
+    logical::eLexico, eSintactico
 
 
 end module globales
@@ -24,7 +24,7 @@ program proceso
 
 
     !PROBANDOOOOOOO
-    open(10, file='Prueba.LFP', status='old', action='read') !Abro el archivo de entrada
+    open(10, file='entrada.LFP', status='old', action='read') !Abro el archivo de entrada
     do
     read(10, '(A)', iostat = ios) linea
     if (ios /= 0) exit   ! Se alcanzo el fin del archivo
@@ -279,7 +279,7 @@ subroutine analizar()
         case (5)
             if (c=='"') then
                 lexema=trim(lexema)//c
-                call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Cadena" // repeat(' ', 200-len_trim("Cadena")), posF, posC-len_trim(lexema))
+                call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Cadena" // repeat(' ', 200-len_trim("Cadena")), posF, posC-len_trim(lexema)+1)
                 call agregarTerminal('Cadena'// repeat(' ', 200 - len_trim("Cadena")))
                 estado=0
             else if (c==char(10)) then
@@ -535,10 +535,18 @@ subroutine agregarToken(lexema, descrip, linea, columna) !Subrutina que agrega l
     cuentaT=cuentaT+1
     tokens(1,cuentaT)=(lexema)
     tokens(2,cuentaT)=(descrip)
+
+    !Creo la copia de los tokens
+    copiaTokens(1,cuentaT)=(lexema)
+    copiaTokens(2,cuentaT)=(descrip)
     write(linea2,'(I0)') linea !Lo transfora a string
     write(columna2,'(I0)') columna !Lo transforma a string
     tokens(3,cuentaT)=(linea2)
     tokens(4,cuentaT)=(columna2)
+
+    !Creo la copia de los tokesn (parte 2)
+    copiaTokens(3,cuentaT)=(linea2)
+    copiaTokens(4,cuentaT)=(columna2)
     !print *, lexema, descrip, linea, columna
 end subroutine agregarToken
 
@@ -553,7 +561,67 @@ end subroutine agregarTerminal
 !Analisis léxico --------------------------------------------------------------------------------------------------------------------------------   
 
 
+!Analisis sintáctico --------------------------------------------------------------------------------------------------------------------------------
+
+subroutine iniciarAnalisisSintactico()
+    use globales
+    implicit none
+    integer :: i
+    
+    !Inicializo la variable que indica la posición del token dentro de la lista de tokens
+    i=1
+
+    call inicio() !Llamo a la subrutina inicio
+
+
+end subroutine iniciarAnalisisSintactico
+
+!Estado inicial del analisis sintáctico
+subroutine inicio()
+    use globales
+    implicit none
+
+    !Llamo a las subrutinas que contienen Controles
+    call Block1()
+
+    !Llamo a las subrutinas que contienen Propiedades
+    call block2()
+
+    !Llamo a las subrutinas que contienen Colocacion
+    call block3()
+
+end subroutine inicio
+
+!Subrutina que contiene los controles
+subroutine Block1()
+    use globales
+    implicit none
 
 
 
+    !Consumo el token Controles
+    call consumirToken(trim("Controles")//repeat(" ",200-len_trim("Controles")))
+    if (.not. eSintactico) call panico()
 
+
+    !Llamo a la subrutina que contiene la palabra reservada Controles
+    call Controles()
+
+end subroutine Block1
+
+subroutine consumirToken(tipo)
+    use globales
+    implicit none
+    character(len=200), intent(in) :: tipo
+
+    !Si el token es igual al tipo que se espera
+    if (trim(terminales(1,i))==trim(tipo)) then
+        i=i+1 !Aumento la posición del token
+    else
+        !Si no es igual, entonces hay un error sintáctico
+        call agregarErrorSintactico(trim(terminales(1,i))//repeat(" ",200-len_trim(terminales(1,i))), "Se esperaba " // trim(tipo) // repeat(" ",200-len_trim("Se esperaba " // trim(tipo))), trim(terminales(3,i)), trim(terminales(4,i)))
+        eSintactico=.true.
+    end if
+
+end subroutine consumirToken
+!Analisis sintáctico --------------------------------------------------------------------------------------------------------------------------------

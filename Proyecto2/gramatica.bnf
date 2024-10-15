@@ -1,0 +1,84 @@
+G = {E, N, I, P} donde:
+
+E = Conjunto de terminales
+N = Conjunto de no terminales
+I = Símbolo Inicial
+P = Producciones
+
+E = {
+    Controles
+    Propiedades
+    Colocacion
+    Etiqueta
+    Boton Check
+    RadioBoton
+    Texto
+    AreaTexto
+    Clave
+    Contenedor
+    setColorLetra
+    setAncho
+    setAlto
+    setTexto
+    setColorFondo
+    setAlineacion
+    setMarcado
+    setGrupo
+    add
+    setPosicion
+    this
+    ID
+    ;
+    .
+    (
+    )
+    ,
+    Numero
+    true
+    false
+    Cadena
+    <!--
+    -->
+}
+
+N = {
+    ReservadaControles
+    
+
+
+
+
+
+}
+
+# Representación de la gramática
+
+S ::= Block1 Block2 Block3
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Block1 ::= '<!--' 'Controles' ControlLista 'Controles' '-->' | COMENTARIO_LINEA | COMENTARIO_MULTILINEA
+
+ControlLista ::= Control ControlLista | ε
+
+Control ::= TIPO ID ';' | COMENTARIO_LINEA | COMENTARIO_MULTILINEA
+
+TIPO ::= 'Etiqueta' | 'Boton' | 'Check' | 'RadioBoton' | 'Texto' | 'AreaTexto' | 'Clave' | 'Contenedor'
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Block2 ::= '<!--' 'Propiedades' PropiedadesLista 'Propiedades' '-->' | COMENTARIO_LINEA | COMENTARIO_MULTILINEA
+
+PropiedadesLista ::= Propiedad PropiedadesLista | ε
+
+Propiedad ::= ID '.' Funcion ';' | COMENTARIO_LINEA | COMENTARIO_MULTILINEA
+
+Funcion ::= Prop '('  ')'
+
+PROP ::= 
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Block3 ::= '<!--' 'Colocacion' colocacionLista 'Colocacion' '-->' | COMENTARIO_LINEA | COMENTARIO_MULTILINEA
