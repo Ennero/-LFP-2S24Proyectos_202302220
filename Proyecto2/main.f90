@@ -4,7 +4,7 @@ module globales
     integer::cuentaT, cuentaN, cuentaE, cuentaCT, cuentaConsumo
     character(len=200), dimension(4,2000)::tokens,erroresLexicos,copiaTokens
     character(len=200), dimension(1,2000)::terminales
-    logical::eLexico, eSintactico, controlValido
+    logical::eLexico, eSintactico, controlValido, propiedadValida, colocacionValida
 
 end module globales
 
@@ -21,7 +21,6 @@ program proceso
     !Inicializando variables
     entrada = '' !Inicializo la variable entrada
 
-
     !PROBANDOOOOOOO
     open(10, file='controles.LFP', status='old', action='read') !Abro el archivo de entrada
     do
@@ -30,8 +29,6 @@ program proceso
     entrada = trim(entrada) // trim(linea) // char(10) ! Concatenar la línea leida al valor de entrada y agregar un salto de línea
     end do
     !PROBANDOOOOOOO
-
-
 
     !call leer() !Llamo a la subrutina leer
     !print *, entrada !Imprimo la variable entrada
@@ -42,8 +39,6 @@ program proceso
     call html_bueno()
 
     call iniciarAnalisisSintactico() !Llamo a la subrutina iniciarAnalisisSintactico
-
-
 
 end program proceso
 
@@ -123,7 +118,7 @@ subroutine analizar()
                 exit
             else
                 call agregarErrorLexico(trim(c)// repeat(' ', 200 - len_trim(c)), "Caracter no reconocido" // repeat(' ', 200-len_trim("Caracter no reconocido")), posF, posC)
-                print*, c
+                !print*, c
                 cycle
             end if
 
@@ -520,7 +515,7 @@ subroutine agregarErrorLexico(lexema, descrip, linea, columna) !Subrutina que ag
     erroresLexicos(1,cuentaE)=(lexema)
     erroresLexicos(2,cuentaE)=(descrip)
 
-    print *, lexema
+    !print *, lexema
 
     write(linea2,'(I0)') linea !Probar nuevamente la forma en la que escribo estas cosas porque ODIO FORTRAAAAAN
     write(columna2,'(I0)') columna !Lo paso a string el int
@@ -557,13 +552,14 @@ subroutine agregarTerminal(terminal) !Subrutina que agrega los terminales
     character(len=200) :: terminal !Se declara la variable
     cuentaCT=cuentaCT+1
     terminales(1,cuentaCT)=terminal
-    print *, terminal
+    !print *, terminal
 end subroutine agregarTerminal
 !Analisis léxico --------------------------------------------------------------------------------------------------------------------------------   
 
 
-!Analisis sintáctico --------------------------------------------------------------------------------------------------------------------------------
+!Analisis sintáctico ----------------------------------------------------------------------------------------------------------------------------
 
+!Inicia el análisis sintáctico (parte 1)
 subroutine iniciarAnalisisSintactico()
     use globales
     implicit none
@@ -572,14 +568,14 @@ subroutine iniciarAnalisisSintactico()
     cuentaConsumo=1
 
     !Si es true no hay error (no lo arreglaré xd)
-    eSintactico=.true.
+    eSintactico=.false.
 
     call inicio() !Llamo a la subrutina inicio
 
 
 end subroutine iniciarAnalisisSintactico
 
-!Estado inicial del analisis sintáctico
+!Estado inicial del analisis sintáctico (parte 2)
 subroutine inicio()
     use globales
     implicit none
@@ -595,37 +591,37 @@ subroutine inicio()
 
 end subroutine inicio
 
-!Subrutina que contiene los controles
+!Lectura de Controles ----------------------------------------------------------------------------------------------------------------------------
 subroutine Block1()
     use globales
     implicit none
 
-    if (trim(terminales(1,cuentaConsumo))=='Comentario') then
-        call consumirToken(trim("Comentario")//repeat(" ",200-len_trim("Comentario")))
+    !Consumo el token <!--
+    call consumirToken(trim("<!--")//repeat(" ",200-len_trim("<!--")))
+    if (eSintactico) call panico()
+
+    !Consumo el token Controles
+    call consumirToken(trim("Controles")//repeat(" ",200-len_trim("Controles")))
+    if (eSintactico) call panico()
+
+    call ControlLista() !Llamo a la subrutina que contiene la lista de controles
+
+    !Consumo el token Controles
+    call consumirToken(trim("Controles")//repeat(" ",200-len_trim("Controles")))
+    if (eSintactico) call panico()
+
+    print *, terminales(1,cuentaConsumo)
+
+    !Consumo el token -->
+    call consumirToken(trim("-->")//repeat(" ",200-len_trim("-->")))
+    if (eSintactico) call panico()
+
+    print *, terminales(1,cuentaConsumo)
+
+    if (eSintactico) then
+        print *, "Error sintáctico"
     else
-        !Consumo el token <!--
-        call consumirToken(trim("<!--")//repeat(" ",200-len_trim("<!--")))
-        if (.not. eSintactico) call panico()
-
-        !Consumo el token Controles
-        call consumirToken(trim("Controles")//repeat(" ",200-len_trim("Controles")))
-        if (.not. eSintactico) call panico()
-
-        call ControlLista() !Llamo a la subrutina que contiene la lista de controles
-
-        !Consumo el token Controles
-        call consumirToken(trim("Controles")//repeat(" ",200-len_trim("Controles")))
-        if (.not. eSintactico) call panico()
-
-        !Consumo el token -->
-        call consumirToken(trim("-->")//repeat(" ",200-len_trim("-->")))
-        if (.not. eSintactico) call panico()
-
-        if (.not. eSintactico) then
-            print *, "Error sintáctico"
-        else
-            print *, "Análisis sintáctico correcto"
-        end if
+        print *, "Análisis sintáctico correcto"
     end if
 
 end subroutine Block1
@@ -639,6 +635,8 @@ recursive subroutine ControlLista()
     if (controlValido) then
         controlValido=.false.
         call Control()
+
+        print *, "Control válido"
         call ControlLista()
     else
         !No hago nada xd
@@ -651,21 +649,27 @@ subroutine Control()
 
     if(trim(terminales(1,cuentaConsumo))=="Comentario") then
         call consumirToken(trim("Comentario")//repeat(" ",200-len_trim("Comentario")))
+        print *, "Comentario"
         return
     else
-        call TIPO()
-        
-        call consumirToken(trim("ID")//repeat(" ",200-len_trim("ID")))
-        if (.not. eSintactico) call panico()
+        !Llamo la subroutina para verificar la validez del token
+        call TIPO_Control()
 
+        print *, terminales(1,cuentaConsumo)
+        
+        !Consumo el token ID
+        call consumirToken(trim("ID")//repeat(" ",200-len_trim("ID")))
+        if (eSintactico) call panico()
+
+        !Consumo el token ;
         call consumirToken(trim(";")//repeat(" ",200-len_trim(";")))
-        if (.not. eSintactico) call panico()
+        if (eSintactico) call panico()
         
     end if
 
 end subroutine Control
 
-subroutine TIPO()
+subroutine TIPO_Control()
     use globales
     implicit none
 
@@ -694,10 +698,10 @@ subroutine TIPO()
         call consumirToken(trim("Contenedor")//repeat(" ",200-len_trim("Contenedor")))
         return
     else !Si no es ninguno de los anteriores, entonces hay un error sintáctico
-        eSintactico=.false.
+        eSintactico=.true.
     end if
 
-end subroutine TIPO
+end subroutine TIPO_Control
 
 !Función que valida si son los controles válidos
 subroutine validoControl()
@@ -705,9 +709,7 @@ subroutine validoControl()
     implicit none
 
     !Si el token es igual a un control
-    if (trim(terminales(1,cuentaConsumo))=="ID") then
-        controlValido=.true.
-    else if (trim(terminales(1,cuentaConsumo))=="Etiqueta") then
+    if (trim(terminales(1,cuentaConsumo))=="Etiqueta") then
         controlValido=.true.
     else if (trim(terminales(1,cuentaConsumo))=="Boton") then
         controlValido=.true.
@@ -729,10 +731,330 @@ subroutine validoControl()
         controlValido=.false.
     end if
 end subroutine validoControl
+!Fin Lectura de Controles ------------------------------------------------------------------------------------------------------------
+
+!Lectura de Propieades ------------------------------------------------------------------------------------------------------------
+subroutine block2()
+    use globales
+    implicit none
+
+    !Consumo el token <!--
+    call consumirToken(trim("<!--")//repeat(" ",200-len_trim("<!--")))
+    if (eSintactico) call panico()
+
+    !Consumo el token Propiedades
+    call consumirToken(trim("Propiedades")//repeat(" ",200-len_trim("Propiedades")))
+    if (eSintactico) call panico()
+
+    call PropiedadesLista() !Llamo a la subrutina que contiene la lista de propiedades
+
+    !Consumo el token Propiedades
+    call consumirToken(trim("Propiedades")//repeat(" ",200-len_trim("Propiedades")))
+    if (eSintactico) call panico()
+
+    !Consumo el token -->
+    call consumirToken(trim("-->")//repeat(" ",200-len_trim("-->")))
+    if (eSintactico) call panico()
+
+end subroutine block2
+
+recursive subroutine PropiedadesLista()
+    use globales
+    implicit none
+
+    !Valido si es una propiedad válida xd
+    call validoPropiedad()
+    if (propiedadValida) then
+        propiedadValida=.false.
+        call Propiedad()
+
+        print *, "Propiedad válida"
+        call PropiedadesLista()
+    else
+        !No hago nada xd
+    end if
+end subroutine PropiedadesLista
+
+subroutine Propiedad()
+    use globales
+    implicit none
+
+    if (trim(terminales(1, cuentaConsumo))=="Comentario") then
+        call consumirToken(trim("Comentario")//repeat(" ",200-len_trim("Comentario")))
+        return
+    else
+
+        !Consumo el token ID
+        call consumirToken(trim("ID")//repeat(" ",200-len_trim("ID")))
+        if (eSintactico) call panico()
+
+        !Consumo el token .
+        call consumirToken(trim(".")//repeat(" ",200-len_trim(".")))
+        if (eSintactico) call panico()
+
+        !Llamo la subrutina de la función
+        call Funcion()
+
+        !Consumo el token ;
+        call consumirToken(trim(";")//repeat(" ",200-len_trim(";")))
+        if (eSintactico) call panico()
+    end if
+end subroutine Propiedad
+
+subroutine Funcion()
+    use globales
+    implicit none
+
+    if (trim(terminales(1,cuentaConsumo))=="setColorLetra") then
+
+        !Consumo el token setColorLetra
+        call consumirToken(trim("setColorLetra")//repeat(" ",200-len_trim("setColorLetra")))
+        if (eSintactico) call panico()
+
+        !Consumo el token (
+        call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
+        if (eSintactico) call panico()
+
+        !Consumo el token Numero
+        call consumirToken(trim("Numero")//repeat(" ",200-len_trim("Numero")))
+        if (eSintactico) call panico()
+
+        !Consumo el token ,
+        call consumirToken(trim(",")//repeat(" ",200-len_trim(",")))
+        if (eSintactico) call panico()
+
+        !Consumo el token Numero
+        call consumirToken(trim("Numero")//repeat(" ",200-len_trim("Numero")))
+        if (eSintactico) call panico()
+
+        !Consumo el token ,
+        call consumirToken(trim(",")//repeat(" ",200-len_trim(",")))
+        if (eSintactico) call panico()
+
+        !Consumo el token Numero
+        call consumirToken(trim("Numero")//repeat(" ",200-len_trim("Numero")))
+        if (eSintactico) call panico()
+
+        !Consumo el token )
+        call consumirToken(trim(")")//repeat(" ",200-len_trim(")")))
+        if (eSintactico) call panico()
+
+    else if (trim(terminales(1,cuentaConsumo))=="setAncho") then
+
+        !Consumo el token setAncho
+        call consumirToken(trim("setAncho")//repeat(" ",200-len_trim("setAncho")))
+        if (eSintactico) call panico()
+
+        !Consumo el token (
+        call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
+        if (eSintactico) call panico()
+
+        !Consumo el token Numero
+        call consumirToken(trim("Numero")//repeat(" ",200-len_trim("Numero")))
+        if (eSintactico) call panico()
+
+        !Consumo el token )
+        call consumirToken(trim(")")//repeat(" ",200-len_trim(")")))
+        if (eSintactico) call panico()
+
+    else if (trim(terminales(1,cuentaConsumo))=="setAlto") then
+
+        !Consumo el token setAlto
+        call consumirToken(trim("setAlto")//repeat(" ",200-len_trim("setAlto")))
+        if (eSintactico) call panico()
+
+        !Consumo el token (
+        call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
+        if (eSintactico) call panico()
+
+        !Consumo el token Numero
+        call consumirToken(trim("Numero")//repeat(" ",200-len_trim("Numero")))
+        if (eSintactico) call panico()
+
+        !Consumo el token )
+        call consumirToken(trim(")")//repeat(" ",200-len_trim(")")))
+        if (eSintactico) call panico()
+
+    else if (trim(terminales(1,cuentaConsumo))=="setTexto") then
+
+        !Consumo el token setTexto
+        call consumirToken(trim("setTexto")//repeat(" ",200-len_trim("setTexto")))
+        if (eSintactico) call panico()
+
+        !Consumo el token (
+        call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
+        if (eSintactico) call panico()
+
+        !Consumo el token Cadena
+        call consumirToken(trim("Cadena")//repeat(" ",200-len_trim("Cadena")))
+        if (eSintactico) call panico()
+
+        !Consumo el token )
+        call consumirToken(trim(")")//repeat(" ",200-len_trim(")")))
+        if (eSintactico) call panico()
+
+    else if (trim(terminales(1,cuentaConsumo))=="setColorFondo") then
+
+        !Consumo el token setColorFondo
+        call consumirToken(trim("setColorFondo")//repeat(" ",200-len_trim("setColorFondo")))
+        if (eSintactico) call panico()
+
+        !Consumo el token (
+        call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
+        if (eSintactico) call panico()
+
+        !Consumo el token Numero
+        call consumirToken(trim("Numero")//repeat(" ",200-len_trim("Numero")))
+        if (eSintactico) call panico()
+
+        !Consumo el token ,
+        call consumirToken(trim(",")//repeat(" ",200-len_trim(",")))
+        if (eSintactico) call panico()
+
+        !Consumo el token Numero
+        call consumirToken(trim("Numero")//repeat(" ",200-len_trim("Numero")))
+        if (eSintactico) call panico()
+
+        !Consumo el token ,
+        call consumirToken(trim(",")//repeat(" ",200-len_trim(",")))
+        if (eSintactico) call panico()
+
+        !Consumo el token Numero
+        call consumirToken(trim("Numero")//repeat(" ",200-len_trim("Numero")))
+        if (eSintactico) call panico()
+
+        !Consumo el token )
+        call consumirToken(trim(")")//repeat(" ",200-len_trim(")")))
+        if (eSintactico) call panico()
+
+    else if (trim(terminales(1,cuentaConsumo))=="setAlineacion") then
+
+        !Consumo el token setAlineacion
+        call consumirToken(trim("setAlineacion")//repeat(" ",200-len_trim("setAlineacion")))
+        if (eSintactico) call panico()
+
+        !Consumo el token (
+        call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
+        if (eSintactico) call panico()
+
+        call Alineado() !Llamo a la subrutina que contiene el alineado
+
+        !Consumo el token )
+        call consumirToken(trim(")")//repeat(" ",200-len_trim(")")))
+        if (eSintactico) call panico()
+
+    else if (trim(terminales(1,cuentaConsumo))=="setMarcado") then
+
+        !Consumo el token setMarcado
+        call consumirToken(trim("setMarcado")//repeat(" ",200-len_trim("setMarcado")))
+        if (eSintactico) call panico()
+
+        !Consumo el token (
+        call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
+        if (eSintactico) call panico()
+
+        call Booleano() !Llamo a la subrutina que contiene el booleano
+
+        !Consumo el token )
+        call consumirToken(trim(")")//repeat(" ",200-len_trim(")")))
+        if (eSintactico) call panico()
+
+    else if (trim(terminales(1,cuentaConsumo))=="setGrupo") then
+
+        !Consumo el token setGrupo
+        call consumirToken(trim("setGrupo")//repeat(" ",200-len_trim("setGrupo")))
+        if (eSintactico) call panico()
+
+        !Consumo el token (
+        call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
+        if (eSintactico) call panico()
+
+        !Consumo el token ID
+        call consumirToken(trim("ID")//repeat(" ",200-len_trim("ID")))
+        if (eSintactico) call panico()
+
+    else !Si no es ninguna de las anteriores, entonces hay un error sintáctico
+        eSintactico=.true.
+    end if
+end subroutine Funcion
+
+subroutine Alineado()
+    use globales
+    implicit none
+
+    if (trim(terminales(1,cuentaConsumo))=="izquierdo") then
+        call consumirToken(trim("izquierdo")//repeat(" ",200-len_trim("Izquierda")))
+        if (eSintactico) call panico()
+    else if (trim(terminales(1,cuentaConsumo))=="centro") then
+        call consumirToken(trim("centro")//repeat(" ",200-len_trim("Centro")))
+        if (eSintactico) call panico()
+    else if (trim(terminales(1,cuentaConsumo))=="derecho") then
+        call consumirToken(trim("derecho")//repeat(" ",200-len_trim("Derecha")))
+        if (eSintactico) call panico()
+    else !Si no es ninguna de las anteriores, entonces hay un error sintáctico
+        eSintactico=.true.
+    end if
+end subroutine Alineado
+
+subroutine Booleano()
+    use globales
+    implicit none
+
+    if (trim(terminales(1,cuentaConsumo))=="true") then
+        call consumirToken(trim("true")//repeat(" ",200-len_trim("true")))
+        if (eSintactico) call panico()
+    else if (trim(terminales(1,cuentaConsumo))=="false") then
+        call consumirToken(trim("false")//repeat(" ",200-len_trim("false")))
+        if (eSintactico) call panico()
+    else !Si no es ninguna de las anteriores, entonces hay un error sintáctico
+        eSintactico=.true.
+    end if
+end subroutine Booleano
+
+subroutine validoPropiedad()
+    use globales
+    implicit none
+
+    !Si el token es igual a una propiedad
+    if (trim(terminales(1,cuentaConsumo))=='setColorLetra') then
+        propiedadValida=.true.
+    else if (trim(terminales(1, cuentaConsumo))=='setAncho') then
+        propiedadValida=.true.
+    else if (trim(terminales(1,cuentaConsumo))=='setAlto') then
+        propiedadValida=.true.
+    else if (trim(terminales(1,cuentaConsumo))=='setTexto') then
+        propiedadValida=.true.
+    else if (trim(terminales(1,cuentaConsumo))=='setColorFondo') then
+        propiedadValida=.true.
+    else if (trim(terminales(1,cuentaConsumo))=='setAlineacion') then
+        propiedadValida=.true.
+    else if (trim(terminales(1,cuentaConsumo))=='setMarcado') then
+        propiedadValida=.true.
+    else if (trim(terminales(1,cuentaConsumo))=='setGrupo') then
+        propiedadValida=.true.
+    else !Si no es ninguna de las anteriores, entonces no es una propiedad válida
+        propiedadValida=.false.
+    end if
+
+end subroutine validoPropiedad
+
+!Fin Lectura de Propiedades ------------------------------------------------------------------------------------------------------------
+
+!Lectura de Colocacion ------------------------------------------------------------------------------------------------------------
+
+!Fin Lectura de Colocacion ------------------------------------------------------------------------------------------------------------
 
 !Subrutina que se llama cuando hay un error sintáctico
 subroutine panico()
+    use globales
+    implicit none
     print *, "Error sintáctico"
+
+    if (terminales(1,cuentaConsumo)==trim(";")) then
+        eSintactico=.false.
+    else
+        cuentaConsumo=cuentaConsumo+1
+    end if
 end subroutine panico
 
 
@@ -748,7 +1070,7 @@ subroutine consumirToken(tipo)
         cuentaConsumo=cuentaConsumo+1 !Aumento la posición del token
     else
         !Si no es igual, entonces hay un error sintáctico
-        eSintactico=.false.
+        eSintactico=.true.
     end if
 
 end subroutine consumirToken
