@@ -45,7 +45,7 @@ N = {
     Block1
     ControlLista
     Control
-    TIPO
+    TIPO_Control
 
     Block2
     PropiedadesLista
@@ -68,9 +68,9 @@ Block1 ::= '<!--' 'Controles' ControlLista 'Controles' '-->'
 
 ControlLista ::= Control ControlLista | ε
 
-Control ::= TIPO ID ';' | COMENTARIO
+Control ::= TIPO_Control ID ';' | COMENTARIO
 
-TIPO ::= 'Etiqueta' | 'Boton' | 'Check'
+TIPO_Control ::= 'Etiqueta' | 'Boton' | 'Check'
     | 'RadioBoton' | 'Texto' | 'AreaTexto'
     | 'Clave' | 'Contenedor'
 -----------------------------------------------------------------------------------------------------------------------------------
@@ -95,9 +95,9 @@ Booleano ::= 'true' | 'false'
 -----------------------------------------------------------------------------------------------------------------------------------
 Block3 ::= '<!--' 'Colocacion' colocacionLista 'Colocacion' '-->'
 
-colocacionLista ::= Colocado colocacionLista | ε
+colocacionLista ::= Colocacion colocacionLista | ε
 
-Colocado ::= ID '.' Colocar ';'
+Colocacion ::= ID '.' Colocar ';'
     | 'this' '.' '(' ID ')' ';'
     | COMENTARIO
 
