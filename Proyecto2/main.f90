@@ -1,24 +1,28 @@
 module globales
 !Aquí ando declarando las variables globales que usaré
     character(len=15000)::entrada
-    integer::cuentaT, cuentaN, cuentaE, cuentaCT, cuentaConsumo
-    character(len=200), dimension(4,2000)::tokens,erroresLexicos,copiaTokens
+    integer::cuentaT, cuentaN, cuentaE, cuentaCT, cuentaConsumo, cuentaES
+    character(len=200), dimension(4,2000)::tokens,erroresLexicos,copiaTokens,erroresSintacticos
     character(len=200), dimension(1,2000)::terminales
-    logical::eLexico, eSintactico, controlValido, propiedadValida, colocacionValida
-
+    logical::eLexico, eSintactico, controlValido, propiedadValida, colocacionValida, ErrorValidado
 end module globales
 
 program proceso
     use globales
     implicit none
-
-
     !-----------------------------------
     integer::ios
     character(len=200)::linea
     !-----------------------------------
 
     !Inicializando variables
+    cuentaT=0
+    cuentaN=0
+    cuentaE=0
+    cuentaCT=0
+    cuentaConsumo=0
+    cuentaES=0
+
     entrada = '' !Inicializo la variable entrada
 
     !PROBANDOOOOOOO
@@ -35,11 +39,11 @@ program proceso
     call analizar ()
 
     !Genero los dos HTML
-    call html_malo()
+
     call html_bueno()
 
     call iniciarAnalisisSintactico() !Llamo a la subrutina iniciarAnalisisSintactico
-
+    call html_malo()
 end program proceso
 
 !Analisis léxico --------------------------------------------------------------------------------------------------------------------------------
@@ -456,7 +460,7 @@ subroutine html_malo () !Subrutina que genera el html con los errores encontrado
     use globales
     implicit none
     !Asigno las variables
-    integer :: unit,i
+    integer :: unit,i,j
     character(len=4) :: cuento
     unit=254 !Se asigna un numero de unidad
     open(unit, file='tablaErrores.html', status='unknown', action='write') !Se abre el archivo para escribir
@@ -473,16 +477,29 @@ subroutine html_malo () !Subrutina que genera el html con los errores encontrado
     write(unit, '(A)') "<body>"
     write(unit, '(A)') "<h2>Tabla de Errores</h2>"
     write(unit, '(A)') "<table>"
-    write(unit, '(A)') "<tr><th>Número de Error</th><th>Error</th><th>Descripción</th><th>Fila</th><th>Columna</th></tr>"
+    write(unit, '(A)') "<tr><th>Número de Error</th><th>Tipo de Error</th><th>Error</th><th>Descripción</th><th>Fila</th><th>Columna</th></tr>"
     do i=1,cuentaE
         write(cuento,'(I3)') i
         write(unit, '(A)') "<tr>"
         write(unit, '(A)') "<td>"//trim(cuento)//"</td>"
+        write(unit, '(A)') "<td>Error Lexico</td>"
         write(unit, '(A)') "<td>"//trim(erroresLexicos(1,i))//"</td>"
         write(unit, '(A)') "<td>"//trim(erroresLexicos(2,i))//"</td>"
         write(unit, '(A)') "<td>"//trim(erroresLexicos(3,i))//"</td>"
         write(unit, '(A)') "<td>"//trim(erroresLexicos(4,i))//"</td>"
         write(unit, '(A)') "</tr>"
+    end do
+    do j=1, cuentaES
+        write(cuento,'(I3)') i
+        write(unit, '(A)') "<tr>"
+        write(unit, '(A)') "<td>"//trim(cuento)//"</td>"
+        write(unit, '(A)') "<td>Error Sintactico</td>"
+        write(unit, '(A)') "<td>"//trim(erroresSintacticos(1,j))//"</td>"
+        write(unit, '(A)') "<td>"//trim(erroresSintacticos(2,j))//"</td>"
+        write(unit, '(A)') "<td>"//trim(erroresSintacticos(3,j))//"</td>"
+        write(unit, '(A)') "<td>"//trim(erroresSintacticos(4,j))//"</td>"
+        write(unit, '(A)') "</tr>"
+        i=i+1
     end do
     close(unit) !Se cierra el archivo
 end subroutine html_malo
@@ -547,6 +564,22 @@ subroutine agregarTerminal(terminal) !Subrutina que agrega los terminales
 end subroutine agregarTerminal
 !Analisis léxico --------------------------------------------------------------------------------------------------------------------------------   
 
+!subrutina para agregar errores sintácticos
+subroutine agregarSintactico(esperado, descrip, linea, columna)
+    use globales !Se usa el modulo globales
+    implicit none
+    character(len=200) :: esperado, descrip,linea, columna
+    eLexico=.true. !Se cambia el valor de error a true (porque ya hay un error xd)
+    cuentaES=cuentaES+1
+    erroresSintacticos(1,cuentaES)=(esperado)
+    erroresSintacticos(2,cuentaES)=(descrip)
+
+    !write(linea2,'(I0)') linea !Probar nuevamente la forma en la que escribo estas cosas porque ODIO FORTRAAAAAN
+    !write(columna2,'(I0)') columna !Lo paso a string el int
+    erroresSintacticos(3,cuentaES)=trim(linea)
+    erroresSintacticos(4,cuentaES)=trim(columna)
+
+end subroutine agregarSintactico
 
 !Analisis sintáctico ----------------------------------------------------------------------------------------------------------------------------
 
@@ -559,6 +592,7 @@ subroutine iniciarAnalisisSintactico()
     cuentaConsumo=1
 
     eSintactico=.false.
+    ErrorValidado=.false.
 
     call inicio() !Llamo a la subrutina inicio
 
@@ -571,13 +605,13 @@ subroutine inicio()
     implicit none
 
     !Llamo a las subrutinas que contienen Controles
-    !call Block1()
+    call Block1()
 
     !Llamo a las subrutinas que contienen Propiedades
     !call block2()
 
     !Llamo a las subrutinas que contienen Colocacion
-    call block3()
+    !call block3()
 
     if (eSintactico) then
         print *, "Error sintáctico"
@@ -595,22 +629,22 @@ end subroutine inicio
 
         !Consumo el token <!--
         call consumirToken(trim("<!--")//repeat(" ",200-len_trim("<!--")))
-        if (eSintactico) call panico()
+        if (eSintactico) call panico(trim("<!--")//repeat(" ",200-len_trim("<!--")))
 
         !Consumo el token Controles
         call consumirToken(trim("Controles")//repeat(" ",200-len_trim("Controles")))
-        if (eSintactico) call panico()
+        if (eSintactico) call panico(trim("Controles")//repeat(" ",200-len_trim("Controles")))
 
         call ControlLista() !Llamo a la subrutina que contiene la lista de controles
 
         !Consumo el token Controles
         call consumirToken(trim("Controles")//repeat(" ",200-len_trim("Controles")))
-        if (eSintactico) call panico()
+        if (eSintactico) call panico(trim("Controles")//repeat(" ",200-len_trim("Controles")))
 
 
         !Consumo el token -->
         call consumirToken(trim("-->")//repeat(" ",200-len_trim("-->")))
-        if (eSintactico) call panico()
+        if (eSintactico) call panico(trim("-->")//repeat(" ",200-len_trim("-->")))
 
     end subroutine Block1
 
@@ -622,6 +656,8 @@ end subroutine inicio
         call validoControl()
         if (controlValido) then
             controlValido=.false.
+
+            print *, terminales(1,cuentaConsumo)
             call Control()
 
             call ControlLista()
@@ -645,11 +681,11 @@ end subroutine inicio
             
             !Consumo el token ID
             call consumirToken(trim("ID")//repeat(" ",200-len_trim("ID")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("ID")//repeat(" ",200-len_trim("ID")))
 
             !Consumo el token ;
             call consumirToken(trim(";")//repeat(" ",200-len_trim(";")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(";")//repeat(" ",200-len_trim(";")))
             
         end if
 
@@ -661,30 +697,39 @@ end subroutine inicio
 
         if(trim(terminales(1,cuentaConsumo))=="Etiqueta") then
             call consumirToken(trim("Etiqueta")//repeat(" ",200-len_trim("Etiqueta")))
+            eSintactico=.false.
             return
         else if(trim(terminales(1,cuentaConsumo))=="Boton") then
             call consumirToken(trim("Boton")//repeat(" ",200-len_trim("Boton")))
+            eSintactico=.false.
             return
         else if(trim(terminales(1,cuentaConsumo))=="Check") then
             call consumirToken(trim("Check")//repeat(" ",200-len_trim("Check")))
+            eSintactico=.false.
             return
         else if(trim(terminales(1,cuentaConsumo))=="RadioBoton") then
             call consumirToken(trim("RadioBoton")//repeat(" ",200-len_trim("RadioBoton")))
+            eSintactico=.false.
             return
         else if(trim(terminales(1,cuentaConsumo))=="Texto") then
             call consumirToken(trim("Texto")//repeat(" ",200-len_trim("Texto")))
+            eSintactico=.false.
             return
         else if(trim(terminales(1,cuentaConsumo))=="AreaTexto") then
             call consumirToken(trim("AreaTexto")//repeat(" ",200-len_trim("AreaTexto")))
+            eSintactico=.false.
             return
         else if(trim(terminales(1,cuentaConsumo))=="Clave") then
             call consumirToken(trim("Clave")//repeat(" ",200-len_trim("Clave")))
+            eSintactico=.false.
             return
         else if(trim(terminales(1,cuentaConsumo))=="Contenedor") then
             call consumirToken(trim("Contenedor")//repeat(" ",200-len_trim("Contenedor")))
+            eSintactico=.false.
             return
         else !Si no es ninguno de los anteriores, entonces hay un error sintáctico
             eSintactico=.true.
+            call panico(trim("un tipo de control")//repeat(" ",200-len_trim("un tipo de control")))
         end if
 
     end subroutine TIPO_Control
@@ -726,21 +771,21 @@ end subroutine inicio
 
         !Consumo el token <!--
         call consumirToken(trim("<!--")//repeat(" ",200-len_trim("<!--")))
-        if (eSintactico) call panico()
+        if (eSintactico) call panico(trim("<!--")//repeat(" ",200-len_trim("<!--")))
 
         !Consumo el token Propiedades
         call consumirToken(trim("Propiedades")//repeat(" ",200-len_trim("Propiedades")))
-        if (eSintactico) call panico()
+        if (eSintactico) call panico(trim("Propiedades")//repeat(" ",200-len_trim("Propiedades")))
 
         call PropiedadesLista() !Llamo a la subrutina que contiene la lista de propiedades
 
         !Consumo el token Propiedades
         call consumirToken(trim("Propiedades")//repeat(" ",200-len_trim("Propiedades")))
-        if (eSintactico) call panico()
+        if (eSintactico) call panico(trim("Propiedades")//repeat(" ",200-len_trim("Propiedades")))
 
         !Consumo el token -->
         call consumirToken(trim("-->")//repeat(" ",200-len_trim("-->")))
-        if (eSintactico) call panico()
+        if (eSintactico) call panico(trim("-->")//repeat(" ",200-len_trim("-->")))
 
     end subroutine block2
 
@@ -773,18 +818,18 @@ end subroutine inicio
 
             !Consumo el token ID
             call consumirToken(trim("ID")//repeat(" ",200-len_trim("ID")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("ID")//repeat(" ",200-len_trim("ID")))
 
             !Consumo el token .
             call consumirToken(trim(".")//repeat(" ",200-len_trim(".")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(".")//repeat(" ",200-len_trim(".")))
 
             !Llamo la subrutina de la función
             call Funcion()
 
             !Consumo el token ;
             call consumirToken(trim(";")//repeat(" ",200-len_trim(";")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(";")//repeat(" ",200-len_trim(";")))
         end if
     end subroutine Propiedad
 
@@ -797,172 +842,173 @@ end subroutine inicio
 
             !Consumo el token setColorLetra
             call consumirToken(trim("setColorLetra")//repeat(" ",200-len_trim("setColorLetra")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("setColorLetra")//repeat(" ",200-len_trim("setColorLetra")))
 
             !Consumo el token (
             call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("(")//repeat(" ",200-len_trim("(")))
 
             !Consumo el token Numero
             call consumirToken(trim("Numero")//repeat(" ",200-len_trim("Numero")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("Numero")//repeat(" ",200-len_trim("Numero")))
 
             !Consumo el token ,
             call consumirToken(trim(",")//repeat(" ",200-len_trim(",")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(",")//repeat(" ",200-len_trim(",")))
 
             !Consumo el token Numero
             call consumirToken(trim("Numero")//repeat(" ",200-len_trim("Numero")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("Numero")//repeat(" ",200-len_trim("Numero")))
 
             !Consumo el token ,
             call consumirToken(trim(",")//repeat(" ",200-len_trim(",")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(",")//repeat(" ",200-len_trim(",")))
 
             !Consumo el token Numero
             call consumirToken(trim("Numero")//repeat(" ",200-len_trim("Numero")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("Numero")//repeat(" ",200-len_trim("Numero")))
 
             !Consumo el token )
             call consumirToken(trim(")")//repeat(" ",200-len_trim(")")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(")")//repeat(" ",200-len_trim(")")))
 
         else if (trim(terminales(1,cuentaConsumo))=="setAncho") then
 
             !Consumo el token setAncho
             call consumirToken(trim("setAncho")//repeat(" ",200-len_trim("setAncho")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("setAncho")//repeat(" ",200-len_trim("setAncho")))
 
             !Consumo el token (
             call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("(")//repeat(" ",200-len_trim("(")))
 
             !Consumo el token Numero
             call consumirToken(trim("Numero")//repeat(" ",200-len_trim("Numero")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("Numero")//repeat(" ",200-len_trim("Numero")))
 
             !Consumo el token )
             call consumirToken(trim(")")//repeat(" ",200-len_trim(")")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(")")//repeat(" ",200-len_trim(")")))
 
         else if (trim(terminales(1,cuentaConsumo))=="setAlto") then
 
             !Consumo el token setAlto
             call consumirToken(trim("setAlto")//repeat(" ",200-len_trim("setAlto")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("setAlto")//repeat(" ",200-len_trim("setAlto")))
 
             !Consumo el token (
             call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("(")//repeat(" ",200-len_trim("(")))
 
             !Consumo el token Numero
             call consumirToken(trim("Numero")//repeat(" ",200-len_trim("Numero")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("Numero")//repeat(" ",200-len_trim("Numero")))
 
             !Consumo el token )
             call consumirToken(trim(")")//repeat(" ",200-len_trim(")")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(")")//repeat(" ",200-len_trim(")")))
 
         else if (trim(terminales(1,cuentaConsumo))=="setTexto") then
 
             !Consumo el token setTexto
             call consumirToken(trim("setTexto")//repeat(" ",200-len_trim("setTexto")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("setTexto")//repeat(" ",200-len_trim("setTexto")))
 
             !Consumo el token (
             call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("(")//repeat(" ",200-len_trim("(")))
 
             !Consumo el token Cadena
             call consumirToken(trim("Cadena")//repeat(" ",200-len_trim("Cadena")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("Cadena")//repeat(" ",200-len_trim("Cadena")))
 
             !Consumo el token )
             call consumirToken(trim(")")//repeat(" ",200-len_trim(")")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(")")//repeat(" ",200-len_trim(")")))
 
         else if (trim(terminales(1,cuentaConsumo))=="setColorFondo") then
 
             !Consumo el token setColorFondo
             call consumirToken(trim("setColorFondo")//repeat(" ",200-len_trim("setColorFondo")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("setColorFondo")//repeat(" ",200-len_trim("setColorFondo")))
 
             !Consumo el token (
             call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("(")//repeat(" ",200-len_trim("(")))
 
             !Consumo el token Numero
             call consumirToken(trim("Numero")//repeat(" ",200-len_trim("Numero")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("Numero")//repeat(" ",200-len_trim("Numero")))
 
             !Consumo el token ,
             call consumirToken(trim(",")//repeat(" ",200-len_trim(",")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(",")//repeat(" ",200-len_trim(",")))
 
             !Consumo el token Numero
             call consumirToken(trim("Numero")//repeat(" ",200-len_trim("Numero")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("Numero")//repeat(" ",200-len_trim("Numero")))
 
             !Consumo el token ,
             call consumirToken(trim(",")//repeat(" ",200-len_trim(",")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(",")//repeat(" ",200-len_trim(",")))
 
             !Consumo el token Numero
             call consumirToken(trim("Numero")//repeat(" ",200-len_trim("Numero")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("Numero")//repeat(" ",200-len_trim("Numero")))
 
             !Consumo el token )
             call consumirToken(trim(")")//repeat(" ",200-len_trim(")")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(")")//repeat(" ",200-len_trim(")")))
 
         else if (trim(terminales(1,cuentaConsumo))=="setAlineacion") then
 
             !Consumo el token setAlineacion
             call consumirToken(trim("setAlineacion")//repeat(" ",200-len_trim("setAlineacion")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("setAlineacion")//repeat(" ",200-len_trim("setAlineacion")))
 
             !Consumo el token (
             call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("(")//repeat(" ",200-len_trim("(")))
 
             call Alineado() !Llamo a la subrutina que contiene el alineado
 
             !Consumo el token )
             call consumirToken(trim(")")//repeat(" ",200-len_trim(")")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(")")//repeat(" ",200-len_trim(")")))
 
         else if (trim(terminales(1,cuentaConsumo))=="setMarcado") then
 
             !Consumo el token setMarcado
             call consumirToken(trim("setMarcado")//repeat(" ",200-len_trim("setMarcado")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("setMarcado")//repeat(" ",200-len_trim("setMarcado")))
 
             !Consumo el token (
             call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("(")//repeat(" ",200-len_trim("(")))
 
             call Booleano() !Llamo a la subrutina que contiene el booleano
 
             !Consumo el token )
             call consumirToken(trim(")")//repeat(" ",200-len_trim(")")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(")")//repeat(" ",200-len_trim(")")))
 
         else if (trim(terminales(1,cuentaConsumo))=="setGrupo") then
 
             !Consumo el token setGrupo
             call consumirToken(trim("setGrupo")//repeat(" ",200-len_trim("setGrupo")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("setGrupo")//repeat(" ",200-len_trim("setGrupo")))
 
             !Consumo el token (
             call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("(")//repeat(" ",200-len_trim("(")))
 
             !Consumo el token ID
             call consumirToken(trim("ID")//repeat(" ",200-len_trim("ID")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("ID")//repeat(" ",200-len_trim("ID")))
 
         else !Si no es ninguna de las anteriores, entonces hay un error sintáctico
             eSintactico=.true.
+            call panico(trim("una propiedad")//repeat(" ",200-len_trim("una propiedad")))
         end if
     end subroutine Funcion
 
@@ -972,15 +1018,16 @@ end subroutine inicio
 
         if (trim(terminales(1,cuentaConsumo))=="izquierdo") then
             call consumirToken(trim("izquierdo")//repeat(" ",200-len_trim("Izquierda")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("izquierdo")//repeat(" ",200-len_trim("Izquierda")))
         else if (trim(terminales(1,cuentaConsumo))=="centro") then
             call consumirToken(trim("centro")//repeat(" ",200-len_trim("Centro")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("centro")//repeat(" ",200-len_trim("Centro")))
         else if (trim(terminales(1,cuentaConsumo))=="derecho") then
             call consumirToken(trim("derecho")//repeat(" ",200-len_trim("Derecha")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("derecho")//repeat(" ",200-len_trim("Derecha")))
         else !Si no es ninguna de las anteriores, entonces hay un error sintáctico
             eSintactico=.true.
+            call panico(trim("un alineado")//repeat(" ",200-len_trim("un alineado")))
         end if
     end subroutine Alineado
 
@@ -990,12 +1037,13 @@ end subroutine inicio
 
         if (trim(terminales(1,cuentaConsumo))=="true") then
             call consumirToken(trim("true")//repeat(" ",200-len_trim("true")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("true")//repeat(" ",200-len_trim("true")))
         else if (trim(terminales(1,cuentaConsumo))=="false") then
             call consumirToken(trim("false")//repeat(" ",200-len_trim("false")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("false")//repeat(" ",200-len_trim("false")))
         else !Si no es ninguna de las anteriores, entonces hay un error sintáctico
             eSintactico=.true.
+            call panico(trim("un booleano")//repeat(" ",200-len_trim("un booleano")))
         end if
     end subroutine Booleano
 
@@ -1024,21 +1072,21 @@ end subroutine inicio
         !Consumo el token <!--
 
         call consumirToken(trim("<!--")//repeat(" ",200-len_trim("<!--")))
-        if (eSintactico) call panico()
+        if (eSintactico) call panico(trim("<!--")//repeat(" ",200-len_trim("<!--")))
 
         !Consumo el token Colocacion
         call consumirToken(trim("Colocacion")//repeat(" ",200-len_trim("Colocacion"))) 
-        if (eSintactico) call panico()
+        if (eSintactico) call panico(trim("Colocacion")//repeat(" ",200-len_trim("Colocacion")))
 
         call ColocacionLista() !Llamo a la subrutina que contiene la lista de colocación
 
         !Consumo el token Colocacion
         call consumirToken(trim("Colocacion")//repeat(" ",200-len_trim("Colocacion")))
-        if (eSintactico) call panico()
+        if (eSintactico) call panico(trim("Colocacion")//repeat(" ",200-len_trim("Colocacion")))
 
         !Consumo el token -->
         call consumirToken(trim("-->")//repeat(" ",200-len_trim("-->")))
-        if (eSintactico) call panico()
+        if (eSintactico) call panico(trim("-->")//repeat(" ",200-len_trim("-->")))
     end subroutine block3
 
     recursive subroutine ColocacionLista()
@@ -1069,50 +1117,51 @@ end subroutine inicio
                 
             !Consumo el token ID
             call consumirToken(trim("ID")//repeat(" ",200-len_trim("ID")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("ID")//repeat(" ",200-len_trim("ID")))
 
             !Consumo el token .
             call consumirToken(trim(".")//repeat(" ",200-len_trim(".")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(".")//repeat(" ",200-len_trim(".")))
 
             call Colocar()!Llamo la subrutina de la función
 
             !Consumo el token ;
             call consumirToken(trim(";")//repeat(" ",200-len_trim(";")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(";")//repeat(" ",200-len_trim(";")))
 
         else if (trim(terminales(1,cuentaConsumo))=="this") then
 
             !Consumo el token this
             call consumirToken(trim("this")//repeat(" ",200-len_trim("this")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("this")//repeat(" ",200-len_trim("this")))
 
             !Consumo el token .
             call consumirToken(trim(".")//repeat(" ",200-len_trim(".")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(".")//repeat(" ",200-len_trim(".")))
 
             !Consumo el token add
             call consumirToken(trim("add")//repeat(" ",200-len_trim("add")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("add")//repeat(" ",200-len_trim("add")))
 
             !Consumo el token (
             call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("(")//repeat(" ",200-len_trim("(")))
 
             !Consumo el token ID
             call consumirToken(trim("ID")//repeat(" ",200-len_trim("ID")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("ID")//repeat(" ",200-len_trim("ID")))
 
             !consumo el token )
             call consumirToken(trim(")")//repeat(" ",200-len_trim(")")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(")")//repeat(" ",200-len_trim(")")))
 
             !Consumo el token ;
             call consumirToken(trim(";")//repeat(" ",200-len_trim(";")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(";")//repeat(" ",200-len_trim(";")))
 
         else !Si no es ninguna de las anteriores, entonces hay un error sintáctico
-            call panico()
+            eSintactico=.true.
+            call panico(trim('un ID o la palabra reservada "this"')//repeat(" ",200-len_trim('un ID o la palabra reservada "this"')))
         end if
     end subroutine Colocacion
 
@@ -1124,54 +1173,50 @@ end subroutine inicio
 
             !Consumo el token setPosicion
             call consumirToken(trim("setPosicion")//repeat(" ",200-len_trim("setPosicion")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("setPosicion")//repeat(" ",200-len_trim("setPosicion")))
 
             !Consumo el token (
             call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("(")//repeat(" ",200-len_trim("(")))
 
             !Consumo el token Numero
             call consumirToken(trim("Numero")//repeat(" ",200-len_trim("Numero")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("Numero")//repeat(" ",200-len_trim("Numero")))
 
             !Consumo el token ,
             call consumirToken(trim(",")//repeat(" ",200-len_trim(",")))
-            if (eSintactico) call panico()
-
+            if (eSintactico) call panico(trim(",")//repeat(" ",200-len_trim(",")))
 
             !Consumo el token Numero
             call consumirToken(trim("Numero")//repeat(" ",200-len_trim("Numero")))
-            if (eSintactico) call panico()
-
-            
+            if (eSintactico) call panico(trim("Numero")//repeat(" ",200-len_trim("Numero")))
 
             !Consumo el token )
             call consumirToken(trim(")")//repeat(" ",200-len_trim(")")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(")")//repeat(" ",200-len_trim(")")))
 
         else if (trim(terminales(1,cuentaConsumo))=="add") then
 
             !Consumo el token add
             call consumirToken(trim("add")//repeat(" ",200-len_trim("add")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("add")//repeat(" ",200-len_trim("add")))
 
             !Consumo el token (
             call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("(")//repeat(" ",200-len_trim("(")))
 
             !Consumo el token ID
             call consumirToken(trim("ID")//repeat(" ",200-len_trim("ID")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim("ID")//repeat(" ",200-len_trim("ID")))
 
             !Consumo el token )
             call consumirToken(trim(")")//repeat(" ",200-len_trim(")")))
-            if (eSintactico) call panico()
+            if (eSintactico) call panico(trim(")")//repeat(" ",200-len_trim(")")))
 
         else
-            call panico()
+            eSintactico=.true.
+            call panico(trim("una colocación")//repeat(" ",200-len_trim("una colocación")))
         end if
-
-
 
     end subroutine Colocar
 
@@ -1194,23 +1239,43 @@ end subroutine inicio
 !Fin Lectura de Colocacion ------------------------------------------------------------------------------------------------------------
 
 
-
-
-
 !Subrutina que se llama cuando hay un error sintáctico
-subroutine panico()
+subroutine panico(esperado)
     use globales
     implicit none
-    print *, "Error sintáctico"
+    character(len=200), intent(in) :: esperado
 
-    !if (terminales(1,cuentaConsumo)==trim(";")) then
-    !    eSintactico=.false.
-    !else
-    !    cuentaConsumo=cuentaConsumo+1
-    !end if
+
+    print *, cuentaConsumo
+    print *, terminales(1,cuentaConsumo-1)
+
+    if (terminales(1,cuentaConsumo-1)/=";") then
+
+        !Genero el error :)
+        call agregarSintactico(trim(esperado)//repeat(' ', 200 - len_trim(esperado)), "Se esperaba un" // esperado // repeat(' ', 200-len_trim(esperado)), &
+        tokens(3,cuentaConsumo)//repeat(' ', 200 -len_trim(tokens(3,cuentaConsumo))) , tokens(4,cuentaConsumo)//repeat(' ', 200 -len_trim(tokens(4,cuentaConsumo))))
+        print *, "entroooooooooooooooooooooooooooooooooooooooooooooo"
+        !Avanzo hasta encontrar un token que sea ;
+        do while (cuentaConsumo<=cuentaCT .and. trim(terminales(1,cuentaConsumo)) /= ";")
+            print *, terminales(1,cuentaConsumo)
+            cuentaConsumo=cuentaConsumo+1
+            print *, "Buscando ;"
+        end do
+
+        !Ya me encuentro en las posición del token ;
+        !Ahora voy una posición adelante de este
+        if (cuentaConsumo<cuentaCT) then
+            print *, "; encontrado en la posición ", cuentaConsumo
+            cuentaConsumo=cuentaConsumo+1
+        else
+            print *, "Se nos acabaron los tokes xd"
+        end if
+
+    else
+        print *, "Ya se encuentra en la posición correcta"
+    end if
+
 end subroutine panico
-
-
 
 !Subrutina que contiene las propiedades y recorre los tokens conforme se van consumiendo
 subroutine consumirToken(tipo)
@@ -1221,6 +1286,7 @@ subroutine consumirToken(tipo)
     !Si el token es igual al tipo que se espera
     if (trim(terminales(1,cuentaConsumo))==trim(tipo)) then
         cuentaConsumo=cuentaConsumo+1 !Aumento la posición del token
+
     else
         !Si no es igual, entonces hay un error sintáctico
         eSintactico=.true.

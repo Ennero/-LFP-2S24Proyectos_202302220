@@ -1,25 +1,12 @@
-<!--Colocacion
-    /*
-    Posicionamiento de los controles
-    */
-    contFondo.setPosicion(25,330);
-    this.add(contFondo);
-    contlogin.setPosicion(586,110);
-    ContBody.add(contlogin);
-    passw.setPosicion(11,54); 
-    contlogin.add(passw);
-    cmdIngresar.setPosicion(40,100);
-    contlogin.add(cmdIngresar);
-    pswClave.setPosicion(67,48);
-    contlogin.add(pswClave);
-    Nombre.setPosicion(8,21);
-    contlogin.add(Nombre);
-    //JTextField0.setPosicion(65,20);
-    //contlogin.add(JTextField0);
-    contlogo2.setPosicion(88,25);
-    ContBody.add(contlogo2);
-    ContLogo1.setPosicion(36,25);
-    ContBody.add(ContLogo1);
-    ContBody.setPosicion(23,21);
-    this.add(ContBody);
-Colocacion -->
+<!--Controles 
+    Contenedor contlogin; 
+    Contenedor contFondo; 
+    Boton cmdIngresar; 
+    Clave pswClave; 
+    Etiqueta passw; 
+    Etiqueta ; // Error sintactico: Se esperaba el token IDENTIFICADOR, pero se encontro PUNTOYCOMA.
+    Texto JTextField0; 
+    Contenedor contlogo2; 
+    Contenedor ContLogo1; 
+    Contenedor ContBody; 
+Controles ¡--> // Error lexico: '¡' no pertenece al lenguaje
