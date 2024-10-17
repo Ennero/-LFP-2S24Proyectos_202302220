@@ -4,7 +4,7 @@ module globales
     integer::cuentaT, cuentaN, cuentaE, cuentaCT, cuentaConsumo, cuentaES
     character(len=200), dimension(4,2000)::tokens,erroresLexicos,copiaTokens,erroresSintacticos
     character(len=200), dimension(1,2000)::terminales
-    logical::eLexico, eSintactico, controlValido, propiedadValida, colocacionValida, ErrorValidado
+    logical::eLexico, eSintactico, controlValido, propiedadValida, colocacionValida, ErrorValidado, exepcion1, recuperado
 end module globales
 
 program proceso
@@ -26,7 +26,7 @@ program proceso
     entrada = '' !Inicializo la variable entrada
 
     !PROBANDOOOOOOO
-    open(10, file='colocacion.LFP', status='old', action='read') !Abro el archivo de entrada
+    open(10, file='colocacion.LFP', status='old', action='read', encoding='UTF-8') !Abro el archivo de entrada
     do
     read(10, '(A)', iostat = ios) linea
     if (ios /= 0) exit   ! Se alcanzo el fin del archivo
@@ -477,13 +477,19 @@ subroutine html_malo () !Subrutina que genera el html con los errores encontrado
     write(unit, '(A)') "<body>"
     write(unit, '(A)') "<h2>Tabla de Errores</h2>"
     write(unit, '(A)') "<table>"
-    write(unit, '(A)') "<tr><th>Número de Error</th><th>Tipo de Error</th><th>Error</th><th>Descripción</th><th>Fila</th><th>Columna</th></tr>"
+    write(unit, '(A)') "<tr><th>Numero de Error</th><th>Tipo de Error</th><th>Token/Componente Esperado</th><th>Descripcion</th><th>Fila</th><th>Columna</th></tr>"
     do i=1,cuentaE
         write(cuento,'(I3)') i
         write(unit, '(A)') "<tr>"
         write(unit, '(A)') "<td>"//trim(cuento)//"</td>"
         write(unit, '(A)') "<td>Error Lexico</td>"
-        write(unit, '(A)') "<td>"//trim(erroresLexicos(1,i))//"</td>"
+        if (trim(erroresLexicos(1,i))=="-->") then
+            write(unit, '(A)') "<td>--&gt;</td>"
+        else if (trim(erroresLexicos(1,i))=="<!--") then
+            write(unit, '(A)') "<td>&lt;!--</td>"
+        else
+            write(unit, '(A)') "<td>"//trim(erroresLexicos(1,i))//"</td>"
+        end if
         write(unit, '(A)') "<td>"//trim(erroresLexicos(2,i))//"</td>"
         write(unit, '(A)') "<td>"//trim(erroresLexicos(3,i))//"</td>"
         write(unit, '(A)') "<td>"//trim(erroresLexicos(4,i))//"</td>"
@@ -494,7 +500,13 @@ subroutine html_malo () !Subrutina que genera el html con los errores encontrado
         write(unit, '(A)') "<tr>"
         write(unit, '(A)') "<td>"//trim(cuento)//"</td>"
         write(unit, '(A)') "<td>Error Sintactico</td>"
-        write(unit, '(A)') "<td>"//trim(erroresSintacticos(1,j))//"</td>"
+        if (trim(erroresSintacticos(1,j))=="-->") then
+            write(unit, '(A)') "<td>--&gt;</td>"
+        else if (trim(erroresSintacticos(1,j))=="<!--") then
+            write(unit, '(A)') "<td>&lt;!--</td>"
+        else
+            write(unit, '(A)') "<td>"//trim(erroresSintacticos(1,i))//"</td>"
+        end if
         write(unit, '(A)') "<td>"//trim(erroresSintacticos(2,j))//"</td>"
         write(unit, '(A)') "<td>"//trim(erroresSintacticos(3,j))//"</td>"
         write(unit, '(A)') "<td>"//trim(erroresSintacticos(4,j))//"</td>"
@@ -525,7 +537,6 @@ subroutine agregarErrorLexico(lexema, descrip, linea, columna) !Subrutina que ag
     cuentaE=cuentaE+1
     erroresLexicos(1,cuentaE)=(lexema)
     erroresLexicos(2,cuentaE)=(descrip)
-
 
     write(linea2,'(I0)') linea !Probar nuevamente la forma en la que escribo estas cosas porque ODIO FORTRAAAAAN
     write(columna2,'(I0)') columna !Lo paso a string el int
@@ -593,6 +604,8 @@ subroutine iniciarAnalisisSintactico()
 
     eSintactico=.false.
     ErrorValidado=.false.
+    exepcion1=.false.
+    recuperado=.true.
 
     call inicio() !Llamo a la subrutina inicio
 
@@ -641,7 +654,6 @@ end subroutine inicio
         call consumirToken(trim("Controles")//repeat(" ",200-len_trim("Controles")))
         if (eSintactico) call panico(trim("Controles")//repeat(" ",200-len_trim("Controles")))
 
-
         !Consumo el token -->
         call consumirToken(trim("-->")//repeat(" ",200-len_trim("-->")))
         if (eSintactico) call panico(trim("-->")//repeat(" ",200-len_trim("-->")))
@@ -662,6 +674,7 @@ end subroutine inicio
 
             call ControlLista()
         else
+
             !No hago nada xd
         end if
     end subroutine ControlLista
@@ -1249,26 +1262,36 @@ subroutine panico(esperado)
     print *, cuentaConsumo
     print *, terminales(1,cuentaConsumo-1)
 
-    if (terminales(1,cuentaConsumo-1)/=";") then
+    if ((terminales(1,cuentaConsumo-1)/=";" .or. terminales(1,cuentaConsumo-1)/="-->" ) .and. cuentaConsumo<=cuentaT) then
 
+        !exepcion1=.false.
         !Genero el error :)
-        call agregarSintactico(trim(esperado)//repeat(' ', 200 - len_trim(esperado)), "Se esperaba un" // esperado // repeat(' ', 200-len_trim(esperado)), &
+        call agregarSintactico(trim(esperado)//repeat(' ', 200 - len_trim(esperado)), "Se encontro un " // terminales(1,cuentaConsumo) // repeat(' ', 200-len_trim(esperado)-len_trim(terminales(1,cuentaConsumo))-len_trim("se encontro un ")), &
         tokens(3,cuentaConsumo)//repeat(' ', 200 -len_trim(tokens(3,cuentaConsumo))) , tokens(4,cuentaConsumo)//repeat(' ', 200 -len_trim(tokens(4,cuentaConsumo))))
         print *, "entroooooooooooooooooooooooooooooooooooooooooooooo"
+
+        recuperado=.false.
+
         !Avanzo hasta encontrar un token que sea ;
-        do while (cuentaConsumo<=cuentaCT .and. trim(terminales(1,cuentaConsumo)) /= ";")
-            print *, terminales(1,cuentaConsumo)
+        do while (cuentaConsumo<=cuentaCT)
+            if (trim(terminales(1,cuentaConsumo)) == ";" .or. trim(terminales(1,cuentaConsumo))=="-->" ) then
+                print *, terminales(1,cuentaConsumo)
+                !Salgo del bucle porque encontre el símbolo de sincronización
+                exit 
+
+                print *, "Buscando ; o -->"
+            end if
             cuentaConsumo=cuentaConsumo+1
-            print *, "Buscando ;"
         end do
 
         !Ya me encuentro en las posición del token ;
         !Ahora voy una posición adelante de este
-        if (cuentaConsumo<cuentaCT) then
-            print *, "; encontrado en la posición ", cuentaConsumo
+        if (cuentaConsumo<=cuentaCT) then
+            print *, "Token de sincronización encontrado en la posición ", cuentaConsumo
             cuentaConsumo=cuentaConsumo+1
         else
-            print *, "Se nos acabaron los tokes xd"
+            print *, "Se nos acabaron los tokens xd"
+            
         end if
 
     else
@@ -1283,14 +1306,56 @@ subroutine consumirToken(tipo)
     implicit none
     character(len=200), intent(in) :: tipo
 
-    !Si el token es igual al tipo que se espera
-    if (trim(terminales(1,cuentaConsumo))==trim(tipo)) then
-        cuentaConsumo=cuentaConsumo+1 !Aumento la posición del token
-
+    if (cuentaConsumo<=cuentaCT) then
+        !Si el token es igual al tipo que se espera
+        if (trim(terminales(1,cuentaConsumo))==trim(tipo)) then
+            cuentaConsumo=cuentaConsumo+1 !Aumento la posición del token
+            recuperado=.true.
+        else
+            !Si no es igual, entonces hay un error sintáctico
+                eSintactico=.true.
+        end if
     else
-        !Si no es igual, entonces hay un error sintáctico
-        eSintactico=.true.
+        !Si ya no hay más tokens, entonces ya no hago nada :)
     end if
 
 end subroutine consumirToken
 !Analisis sintáctico --------------------------------------------------------------------------------------------------------------------------------
+
+!Creación de HTML -----------------------------------------------------------------------------------------------------------------------------------
+subroutine crearHTML()
+    use globales
+    implicit none
+    !Asigno las variables
+    integer :: unit,i
+    character(len=4) :: cuento
+    unit=30530 !Se asigna un numero de unidad
+    open(unit, file='tablaTokens.html', status='unknown', action='write') !Se abre el archivo para escribir
+    write(unit, '(A)') "<!DOCTYPE html>"
+    write(unit, '(A)') "<html>"
+    write(unit, '(A)') "<head>"
+    write(unit, '(A)') "<title>Página Web</title>"
+    write(unit, '(A)') "<link rel='stylesheet' type='text/css' href='estilos.css'>"
+    write(unit, '(A)') "</head>"
+    write(unit, '(A)') "<body>"
+
+
+
+
+
+    write(unit, '(A)') "</body>"    
+    
+
+
+
+end subroutine crearHTML
+
+
+
+
+
+
+
+!Creación de HTML -----------------------------------------------------------------------------------------------------------------------------------
+
+
