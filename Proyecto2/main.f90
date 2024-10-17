@@ -5,11 +5,18 @@ module globales
     character(len=200), dimension(4,2000)::tokens,erroresLexicos,copiaTokens,erroresSintacticos
     character(len=200), dimension(1,2000)::terminales
     logical::eLexico, eSintactico, controlValido, propiedadValida, colocacionValida, ErrorValidado, exepcion1, recuperado
+
+    !Arreglo para almacenar los objetos con la siguiente estructura
+    !   1     2          3       4   5   6        7       8   9  10    11         12         13        14     15      16       17     18   19  20...
+    ! | ID | Tipo | ColorLetra | 0 | 0 | 0 | ColorFondo | 0 | 0 | 0 | Texto | Alineacion | Marcado | Grupo | Ancho | Alto | Posicion | x | y | Add
+    
+    character(len=200), dimension(50,2000)::objetos
 end module globales
 
 program proceso
     use globales
     implicit none
+    integer::ta,tata
     !-----------------------------------
     integer::ios
     character(len=200)::linea
@@ -22,8 +29,25 @@ program proceso
     cuentaCT=0
     cuentaConsumo=0
     cuentaES=0
+    ta=1
+    tata=1
 
     entrada = '' !Inicializo la variable entrada
+
+    !Inicialio la cosa de los objetos
+    do while (ta<=50)
+        do while (tata<=2000)
+            objetos(ta,tata)=''
+            tata=tata+1
+        end do
+        tata=1
+        ta=ta+1
+    end do
+    !-----------------------------------
+
+
+
+
 
     !PROBANDOOOOOOO
     open(10, file='colocacion.LFP', status='old', action='read', encoding='UTF-8') !Abro el archivo de entrada
@@ -42,7 +66,9 @@ program proceso
 
     call html_bueno()
 
-    call iniciarAnalisisSintactico() !Llamo a la subrutina iniciarAnalisisSintactico
+    !call iniciarAnalisisSintactico() !Llamo a la subrutina iniciarAnalisisSintactico
+
+    call crearObjetos()
     call html_malo()
 end program proceso
 
@@ -1322,18 +1348,198 @@ subroutine consumirToken(tipo)
 end subroutine consumirToken
 !Analisis sintáctico --------------------------------------------------------------------------------------------------------------------------------
 
+!Almacenando los objetos --------------------------------------------------------------------------------------------------------------------------------
+subroutine crearObjetos()
+    use globales
+    implicit none
+    integer :: i,j, colocacionLength, propiedadesLength, controlesLength, bi,k,p
+    !Asigno las variables
+    i=2
+
+    !Este son las filas +1
+    j=1
+    !Este son las filas +1
+
+    colocacionLength=3
+    k=1
+    
+    !Cuento la distancia que deberia de recorrer dentro de controles
+    do while (trim(tokens(1,colocacionLength)) /= "Controles")
+        colocacionLength=colocacionLength+1
+    end do
+
+    !Recorro los tokens y los almaceno
+    do while(i<colocacionLength)
+        i=i+1
+        if (trim(tokens(1,i))=="Etiqueta" .or. trim(tokens(1,i))=="Boton" .or. trim(tokens(1,i))=="Check" &
+        .or. trim(tokens(1,i))=="RadioBoton" .or. trim(tokens(1,i))=="Texto" .or. trim(tokens(1,i))=="AreaTexto" &
+        .or. trim(tokens(1,i))=="Clave" .or. trim(tokens(1,i))=="Contenedor") then
+            objetos(1,j)=tokens(1,i+1)
+            objetos(2,j)=trim(tokens(1,i))
+            j=j+1
+        end if
+    end do
+
+    !Creo el this
+    objetos(1,j)="this"
+
+    !Inicializo un poco las cosas de Propiedades
+    propiedadesLength=i
+    bi=0
+    !Cuento la distancia que deberia de recorrer dentro de Propiedades
+    do while (bi/=2)
+        propiedadesLength=propiedadesLength+1
+        if(trim(tokens(1,propiedadesLength))=="Propiedades") then
+            bi=bi+1
+        end if
+    end do
+
+    !Recorro los tokens y los almaceno
+    do while (i<propiedadesLength)
+        i=i+1
+
+        !Si es un ID, entonces es una propiedad
+        if (trim(terminales(1,i))=="ID") then
+
+            k=1 !Reinicio la k
+            !Reviso dentro de cada objeto
+            do while (k<j)
+                if (trim(objetos(1,k))==trim(tokens(1,i))) then
+                    if (trim(tokens(1,i+2))=="setColorLetra") then
+                        objetos(3,k)=trim(tokens(1,i+2))
+                        objetos(4,k)=trim(tokens(1,i+4))
+                        objetos(5,k)=trim(tokens(1,i+6))
+                        objetos(6,k)=trim(tokens(1,i+8))
+                    else if (trim(tokens(1,i+2))=="setAncho") then
+                        objetos(15,k)=trim(tokens(1,i+4))
+                    else if (trim(tokens(1,i+2))=="setAlto") then
+                        objetos(16,k)=trim(tokens(1,i+4))
+                    else if (trim(tokens(1,i+2))=="setTexto") then
+                        objetos(11,k)=trim(tokens(1,i+4))
+                    else if (trim(tokens(1,i+2))=="setColorFondo") then
+                        objetos(7,k)=trim(tokens(1,i+2))
+                        objetos(8,k)=trim(tokens(1,i+4))
+                        objetos(9,k)=trim(tokens(1,i+6))
+                        objetos(10,k)=trim(tokens(1,i+8))
+                    else if (trim(tokens(1,i+2))=="setAlineacion") then
+                        objetos(12,k)=trim(tokens(1,i+4))
+                    else if (trim(tokens(1,i+2))=="setMarcado") then
+                        objetos(13,k)=trim(tokens(1,i+4))
+                    else if (trim(tokens(1,i+2))=="setGrupo") then
+                        objetos(14,k)=trim(tokens(1,i+4))
+                    end if
+
+                    !print *, trim(objetos(3,k)),trim(objetos(4,k)),trim(objetos(5,k)),trim(objetos(6,k)),trim(objetos(7,k)),trim(objetos(8,k)),trim(objetos(9,k)),trim(objetos(10,k))
+                    !print *, "Propiedad",trim(objetos(1,k)),trim(objetos(2,k)),trim(objetos(3,k)),trim(objetos(4,k)),trim(objetos(5,k)),trim(objetos(6,k)),trim(objetos(7,k)),trim(objetos(8,k)),trim(objetos(9,k)),trim(objetos(10,k)),trim(objetos(11,k)),trim(objetos(12,k)),trim(objetos(13,k)),trim(objetos(14,k)),trim(objetos(15,k)),trim(objetos(16,k))
+                end if
+                k=k+1
+            end do
+        end if
+    end do
+
+    !Inicializo un poco las cosas de Colocacion
+    controlesLength=i
+    bi=0
+
+    !Cuento la distancia que deberia de recorrer dentro de Colocacion
+    do while (bi/=2)
+        controlesLength=controlesLength+1
+        if(trim(tokens(1,controlesLength))=="Colocacion") then
+            bi=bi+1
+            print *, controlesLength
+        end if
+    end do
+
+    !Recorro los tokens y los almaceno
+    do while (i<controlesLength)
+        i=i+1
+
+        !Si es un ID, entonces es una colocación
+        if (trim(terminales(1,i))=="ID") then
+
+            k=1 !Reinicio la k
+            !Reviso dentro de cada objeto
+            do while (k<j)
+                if (trim(objetos(1,k))==trim(tokens(1,i))) then
+                    if (trim(tokens(1,i+2))=="setPosicion") then
+                        objetos(17,k)=trim(tokens(1,i+2))
+                        objetos(18,k)=trim(tokens(1,i+4))
+                        objetos(19,k)=trim(tokens(1,i+6))
+                    else if (trim(tokens(1,i+2))=="add") then
+
+                        p=20 !Reinicio la ñ
+                        !Reviso cada Add si ya tiene o no
+                        do while (p<=50)
+                            if (trim(objetos(p,k))=="") then
+                                objetos(p,k)=trim(tokens(1,i+4))
+                                exit
+                            end if
+                            p=p+1
+                        end do
+                    end if
+                    !print *, trim(objetos(17,k)),trim(objetos(18,k)),trim(objetos(19,k))
+                    !print *, "Colocacion",trim(objetos(1,k)),trim(objetos(2,k)),trim(objetos(3,k)),trim(objetos(4,k)),trim(objetos(5,k)),trim(objetos(6,k)),trim(objetos(7,k)),trim(objetos(8,k)),trim(objetos(9,k)),trim(objetos(10,k)),trim(objetos(11,k)),trim(objetos(12,k)),trim(objetos(13,k)),trim(objetos(14,k)),trim(objetos(15,k)),trim(objetos(16,k)),trim(objetos(17,k)),trim(objetos(18,k)),trim(objetos(19,k))
+                end if
+                k=k+1
+            end do
+        else if (trim(terminales(1,i))=="this") then
+            !print *, "ola"
+            k=1 !Reinicio la k
+            !Reviso dentro de cada objeto
+            do while (k<j+1)
+                print *, k
+                if (trim(objetos(1,k))==trim(tokens(1,i))) then
+                    if (trim(tokens(1,i+2))=="add") then
+
+                        p=20 !Reinicio la ñ
+                        !Reviso cada Add si ya tiene o no
+                        do while (p<=50)
+                            if (trim(objetos(p,k))=="") then
+                                objetos(p,k)=trim(tokens(1,i+4))
+                                exit
+                            end if
+                            p=p+1
+                        end do
+                    end if
+                    !print *, trim(objetos(19,k))
+                    print *, "Colocacion",trim(objetos(1,k)),trim(objetos(2,k)),trim(objetos(3,k)),trim(objetos(4,k)),trim(objetos(5,k)),trim(objetos(6,k)),trim(objetos(7,k)),trim(objetos(8,k)),trim(objetos(9,k)),trim(objetos(10,k)),trim(objetos(11,k)),trim(objetos(12,k)),trim(objetos(13,k)),trim(objetos(14,k)),trim(objetos(15,k)),trim(objetos(16,k)),trim(objetos(17,k)),trim(objetos(18,k)),trim(objetos(19,k))
+                end if
+                k=k+1
+            end do
+
+        else
+            !print *, "ola"
+        end if
+    end do
+
+
+end subroutine crearObjetos
+
+
+
+
+
+!Fin Almacenando los objetos --------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
 !Creación de HTML -----------------------------------------------------------------------------------------------------------------------------------
 subroutine crearHTML()
     use globales
     implicit none
     !Asigno las variables
-    integer :: unit,i
-    character(len=4) :: cuento
+    integer :: unit !,i
+    !character(len=4) :: cuento
     unit=30530 !Se asigna un numero de unidad
     open(unit, file='tablaTokens.html', status='unknown', action='write') !Se abre el archivo para escribir
     write(unit, '(A)') "<!DOCTYPE html>"
     write(unit, '(A)') "<html>"
     write(unit, '(A)') "<head>"
+    write(unit, '(A)') '<meta charset="UTF-8">'
     write(unit, '(A)') "<title>Página Web</title>"
     write(unit, '(A)') "<link rel='stylesheet' type='text/css' href='estilos.css'>"
     write(unit, '(A)') "</head>"
@@ -1342,9 +1548,9 @@ subroutine crearHTML()
 
 
 
-
-    write(unit, '(A)') "</body>"    
     
+    write(unit, '(A)') "</body>"    
+    write(unit, '(A)') "</html>"
 
 
 

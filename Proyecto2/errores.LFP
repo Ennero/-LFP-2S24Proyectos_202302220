@@ -91,6 +91,7 @@ Propiedades -->
     contlogin.add(Nombre); 
     JTextField0.setPosicion(65,20);
 
+
     contlogin.add(cmdIngresar); 
     contlogin.add(JTextField0); 
     contlogo2.setPosicion(88,25);

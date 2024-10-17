@@ -51,6 +51,8 @@ Controles -->
     contlogo2.setAncho(150); 
     contlogo2.setAlto( 50);
     contlogo2.setColorFondo(0,128,128);
+
+
     //#$fin de contlogo2
     //#$inicio de ContLogo1
     ContLogo1.setAncho(50); 
