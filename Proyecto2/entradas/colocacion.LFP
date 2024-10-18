@@ -10,6 +10,8 @@
     Contenedor contlogo2;
     Contenedor ContLogo1;
     Contenedor ContBody;
+    Contenedor probando;
+    Boton pruebaBTN;
 Controles -->
 
 <!--Propiedades
@@ -52,6 +54,13 @@ Controles -->
     contlogo2.setAlto( 50);
     contlogo2.setColorFondo(0,128,128);
 
+    probando.setColorFondo(0,56,82);
+
+    probando.setAncho(250); 
+    probando.setAlto(150);
+    pruebaBTN.setTexto("Limonosa");
+
+    cmdIngresar.setAlineacion(centro)
 
     //#$fin de contlogo2
     //#$inicio de ContLogo1
@@ -77,6 +86,15 @@ Propiedades -->
     passw.setPosicion(11,54); 
     contlogin.add(passw);
     cmdIngresar.setPosicion(40,100);
+
+    probando.setPosicion(800,400); 
+    probando.add(pruebaBTN);
+
+    this.add(probando);
+
+    pruebaBTN.setPosicion(0,0); 
+
+
     contlogin.add(cmdIngresar);
     pswClave.setPosicion(67,48);
     contlogin.add(pswClave);

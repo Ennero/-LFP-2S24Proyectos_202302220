@@ -67,11 +67,13 @@ program proceso
     call html_bueno()
 
     !call iniciarAnalisisSintactico() !Llamo a la subrutina iniciarAnalisisSintactico
-    call crearObjetos()
+    !call crearObjetos()
 
-    call crearCSS()
+    !Subrutinas para crear el CSS y el HTML
+    !call crearCSS()
+    !call crearHTML()
+    !Fin de la creación de los archivos
 
-    call crearHTML()
     call html_malo()
 end program proceso
 
@@ -1587,9 +1589,12 @@ subroutine crearCSS()
             write(unit, '(A)') 'height: 25px;'
         end if  
 
-        if (trim(objetos(12,i)) == ' ' .and. (trim(objetos(2,i))=='Boton' .or. trim(objetos(2,i))=='Texto' .or. trim(objetos(2,i))=='AreaTexto')) then
+        if (trim(objetos(12,i)) == ' ' .and. (trim(objetos(2,i))=='Boton' .or. trim(objetos(2,i))=='Texto' .or. trim(objetos(2,i))=='Clave')) then
             write(unit, '(A)') 'text-align: left;'
         end if
+
+        !A Todos les meto font-size como dice el doc
+        write(unit, '(A)') 'font-size: 12px;'
 
         write(unit, '(A)') '}'
         i = i + 1
@@ -1611,212 +1616,204 @@ end subroutine crearCSS
 !Fin Creación de CSS -----------------------------------------------------------------------------------------------------------------------------------
 
 !Creación de HTML -----------------------------------------------------------------------------------------------------------------------------------
-subroutine crearHTML()
-    use globales
-    implicit none
-    !Asigno las variables
-    integer :: unit !,i
-    texto=""
-    !character(len=4) :: cuento
-    unit=30530 !Se asigna un numero de unidad
-    open(unit, file='page/pagina.html', status='unknown', action='write') !Se abre el archivo para escribir
-    write(unit, '(A)') "<!DOCTYPE html>"
-    write(unit, '(A)') "<html>"
-    write(unit, '(A)') "<head>"
-    write(unit, '(A)') '<meta charset="UTF-8">'
-    write(unit, '(A)') "<title>Página Web</title>"
-    write(unit, '(A)') "<link rel='stylesheet' type='text/css' href='estilos.css'>"
-    write(unit, '(A)') "</head>"
-    call contenido()
-    write(unit, '(A)') texto    
-    write(unit, '(A)') "</html>"
-    close(unit)
-end subroutine crearHTML
+    subroutine crearHTML()
+        use globales
+        implicit none
+        !Asigno las variables
+        integer :: unit !,i
+        texto=""
+        !character(len=4) :: cuento
+        unit=30530 !Se asigna un numero de unidad
+        open(unit, file='page/pagina.html', status='unknown', action='write') !Se abre el archivo para escribir
+        write(unit, '(A)') "<!DOCTYPE html>"
+        write(unit, '(A)') "<html>"
+        write(unit, '(A)') "<head>"
+        write(unit, '(A)') '<meta charset="UTF-8">'
+        write(unit, '(A)') "<title>Página Web</title>"
+        write(unit, '(A)') "<link rel='stylesheet' type='text/css' href='estilos.css'>"
+        write(unit, '(A)') "</head>"
+        call contenido()
+        write(unit, '(A)') texto    
+        write(unit, '(A)') "</html>"
+        close(unit)
+    end subroutine crearHTML
 
-subroutine contenido()
-    use globales
-    implicit none
-    integer :: i,j,k
-    character(len=200) :: previous
-    
-    i=1
-    j=1
-    do while (i<=sizeObjetos)
-        if (trim(copiaObjetos(1,i))=="this") then
-            k=0
-            copiaObjetos(1,i)=" "
-            texto=trim(texto)//'<body>'
-            do while (trim(copiaObjetos(20+k,i)) /= " ")
-                print *, "aqui va un ADD"
-                previous=trim(copiaObjetos(20+k,i))
-                call div(previous)
-                k=k+1
-            end do
-            texto=trim(texto)//'</body>'
-        end if
-        i=i+1
-    end do
-end subroutine contenido
-
-recursive subroutine div(previous)
-    use globales
-    implicit none
-    integer :: i,j,k
-    character(len=200) :: previous
-
-    print *, previous
-    i=1
-    j=1
-    do while (i<=sizeObjetos)
-    !Caso de donde viene de this
-        if (trim(copiaObjetos(1,i))==trim(previous)) then
-            print *, copiaObjetos(2,i),i
-            !Si lo que se encontró es un contenedor
-            if(trim(copiaObjetos(2,i))=="Contenedor") then
-                texto=trim(texto)//'<div id="'//trim(copiaObjetos(1,i)) // '">'
-                copiaObjetos(1,i)=" "
+    subroutine contenido()
+        use globales
+        implicit none
+        integer :: i,j,k
+        character(len=200) :: previous
+        
+        i=1
+        j=1
+        do while (i<=sizeObjetos)
+            if (trim(copiaObjetos(1,i))=="this") then
                 k=0
+                copiaObjetos(1,i)=" "
+                texto=trim(texto)//'<body>'
                 do while (trim(copiaObjetos(20+k,i)) /= " ")
-                    print *, "Aquí hay un add de un div"
+                    print *, "aqui va un ADD"
                     previous=trim(copiaObjetos(20+k,i))
-                    
                     call div(previous)
                     k=k+1
                 end do
-                texto=trim(texto)//'</div>'
+                texto=trim(texto)//'</body>'
+            end if
+            i=i+1
+        end do
+    end subroutine contenido
 
-            !Si lo que se encontró es un boton
-            else if(trim(copiaObjetos(2,i))=="Boton") then
-                texto=trim(texto)//'<input type="submit" id="'//trim(copiaObjetos(1,i))//'"'
-                copiaObjetos(1,i)=" "
-                k=3
-                do while (k<20)
-                    
-                    if (k==11) then
-                        texto=trim(texto)//' value="'//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k,i))-1))//'"'
-                    end if
+    recursive subroutine div(previous)
+        use globales
+        implicit none
+        integer :: i,j,k
+        character(len=200) :: previous
 
-                    !quizá le tengo que agregar la alineación pero está pendiente
+        print *, previous
+        i=1
+        j=1
+        do while (i<=sizeObjetos)
+        !Caso de donde viene de this
+            if (trim(copiaObjetos(1,i))==trim(previous)) then
+                print *, copiaObjetos(2,i),i
+                !Si lo que se encontró es un contenedor
+                if(trim(copiaObjetos(2,i))=="Contenedor") then
+                    texto=trim(texto)//'<div id="'//trim(copiaObjetos(1,i)) // '">'
+                    copiaObjetos(1,i)=" "
+                    k=0
+                    do while (trim(copiaObjetos(20+k,i)) /= " ")
+                        print *, "Aquí hay un add de un div"
+                        previous=trim(copiaObjetos(20+k,i))
+                        
+                        call div(previous)
+                        k=k+1
+                    end do
+                    texto=trim(texto)//'</div>'
 
-                    k=k+1
-                end do
-                texto=trim(texto)//'/>'
+                !Si lo que se encontró es un boton
+                else if(trim(copiaObjetos(2,i))=="Boton") then
+                    texto=trim(texto)//'<input type="submit" id="'//trim(copiaObjetos(1,i))//'"'
+                    copiaObjetos(1,i)=" "
+                    k=3
+                    do while (k<20)
+                        
+                        if (k==11) then
+                            texto=trim(texto)//' value="'//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k,i))-1))//'"'
+                        end if
 
-            !Si lo que se encontró es un check
-            else if (trim(copiaObjetos(2,i))=="Check") then
-                texto=trim(texto)//'<input type="checkbox" id="'//trim(copiaObjetos(k,i))
-                copiaObjetos(1,i)=" "
-                k=3
-                do while (k<20)
-                    
-                    if (k==11) then
-                        texto=trim(texto)//' value="'//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k,i))-1))//'"'
-                    else if (k==13) then
-                        texto=trim(texto)//' checked'
-                    else if (k==14) then
-                        texto=trim(texto)//' name="'//trim(copiaObjetos(k,i))//'"'
-                    end if
-                    !quizá le tengo que agregar la alineación pero está pendiente
+                        !quizá le tengo que agregar la alineación pero está pendiente
 
-                    k=k+1
-                end do
-                texto=trim(texto)//'/>'
+                        k=k+1
+                    end do
+                    texto=trim(texto)//'/>'
 
-            !Si lo que se encontró es un radio
-            else if(trim(copiaObjetos(2,i))=="RadioBoton") then
-                texto=trim(texto)//'<input type="radio" id="'//trim(copiaObjetos(1,i))
-                copiaObjetos(1,i)=" "
-                k=3
-                do while (k<20)
-                    
-                    if (k==11) then
-                        texto=trim(texto)//' value="'//trim(copiaObjetos(k,i))//'"'
-                    else if (k==13) then
-                        texto=trim(texto)//' checked'
-                    else if (k==14) then
-                        texto=trim(texto)//' name="'//trim(copiaObjetos(k,i))//'"'
-                    end if
-                    !quizá le tengo que agregar la alineación pero está pendiente
+                !Si lo que se encontró es un check
+                else if (trim(copiaObjetos(2,i))=="Check") then
+                    texto=trim(texto)//'<input type="checkbox" id="'//trim(copiaObjetos(k,i))
+                    copiaObjetos(1,i)=" "
+                    k=3
+                    do while (k<20)
+                        
+                        if (k==11) then
+                            texto=trim(texto)//' value="'//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k,i))-1))//'"'
+                        else if (k==13) then
+                            texto=trim(texto)//' checked'
+                        else if (k==14) then
+                            texto=trim(texto)//' name="'//trim(copiaObjetos(k,i))//'"'
+                        end if
+                        !quizá le tengo que agregar la alineación pero está pendiente
 
-                    k=k+1
-                end do
-                texto=trim(texto)//'/>'
+                        k=k+1
+                    end do
+                    texto=trim(texto)//'/>'
 
-            !Si lo que se encontró es una etiqueta
-            else if(trim(copiaObjetos(2,i))=="Etiqueta") then
-                texto=trim(texto)//'<label id="'//trim(copiaObjetos(1,i))//'">'
-                copiaObjetos(1,i)=" "
-                k=3
-                do while (k<20)
-                    if (k==11) then
-                        texto=trim(texto)//(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k,i))-1))
-                    end if
-                    !quizá le tengo que agregar la alineación pero está pendiente
+                !Si lo que se encontró es un radio
+                else if(trim(copiaObjetos(2,i))=="RadioBoton") then
+                    texto=trim(texto)//'<input type="radio" id="'//trim(copiaObjetos(1,i))
+                    copiaObjetos(1,i)=" "
+                    k=3
+                    do while (k<20)
+                        
+                        if (k==11) then
+                            texto=trim(texto)//' value="'//trim(copiaObjetos(k,i))//'"'
+                        else if (k==13) then
+                            texto=trim(texto)//' checked'
+                        else if (k==14) then
+                            texto=trim(texto)//' name="'//trim(copiaObjetos(k,i))//'"'
+                        end if
+                        !quizá le tengo que agregar la alineación pero está pendiente
 
-                    k=k+1
-                end do
-                texto=trim(texto)//'</label>'
+                        k=k+1
+                    end do
+                    texto=trim(texto)//'/>'
 
-            !Si lo que se encontró es un area de texto
-            else if (trim(copiaObjetos(2,i))=="AreaTexto") then
-                texto=trim(texto)//'<textarea id="'//trim(copiaObjetos(1,i))//'>'
-                copiaObjetos(1,i)=" "
-                k=3
-                do while (k<20)
-                    
-                    if (k==11) then
-                        texto=trim(texto)//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k+1,i))-1))
-                    end if
+                !Si lo que se encontró es una etiqueta
+                else if(trim(copiaObjetos(2,i))=="Etiqueta") then
+                    texto=trim(texto)//'<label id="'//trim(copiaObjetos(1,i))//'">'
+                    copiaObjetos(1,i)=" "
+                    k=3
+                    do while (k<20)
+                        if (k==11) then
+                            texto=trim(texto)//(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k,i))-1))
+                        end if
+                        !quizá le tengo que agregar la alineación pero está pendiente
 
-                    k=k+1
-                end do
-                texto=trim(texto)//'</textarea>'
+                        k=k+1
+                    end do
+                    texto=trim(texto)//'</label>'
 
-            !Si lo que se encontró es una clave
-            else if (trim(copiaObjetos(2,i))=="Clave") then
-                texto=trim(texto)//'<input type="password" id="'//trim(copiaObjetos(1,i))//'"'
-                copiaObjetos(1,i)=" "
-                k=3
-                do while (k<20)
-                    print *, "Entre a la clave"
-                    if (k==11) then
-                        texto=trim(texto)//' value="'//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k,i))-1))//'"'
-                    end if
+                !Si lo que se encontró es un area de texto
+                else if (trim(copiaObjetos(2,i))=="AreaTexto") then
+                    texto=trim(texto)//'<textarea id="'//trim(copiaObjetos(1,i))//'>'
+                    copiaObjetos(1,i)=" "
+                    k=3
+                    do while (k<20)
+                        
+                        if (k==11) then
+                            texto=trim(texto)//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k+1,i))-1))
+                        end if
 
-                    k=k+1
-                end do
-                texto=trim(texto)//'/>'
+                        k=k+1
+                    end do
+                    texto=trim(texto)//'</textarea>'
 
-            !Si que se encontró es una etiqueta
-            else if (trim(copiaObjetos(2,i))=="Texto") then
-                texto=trim(texto)//'<input type="text" id="'//trim(copiaObjetos(1,i))//'"'
-                copiaObjetos(1,i)=" "
-                k=3
-                do while (k<20)
-                    
-                    if (k==11) then
-                        texto=trim(texto)//' value="'//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k,i))-1))//'"'
-                    end if
+                !Si lo que se encontró es una clave
+                else if (trim(copiaObjetos(2,i))=="Clave") then
+                    texto=trim(texto)//'<input type="password" id="'//trim(copiaObjetos(1,i))//'"'
+                    copiaObjetos(1,i)=" "
+                    k=3
+                    do while (k<20)
+                        print *, "Entre a la clave"
+                        if (k==11) then
+                            texto=trim(texto)//' value="'//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k,i))-1))//'"'
+                        end if
 
-                    k=k+1
-                end do
-                texto=trim(texto)//'/>'
+                        k=k+1
+                    end do
+                    texto=trim(texto)//'/>'
+
+                !Si que se encontró es una etiqueta
+                else if (trim(copiaObjetos(2,i))=="Texto") then
+                    texto=trim(texto)//'<input type="text" id="'//trim(copiaObjetos(1,i))//'"'
+                    copiaObjetos(1,i)=" "
+                    k=3
+                    do while (k<20)
+                        
+                        if (k==11) then
+                            texto=trim(texto)//' value="'//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k,i))-1))//'"'
+                        end if
+
+                        k=k+1
+                    end do
+                    texto=trim(texto)//'/>'
+
+                end if
 
             end if
+            i=i+1
+        end do
 
-
-
-
-            
-
-
-
-        end if
-        i=i+1
-    end do
-
-end subroutine div
-
+    end subroutine div
 
 !Creación de HTML -----------------------------------------------------------------------------------------------------------------------------------
 

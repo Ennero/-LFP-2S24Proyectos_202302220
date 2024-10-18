@@ -53,10 +53,6 @@ def tokens(): #Función para mostrar los tokens
 
 
 
-
-
-
-
 #Todo lo relacionado a la interfaz gráfica ----------------------------------------------
 
 #Declaro e inicializo las variables globales para la interfaz
