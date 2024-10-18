@@ -4,6 +4,7 @@ from tkinter import messagebox
 from tkinter import ttk as tkk
 import webbrowser
 import subprocess
+import copy
 
 
 
@@ -18,7 +19,6 @@ analizado=False
 # Función para analizar el texto
 def analizar():
     global analizado
-    analizado=True
     cuerpo=entrada.get("1.0", tk.END) #Obtengo el contenido del editor de texto
     lineas=cuerpo.splitlines() #Divido el contenido del editor de texto por líneas
     todasVacias=all(linea=="" or linea.isspace() for linea in lineas) #Verifico si todas las líneas estan vacias
@@ -33,25 +33,55 @@ def analizar():
         salida=resultado.stdout.strip() #Aquí obtengo la salida del análisis
         print(salida)
         #Aquí coloco todo lo demás del análisis
+        if (salida=="Bien"):
+            messagebox.showinfo("Análisis", "El análisis se realizó correctamente.")
+            info.config(text="Análisis correcto", foreground="green") #Mensaje de éxito
+            analizado=True
+
+
+
+        else:
+            messagebox.showerror("Error", "Error durante el análisis")
+            info.config(text="Análisis Fallido", foreground="red")
+            analizado=False
+            partes=salida.split("\n")
+            print(len(partes))
+            print("+++++++++++++++++++++++++++++++++++++++++++++++++++++")
+            temporadita=0
+            otro=0
+            v=0
+            while temporadita<len(partes)/5:
+                fila=[]
+                v=0
+                fila.append(temporadita+1)
+                while v<5:
+                    fila.append(partes[otro])
+                    otro=otro+1
+                    v+=1
+                temporadita+=1
+                arbol.insert("", "end", values=fila)
+            
+            
         
 
 def actualizarTabla(): #Función para actualizar la tabla de errores
     pass
+
+def insertarDatos(tabla):
+    for indice, row in tabla.iterrows():
+        arbol.insert("", tk.END, values=(row["Tipo"], row["Linea"], row["Columna"], row["Token"], row["Descripción"]))
 
 def tokens(): #Función para mostrar los tokens
     global analizado
     if analizado:
 
         webbrowser.open("tablaTokens.html")
+        info.config(text="Mostrando tokens", foreground="green")
     else:
-        messagebox.showerror("Error", "Primero debe analizar el texto.")
-        info.config(text="Primero debe analizar el texto", foreground="red")
-
-
-
-
-
-
+        messagebox.showerror("Error", "Primero se debe ejecutar el análisis exitosamente")
+        info.config(text="Falta de análisis exitoso", foreground="red")
+        
+        
 
 #Todo lo relacionado a la interfaz gráfica ----------------------------------------------
 
@@ -103,12 +133,14 @@ def guardar(): #Función para guardar el archivo
 def guardarComo(): #Función para guardar el archivo como
     global ruta, guardado,preguntar #Uso las variables globales
     info.config(text="Guardando archivo como...", foreground="black") #Mensaje que dice el proceso
+    temprutra=copy.deepcopy(ruta) #Guardo la ruta actual
     ruta=filedialog.asksaveasfilename(title="Guardar archivo",filetypes=(("Archivos .LFP", "*.LFP"),))
     if ruta != "": #Si la ruta no está vacía
         guardado=True #Cambio el estado de guardado
         guardar() #Llamo a la función guardar
     else:
         info.config(text="No se guardó el archivo", foreground="red") #Mensaje de error
+        ruta=copy.deepcopy(temprutra) #Recupero la ruta anterior
 
 def pregunta(): #Función para preguntar si se quiere guardar
     global guardado, ruta, preguntar #Uso las variables globales
@@ -229,48 +261,22 @@ salir.config(background="white", foreground="red", font=("Arial", 13, "bold"))
 
 
 #Creación de la tabla de errores ----------------------------------------------
-arbol=tkk.Treeview(frame2, columns=("Tipo","Linea","Columna","Token","Descripción"), show="headings")
+arbol=tkk.Treeview(frame2, columns=("No. Error","Tipo","Linea","Columna","Token","Descripción"), show="headings")
 arbol.pack(side="left") #Lo empaqueto en el frame2
 #Encabezados
+arbol.heading("No. Error", text="No. Error")
 arbol.heading("Tipo", text="Tipo")
 arbol.heading("Linea", text="Linea")
 arbol.heading("Columna", text="Columna")
 arbol.heading("Token", text="Token")
 arbol.heading("Descripción", text="Descripción")
 
-#Datos de prueba
-data = [
-    ("Ana", 25, "Madrid", "España", "Femenino"),
-    ("Pedro", 30, "Barcelona", "España", "Masculino"),
-    ("Luisa", 22, "Sevilla", "España", "Femenino"),
-    ("Ana", 25, "Madrid", "España", "Femenino"),
-    ("Pedro", 30, "Barcelona", "España", "Masculino"),
-    ("Luisa", 22, "Sevilla", "España", "Femenino"),
-    ("Ana", 25, "Madrid", "España", "Femenino"),
-    ("Pedro", 30, "Barcelona", "España", "Masculino"),
-    ("Luisa", 22, "Sevilla", "España", "Femenino"),
-    ("Ana", 25, "Madrid", "España", "Femenino"),
-    ("Pedro", 30, "Barcelona", "España", "Masculino"),
-    ("Luisa", 22, "Sevilla", "España", "Femenino"),
-    ("Ana", 25, "Madrid", "España", "Femenino"),
-    ("Pedro", 30, "Barcelona", "España", "Masculino"),
-    ("Luisa", 22, "Sevilla", "España", "Femenino"),
-    ("Ana", 25, "Madrid", "España", "Femenino"),
-    ("Pedro", 30, "Barcelona", "España", "Masculino"),
-    ("Luisa", 22, "Sevilla", "España", "Femenino")
-]
-for row in data:
-    arbol.insert("", "end", values=row)
+
 
 #Las scrollbar de la tabla
 barraX=tk.Scrollbar(frame2, orient="vertical", command=arbol.yview)
 barraX.pack(side="right", fill="y")
 arbol.config(yscrollcommand=barraX.set)
-
-'''barraY=tk.Scrollbar(frame2, orient="horizontal", command=arbol.xview)
-barraY.pack(side="bottom", fill="x")
-arbol.config(xscrollcommand=barraY.set)'''
-
 
 
 # Ejecuta la ventana

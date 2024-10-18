@@ -4,7 +4,7 @@ module globales
     integer::cuentaT, cuentaN, cuentaE, cuentaCT, cuentaConsumo, cuentaES,sizeObjetos,temporal
     character(len=200), dimension(4,2000)::tokens,erroresLexicos,copiaTokens,erroresSintacticos
     character(len=200), dimension(1,2000)::terminales
-    logical::eLexico, eSintactico, controlValido, propiedadValida, colocacionValida, ErrorValidado, exepcion1, recuperado
+    logical::eLexico, eSintactico, controlValido, propiedadValida, colocacionValida, ErrorValidado, exepcion1, recuperado,bien
 
     !Arreglo para almacenar los objetos con la siguiente estructura
     !   1     2          3       4   5   6        7       8   9  10    11         12         13        14     15      16       17     18   19  20...
@@ -16,11 +16,7 @@ end module globales
 program proceso
     use globales
     implicit none
-    integer::ta,tata
-    !-----------------------------------
-    integer::ios
-    character(len=200)::linea
-    !-----------------------------------
+    integer::ta,tata,tio,herberth
 
     !Inicializando variables
     cuentaT=0
@@ -31,11 +27,12 @@ program proceso
     cuentaES=0
     ta=1
     tata=1
+    bien=.true.
 
 
     entrada = '' !Inicializo la variable entrada
 
-    !Inicialio la cosa de los objetos
+    !Inicializo la cosa de los objetos
     do while (ta<=50)
         do while (tata<=200)
             objetos(ta,tata)=' '
@@ -47,18 +44,7 @@ program proceso
     !-----------------------------------
 
 
-
-
-    !PROBANDOOOOOOO
-    open(10, file='colocacion.LFP', status='old', action='read', encoding='UTF-8') !Abro el archivo de entrada
-    do
-    read(10, '(A)', iostat = ios) linea
-    if (ios /= 0) exit   ! Se alcanzo el fin del archivo
-    entrada = trim(entrada) // trim(linea) // char(10) ! Concatenar la línea leida al valor de entrada y agregar un salto de línea
-    end do
-    !PROBANDOOOOOOO
-
-    !call leer() !Llamo a la subrutina leer
+    call leer() !Llamo a la subrutina leer
 
     call analizar ()
 
@@ -75,6 +61,21 @@ program proceso
     !Fin de la creación de los archivos
 
     call html_malo()
+
+    if (bien) then
+        print *, "Bien"
+    else
+        !Ciclo para escribir los errores léxicos
+        tio=1
+        do while (tio<=cuentaE)
+            print *, 'Error Lexico',char(10),trim(erroresLexicos(1,tio)),char(10),trim(erroresLexicos(2,tio)), char(10),trim(erroresLexicos(3,tio)), char(10),trim(erroresLexicos(4,tio))
+            tio=tio+1
+        end do
+        
+
+
+
+    end if
 end program proceso
 
 !Analisis léxico --------------------------------------------------------------------------------------------------------------------------------
@@ -569,6 +570,8 @@ subroutine agregarErrorLexico(lexema, descrip, linea, columna) !Subrutina que ag
     erroresLexicos(1,cuentaE)=(lexema)
     erroresLexicos(2,cuentaE)=(descrip)
 
+    bien=.false.
+
     write(linea2,'(I0)') linea !Probar nuevamente la forma en la que escribo estas cosas porque ODIO FORTRAAAAAN
     write(columna2,'(I0)') columna !Lo paso a string el int
     erroresLexicos(3,cuentaE)=trim(linea2)
@@ -620,7 +623,6 @@ subroutine agregarSintactico(esperado, descrip, linea, columna)
     !write(columna2,'(I0)') columna !Lo paso a string el int
     erroresSintacticos(3,cuentaES)=trim(linea)
     erroresSintacticos(4,cuentaES)=trim(columna)
-
 end subroutine agregarSintactico
 
 !Analisis sintáctico ----------------------------------------------------------------------------------------------------------------------------
