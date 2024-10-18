@@ -1,7 +1,7 @@
 module globales
 !Aquí ando declarando las variables globales que usaré
-    character(len=15000)::entrada
-    integer::cuentaT, cuentaN, cuentaE, cuentaCT, cuentaConsumo, cuentaES
+    character(len=15000)::entrada,texto
+    integer::cuentaT, cuentaN, cuentaE, cuentaCT, cuentaConsumo, cuentaES,sizeObjetos,temporal
     character(len=200), dimension(4,2000)::tokens,erroresLexicos,copiaTokens,erroresSintacticos
     character(len=200), dimension(1,2000)::terminales
     logical::eLexico, eSintactico, controlValido, propiedadValida, colocacionValida, ErrorValidado, exepcion1, recuperado
@@ -10,7 +10,7 @@ module globales
     !   1     2          3       4   5   6        7       8   9  10    11         12         13        14     15      16       17     18   19  20...
     ! | ID | Tipo | ColorLetra | 0 | 0 | 0 | ColorFondo | 0 | 0 | 0 | Texto | Alineacion | Marcado | Grupo | Ancho | Alto | Posicion | x | y | Add
     
-    character(len=200), dimension(50,2000)::objetos
+    character(len=200), dimension(50,200)::objetos,copiaObjetos
 end module globales
 
 program proceso
@@ -32,19 +32,19 @@ program proceso
     ta=1
     tata=1
 
+
     entrada = '' !Inicializo la variable entrada
 
     !Inicialio la cosa de los objetos
     do while (ta<=50)
-        do while (tata<=2000)
-            objetos(ta,tata)=''
+        do while (tata<=200)
+            objetos(ta,tata)=' '
             tata=tata+1
         end do
         tata=1
         ta=ta+1
     end do
     !-----------------------------------
-
 
 
 
@@ -67,8 +67,11 @@ program proceso
     call html_bueno()
 
     !call iniciarAnalisisSintactico() !Llamo a la subrutina iniciarAnalisisSintactico
-
     call crearObjetos()
+
+    call crearCSS()
+
+    call crearHTML()
     call html_malo()
 end program proceso
 
@@ -1446,7 +1449,6 @@ subroutine crearObjetos()
         controlesLength=controlesLength+1
         if(trim(tokens(1,controlesLength))=="Colocacion") then
             bi=bi+1
-            print *, controlesLength
         end if
     end do
 
@@ -1470,7 +1472,7 @@ subroutine crearObjetos()
                         p=20 !Reinicio la ñ
                         !Reviso cada Add si ya tiene o no
                         do while (p<=50)
-                            if (trim(objetos(p,k))=="") then
+                            if (trim(objetos(p,k))==" ") then
                                 objetos(p,k)=trim(tokens(1,i+4))
                                 exit
                             end if
@@ -1478,23 +1480,20 @@ subroutine crearObjetos()
                         end do
                     end if
                     !print *, trim(objetos(17,k)),trim(objetos(18,k)),trim(objetos(19,k))
-                    !print *, "Colocacion",trim(objetos(1,k)),trim(objetos(2,k)),trim(objetos(3,k)),trim(objetos(4,k)),trim(objetos(5,k)),trim(objetos(6,k)),trim(objetos(7,k)),trim(objetos(8,k)),trim(objetos(9,k)),trim(objetos(10,k)),trim(objetos(11,k)),trim(objetos(12,k)),trim(objetos(13,k)),trim(objetos(14,k)),trim(objetos(15,k)),trim(objetos(16,k)),trim(objetos(17,k)),trim(objetos(18,k)),trim(objetos(19,k))
+                    !print *, "Colocacion",trim(objetos(1,k)),trim(objetos(2,k)),trim(objetos(3,k)),trim(objetos(4,k)),trim(objetos(5,k)),trim(objetos(6,k)),trim(objetos(7,k)),trim(objetos(8,k)),trim(objetos(9,k)),trim(objetos(10,k)),trim(objetos(11,k)),trim(objetos(12,k)),trim(objetos(13,k)),trim(objetos(14,k)),trim(objetos(15,k)),trim(objetos(16,k)),trim(objetos(17,k)),trim(objetos(18,k)),trim(objetos(19,k)),trim(objetos(20,k)),trim(objetos(20,k)),trim(objetos(21,k)), trim(objetos(22,k)),trim(objetos(23,k))
                 end if
                 k=k+1
             end do
         else if (trim(terminales(1,i))=="this") then
-            !print *, "ola"
             k=1 !Reinicio la k
             !Reviso dentro de cada objeto
             do while (k<j+1)
-                print *, k
                 if (trim(objetos(1,k))==trim(tokens(1,i))) then
                     if (trim(tokens(1,i+2))=="add") then
-
                         p=20 !Reinicio la ñ
                         !Reviso cada Add si ya tiene o no
                         do while (p<=50)
-                            if (trim(objetos(p,k))=="") then
+                            if (trim(objetos(p,k))==" ") then
                                 objetos(p,k)=trim(tokens(1,i+4))
                                 exit
                             end if
@@ -1502,30 +1501,90 @@ subroutine crearObjetos()
                         end do
                     end if
                     !print *, trim(objetos(19,k))
-                    print *, "Colocacion",trim(objetos(1,k)),trim(objetos(2,k)),trim(objetos(3,k)),trim(objetos(4,k)),trim(objetos(5,k)),trim(objetos(6,k)),trim(objetos(7,k)),trim(objetos(8,k)),trim(objetos(9,k)),trim(objetos(10,k)),trim(objetos(11,k)),trim(objetos(12,k)),trim(objetos(13,k)),trim(objetos(14,k)),trim(objetos(15,k)),trim(objetos(16,k)),trim(objetos(17,k)),trim(objetos(18,k)),trim(objetos(19,k))
                 end if
                 k=k+1
             end do
-
-        else
-            !print *, "ola"
         end if
     end do
 
+    !Guardo el tamaño del arreglo que acabo de crear
+    sizeObjetos=j
 
 end subroutine crearObjetos
-
-
-
-
-
 !Fin Almacenando los objetos --------------------------------------------------------------------------------------------------------------------------------
 
+!Creación de CSS -----------------------------------------------------------------------------------------------------------------------------------
+subroutine crearCSS()
+    use globales
+    implicit none
+    integer :: unit ,i,j
+        !character(len=4) :: cuento
+        unit=305320 !Se asigna un numero de unidad
+    i=1
+
+    open(unit, file='page/estilos.css', status='unknown', action='write') !Se abre el archivo para escribir
 
 
+    do while (i <= sizeObjetos)
 
+        !Aquí solo le asigno el body en vez de this
+        if(trim(objetos(1,i))=='this') then
+            write(unit, '(A)') 'body {'
+        else
+            write(unit, '(A)') '#' // trim(objetos(1, i)) // '{'
+        end if
+        j = 2
+        do while (j <= 50)
 
+            if (trim(objetos(j, i)) /= ' ') then
+                if (j == 3) then
+                    ! Para el color de la letra
+                    write(unit, '(A)') 'color: rgb(' // trim(objetos(j+1, i)) // ',' // trim(objetos(j+2, i)) // ',' // trim(objetos(j+3, i)) // ');'
+                    j = j + 3
+                else if (j == 7) then
+                    ! Para el color del fondo
+                    write(unit, '(A)') 'background-color: rgb(' // trim(objetos(j+1, i)) // ',' // trim(objetos(j+2, i)) // ',' // trim(objetos(j+3, i)) // ');'
+                    j = j + 3
+                else if (j == 12) then
+                    ! Para la alineación
+                    if (trim(objetos(j, i)) == "izquierdo") then
+                        write(unit, '(A)') 'text-align: left;'
+                    else if (trim(objetos(j, i)) == "centro") then
+                        write(unit, '(A)') 'text-align: center;'
+                    else if (trim(objetos(j, i)) == "derecho") then
+                        write(unit, '(A)') 'text-align: right;'
+                    end if
+                else if (j == 15) then
+                    ! Para el ancho
+                    write(unit, '(A)') 'width: ' // trim(objetos(j, i)) // 'px;'
+                else if (j == 16) then
+                    ! Para el alto
+                    write(unit, '(A)') 'height: ' // trim(objetos(j, i)) // 'px;'
+                else if (j == 18) then
+                    ! Para la posición
+                    write(unit, '(A)') 'position: absolute;'
+                    write(unit, '(A)') 'top: ' // trim(objetos(j, i)) // 'px;'
+                    write(unit, '(A)') 'left: ' // trim(objetos(j+1, i)) // 'px;'
+                    j = j + 2
+                end if
+            end if
+            j = j + 1
+        end do
+        write(unit, '(A)') '}'
+        i = i + 1
+    end do
+    !print *, objetos(17,1), objetos(18,1), objetos(19,1)
+    
+    !Copio el arreglo que contiene los objetos
+    do i=1,50
+        do j=1,sizeObjetos
+            copiaObjetos(i,j)=objetos(i,j)
+        end do
+    end do
+    close (unit)
 
+end subroutine crearCSS
+!Fin Creación de CSS -----------------------------------------------------------------------------------------------------------------------------------
 
 !Creación de HTML -----------------------------------------------------------------------------------------------------------------------------------
 subroutine crearHTML()
@@ -1533,9 +1592,10 @@ subroutine crearHTML()
     implicit none
     !Asigno las variables
     integer :: unit !,i
+    texto=""
     !character(len=4) :: cuento
     unit=30530 !Se asigna un numero de unidad
-    open(unit, file='tablaTokens.html', status='unknown', action='write') !Se abre el archivo para escribir
+    open(unit, file='page/pagina.html', status='unknown', action='write') !Se abre el archivo para escribir
     write(unit, '(A)') "<!DOCTYPE html>"
     write(unit, '(A)') "<html>"
     write(unit, '(A)') "<head>"
@@ -1543,23 +1603,198 @@ subroutine crearHTML()
     write(unit, '(A)') "<title>Página Web</title>"
     write(unit, '(A)') "<link rel='stylesheet' type='text/css' href='estilos.css'>"
     write(unit, '(A)') "</head>"
-    write(unit, '(A)') "<body>"
-
-
-
-
-    
-    write(unit, '(A)') "</body>"    
+    call contenido()
+    write(unit, '(A)') texto    
     write(unit, '(A)') "</html>"
-
-
-
+    close(unit)
 end subroutine crearHTML
 
+subroutine contenido()
+    use globales
+    implicit none
+    integer :: i,j,k
+    character(len=200) :: previous
+    
+    i=1
+    j=1
+    do while (i<=sizeObjetos)
+        if (trim(copiaObjetos(1,i))=="this") then
+            k=0
+            copiaObjetos(1,i)=" "
+            texto=trim(texto)//'<body>'
+            do while (trim(copiaObjetos(20+k,i)) /= " ")
+                print *, "aqui va un ADD"
+                previous=trim(copiaObjetos(20+k,i))
+                call div(previous)
+                k=k+1
+            end do
+            texto=trim(texto)//'</body>'
+        end if
+        i=i+1
+    end do
+end subroutine contenido
+
+recursive subroutine div(previous)
+    use globales
+    implicit none
+    integer :: i,j,k
+    character(len=200) :: previous
+
+    print *, previous
+    i=1
+    j=1
+    do while (i<=sizeObjetos)
+    !Caso de donde viene de this
+        if (trim(copiaObjetos(1,i))==trim(previous)) then
+
+
+            !Si lo que se encontró es un contenedor
+            if(trim(copiaObjetos(2,i))=="Contenedor") then
+                texto=trim(texto)//'<div id="'//trim(copiaObjetos(1,i)) // '">'
+                copiaObjetos(1,i)=" "
+                k=0
+                do while (trim(copiaObjetos(20+k,i)) /= " ")
+                    print *, "Aquí hay un add de un div"
+                    previous=trim(copiaObjetos(20+k,i))
+                    call div(previous)
+                    k=k+1
+                end do
+                texto=trim(texto)//'</div>'
+
+            !Si lo que se encontró es un boton
+            else if(trim(copiaObjetos(2,i))=="Boton") then
+                texto=trim(texto)//'< input type="submit" id="'//trim(copiaObjetos(1,i))
+                copiaObjetos(1,i)=" "
+                k=3
+                do while (trim(copiaObjetos(k,i)) /= " ")
+                    
+                    if (k==11) then
+                        texto=trim(texto)//' value="'//trim(copiaObjetos(k,i))//'"'
+                    end if
+
+                    !quizá le tengo que agregar la alineación pero está pendiente
+
+                    k=k+1
+                end do
+                texto=trim(texto)//'"/>'
+
+            !Si lo que se encontró es un check
+            else if (trim(copiaObjetos(2,i))=="Check") then
+                texto=trim(texto)//'<input type="checkbox" id="'//trim(copiaObjetos(k,i))
+                copiaObjetos(1,i)=" "
+                k=3
+                do while (trim(copiaObjetos(k,i)) /= " ")
+                    
+                    if (k==11) then
+                        texto=trim(texto)//' value="'//trim(copiaObjetos(k,i))//'"'
+                    else if (k==13) then
+                        texto=trim(texto)//' checked'
+                    else if (k==14) then
+                        texto=trim(texto)//' name="'//trim(copiaObjetos(k,i))//'"'
+                    end if
+                    !quizá le tengo que agregar la alineación pero está pendiente
+
+                    k=k+1
+                end do
+                texto=trim(texto)//'/>'
+
+            !Si lo que se encontró es un radio
+            else if(trim(copiaObjetos(2,i))=="RadioBoton") then
+                texto=trim(texto)//'<input type="radio" id="'//trim(copiaObjetos(1,i))
+                copiaObjetos(1,i)=" "
+                k=3
+                do while (trim(copiaObjetos(k,i)) /= " ")
+                    
+                    if (k==11) then
+                        texto=trim(texto)//' value="'//trim(copiaObjetos(k,i))//'"'
+                    else if (k==13) then
+                        texto=trim(texto)//' checked'
+                    else if (k==14) then
+                        texto=trim(texto)//' name="'//trim(copiaObjetos(k,i))//'"'
+                    end if
+                    !quizá le tengo que agregar la alineación pero está pendiente
+
+                    k=k+1
+                end do
+                texto=trim(texto)//'/>'
+
+            !Si lo que se encontró es una etiqueta
+            else if(trim(copiaObjetos(2,i))=="Etiqueta") then
+                texto=trim(texto)//'<label id="'//trim(copiaObjetos(1,i))//'>'
+                copiaObjetos(1,i)=" "
+                k=3
+                do while (trim(copiaObjetos(k,i)) /= " ")
+                    
+                    if (k==11) then
+                        texto=trim(texto)//trim(copiaObjetos(k,i)(2:len(trim(copiaObjetos(k+1,i)))-1))
+                    end if
+                    !quizá le tengo que agregar la alineación pero está pendiente
+
+                    k=k+1
+                end do
+                texto=trim(texto)//'</label>'
+
+            !Si lo que se encontró es un area de texto
+            else if (trim(copiaObjetos(2,i))=="AreaTexto") then
+                texto=trim(texto)//'<textarea id="'//trim(copiaObjetos(1,i))//'>'
+                copiaObjetos(1,i)=" "
+                k=3
+                do while (trim(copiaObjetos(k,i)) /= " ")
+                    
+                    if (k==11) then
+                        texto=trim(texto)//trim(copiaObjetos(k,i)(2:len(trim(copiaObjetos(k+1,i)))-1))
+                    end if
+
+                    k=k+1
+                end do
+                texto=trim(texto)//'</textarea>'
+
+            !Si lo que se encontró es una clave
+            else if (trim(copiaObjetos(2,i))=="Clave") then
+                texto=trim(texto)//'<input type="password" id="'//trim(copiaObjetos(1,i))
+                copiaObjetos(1,i)=" "
+                k=3
+                do while (trim(copiaObjetos(k,i)) /= " ")
+                    
+                    if (k==11) then
+                        texto=trim(texto)//' value="'//trim(copiaObjetos(k,i))//'"'
+                    end if
+
+                    k=k+1
+                end do
+                texto=trim(texto)//'/>'
+
+            !Si que se encontró es una etiqueta
+            else if (trim(copiaObjetos(2,i))=="Texto") then
+                texto=trim(texto)//'<input type="text" id="'//trim(copiaObjetos(1,i))
+                copiaObjetos(1,i)=" "
+                k=3
+                do while (trim(copiaObjetos(k,i)) /= " ")
+                    
+                    if (k==11) then
+                        texto=trim(texto)//' value="'//trim(copiaObjetos(k,i))//'"'
+                    end if
+
+                    k=k+1
+                end do
+                texto=trim(texto)//'/>'
+
+
+
+            end if
 
 
 
 
+            
+
+
+
+        end if
+        i=i+1
+    end do
+
+end subroutine div
 
 
 !Creación de HTML -----------------------------------------------------------------------------------------------------------------------------------
