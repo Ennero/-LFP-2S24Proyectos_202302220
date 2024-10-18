@@ -1527,6 +1527,7 @@ subroutine crearCSS()
 
     do while (i <= sizeObjetos)
 
+
         !Aquí solo le asigno el body en vez de this
         if(trim(objetos(1,i))=='this') then
             write(unit, '(A)') 'body {'
@@ -1537,6 +1538,7 @@ subroutine crearCSS()
         do while (j <= 50)
 
             if (trim(objetos(j, i)) /= ' ') then
+
                 if (j == 3) then
                     ! Para el color de la letra
                     write(unit, '(A)') 'color: rgb(' // trim(objetos(j+1, i)) // ',' // trim(objetos(j+2, i)) // ',' // trim(objetos(j+3, i)) // ');'
@@ -1563,13 +1565,32 @@ subroutine crearCSS()
                 else if (j == 18) then
                     ! Para la posición
                     write(unit, '(A)') 'position: absolute;'
-                    write(unit, '(A)') 'top: ' // trim(objetos(j, i)) // 'px;'
-                    write(unit, '(A)') 'left: ' // trim(objetos(j+1, i)) // 'px;'
+                    write(unit, '(A)') 'left: ' // trim(objetos(j, i)) // 'px;'
+                    write(unit, '(A)') 'top: ' // trim(objetos(j+1, i)) // 'px;'
                     j = j + 2
                 end if
+
             end if
             j = j + 1
+            
         end do
+
+        !Agrego los predefinidos
+        if(trim(objetos(15,i)) == ' ' .and. trim(objetos(2,i))== 'AreaTexto') then
+            write(unit, '(A)') 'width: 150px;'
+        else if(trim(objetos(15,i)) == ' ') then
+            write(unit, '(A)') 'width: 100px;'
+        end if
+        if(trim(objetos(16,i)) == ' ' .and. trim(objetos(2,i))== 'AreaTexto') then
+            write(unit, '(A)') 'height: 150px;'
+        else if(trim(objetos(16,i)) == ' ') then
+            write(unit, '(A)') 'height: 25px;'
+        end if  
+
+        if (trim(objetos(12,i)) == ' ' .and. (trim(objetos(2,i))=='Boton' .or. trim(objetos(2,i))=='Texto' .or. trim(objetos(2,i))=='AreaTexto')) then
+            write(unit, '(A)') 'text-align: left;'
+        end if
+
         write(unit, '(A)') '}'
         i = i + 1
     end do
@@ -1582,6 +1603,9 @@ subroutine crearCSS()
         end do
     end do
     close (unit)
+
+    print *,"sdfjaskdfjskldfjaklsdjfjsadjfajsdklfjasdf"
+    print *, copiaObjetos(11,5)
 
 end subroutine crearCSS
 !Fin Creación de CSS -----------------------------------------------------------------------------------------------------------------------------------
@@ -1646,8 +1670,7 @@ recursive subroutine div(previous)
     do while (i<=sizeObjetos)
     !Caso de donde viene de this
         if (trim(copiaObjetos(1,i))==trim(previous)) then
-
-
+            print *, copiaObjetos(2,i),i
             !Si lo que se encontró es un contenedor
             if(trim(copiaObjetos(2,i))=="Contenedor") then
                 texto=trim(texto)//'<div id="'//trim(copiaObjetos(1,i)) // '">'
@@ -1656,6 +1679,7 @@ recursive subroutine div(previous)
                 do while (trim(copiaObjetos(20+k,i)) /= " ")
                     print *, "Aquí hay un add de un div"
                     previous=trim(copiaObjetos(20+k,i))
+                    
                     call div(previous)
                     k=k+1
                 end do
@@ -1663,30 +1687,30 @@ recursive subroutine div(previous)
 
             !Si lo que se encontró es un boton
             else if(trim(copiaObjetos(2,i))=="Boton") then
-                texto=trim(texto)//'< input type="submit" id="'//trim(copiaObjetos(1,i))
+                texto=trim(texto)//'<input type="submit" id="'//trim(copiaObjetos(1,i))//'"'
                 copiaObjetos(1,i)=" "
                 k=3
-                do while (trim(copiaObjetos(k,i)) /= " ")
+                do while (k<20)
                     
                     if (k==11) then
-                        texto=trim(texto)//' value="'//trim(copiaObjetos(k,i))//'"'
+                        texto=trim(texto)//' value="'//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k,i))-1))//'"'
                     end if
 
                     !quizá le tengo que agregar la alineación pero está pendiente
 
                     k=k+1
                 end do
-                texto=trim(texto)//'"/>'
+                texto=trim(texto)//'/>'
 
             !Si lo que se encontró es un check
             else if (trim(copiaObjetos(2,i))=="Check") then
                 texto=trim(texto)//'<input type="checkbox" id="'//trim(copiaObjetos(k,i))
                 copiaObjetos(1,i)=" "
                 k=3
-                do while (trim(copiaObjetos(k,i)) /= " ")
+                do while (k<20)
                     
                     if (k==11) then
-                        texto=trim(texto)//' value="'//trim(copiaObjetos(k,i))//'"'
+                        texto=trim(texto)//' value="'//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k,i))-1))//'"'
                     else if (k==13) then
                         texto=trim(texto)//' checked'
                     else if (k==14) then
@@ -1703,7 +1727,7 @@ recursive subroutine div(previous)
                 texto=trim(texto)//'<input type="radio" id="'//trim(copiaObjetos(1,i))
                 copiaObjetos(1,i)=" "
                 k=3
-                do while (trim(copiaObjetos(k,i)) /= " ")
+                do while (k<20)
                     
                     if (k==11) then
                         texto=trim(texto)//' value="'//trim(copiaObjetos(k,i))//'"'
@@ -1720,13 +1744,12 @@ recursive subroutine div(previous)
 
             !Si lo que se encontró es una etiqueta
             else if(trim(copiaObjetos(2,i))=="Etiqueta") then
-                texto=trim(texto)//'<label id="'//trim(copiaObjetos(1,i))//'>'
+                texto=trim(texto)//'<label id="'//trim(copiaObjetos(1,i))//'">'
                 copiaObjetos(1,i)=" "
                 k=3
-                do while (trim(copiaObjetos(k,i)) /= " ")
-                    
+                do while (k<20)
                     if (k==11) then
-                        texto=trim(texto)//trim(copiaObjetos(k,i)(2:len(trim(copiaObjetos(k+1,i)))-1))
+                        texto=trim(texto)//(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k,i))-1))
                     end if
                     !quizá le tengo que agregar la alineación pero está pendiente
 
@@ -1739,10 +1762,10 @@ recursive subroutine div(previous)
                 texto=trim(texto)//'<textarea id="'//trim(copiaObjetos(1,i))//'>'
                 copiaObjetos(1,i)=" "
                 k=3
-                do while (trim(copiaObjetos(k,i)) /= " ")
+                do while (k<20)
                     
                     if (k==11) then
-                        texto=trim(texto)//trim(copiaObjetos(k,i)(2:len(trim(copiaObjetos(k+1,i)))-1))
+                        texto=trim(texto)//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k+1,i))-1))
                     end if
 
                     k=k+1
@@ -1751,13 +1774,13 @@ recursive subroutine div(previous)
 
             !Si lo que se encontró es una clave
             else if (trim(copiaObjetos(2,i))=="Clave") then
-                texto=trim(texto)//'<input type="password" id="'//trim(copiaObjetos(1,i))
+                texto=trim(texto)//'<input type="password" id="'//trim(copiaObjetos(1,i))//'"'
                 copiaObjetos(1,i)=" "
                 k=3
-                do while (trim(copiaObjetos(k,i)) /= " ")
-                    
+                do while (k<20)
+                    print *, "Entre a la clave"
                     if (k==11) then
-                        texto=trim(texto)//' value="'//trim(copiaObjetos(k,i))//'"'
+                        texto=trim(texto)//' value="'//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k,i))-1))//'"'
                     end if
 
                     k=k+1
@@ -1766,20 +1789,18 @@ recursive subroutine div(previous)
 
             !Si que se encontró es una etiqueta
             else if (trim(copiaObjetos(2,i))=="Texto") then
-                texto=trim(texto)//'<input type="text" id="'//trim(copiaObjetos(1,i))
+                texto=trim(texto)//'<input type="text" id="'//trim(copiaObjetos(1,i))//'"'
                 copiaObjetos(1,i)=" "
                 k=3
-                do while (trim(copiaObjetos(k,i)) /= " ")
+                do while (k<20)
                     
                     if (k==11) then
-                        texto=trim(texto)//' value="'//trim(copiaObjetos(k,i))//'"'
+                        texto=trim(texto)//' value="'//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k,i))-1))//'"'
                     end if
 
                     k=k+1
                 end do
                 texto=trim(texto)//'/>'
-
-
 
             end if
 
