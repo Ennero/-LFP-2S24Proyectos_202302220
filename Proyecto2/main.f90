@@ -72,6 +72,12 @@ program proceso
             tio=tio+1
         end do
         
+        !Ciclo para escribir los errores sintácticos
+        herberth=1
+        do while(herberth<=cuentaES)
+            print *, 'Error Sintactico',char(10),trim(erroresSintacticos(1,herberth)),char(10),trim(erroresSintacticos(2,herberth)), char(10),trim(erroresSintacticos(3,herberth)), char(10),trim(erroresSintacticos(4,herberth))
+            herberth=herberth+1
+        end do
 
 
 
