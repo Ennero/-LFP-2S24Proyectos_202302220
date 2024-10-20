@@ -18,6 +18,22 @@ program proceso
     implicit none
     integer::ta,tata,tio,herberth
 
+    !*****************************************************************************************************************************************
+    !-----------------------------------
+    integer::ios
+    character(len=200)::linea
+    !-----------------------------------
+
+    !PROBANDOOOOOOO
+    open(10, file='entradas\calificacion.LFP', status='old', action='read', encoding='UTF-8') !Abro el archivo de entrada
+    do
+    read(10, '(A)', iostat = ios) linea
+    if (ios /= 0) exit   ! Se alcanzo el fin del archivo
+    entrada = trim(entrada) // trim(linea) // char(10) ! Concatenar la línea leida al valor de entrada y agregar un salto de línea
+    end do
+    !PROBANDOOOOOOO
+    !*****************************************************************************************************************************************
+
     !Inicializando variables
     cuentaT=0
     cuentaN=0
@@ -44,7 +60,7 @@ program proceso
     !-----------------------------------
 
 
-    call leer() !Llamo a la subrutina leer
+    !call leer() !Llamo a la subrutina leer
 
     call analizar()
 
