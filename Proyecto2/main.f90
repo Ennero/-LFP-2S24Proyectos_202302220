@@ -17,6 +17,22 @@ module globales
         use globales
         implicit none
         integer::ta,tata,tio,herberth
+
+            !-----------------------------------
+            integer::ios
+            character(len=200)::linea
+            !-----------------------------------
+
+        entrada = '' !Inicializo la variable entrada
+
+            !PROBANDOOOOOOO
+            open(10, file='entradas/calificacion.LFP', status='old', action='read') !Abro el archivo de entrada
+            do
+            read(10, '(A)', iostat = ios) linea
+            if (ios /= 0) exit   ! Se alcanzo el fin del archivo
+            entrada = trim(entrada) // trim(linea) // char(10) ! Concatenar la línea leida al valor de entrada y agregar un salto de línea
+            end do
+            !PROBANDOOOOOOO
     
         !Inicializando variables
         cuentaT=0
@@ -30,7 +46,7 @@ module globales
         bien=.true.
     
     
-        entrada = '' !Inicializo la variable entrada
+
     
         !Inicializo la cosa de los objetos
         do while (ta<=50)
@@ -669,12 +685,7 @@ module globales
     
         !Llamo a las subrutinas que contienen Colocacion
         call block3()
-    
-        !if (eSintactico) then
-            !print *, "Error sintáctico"
-        !else
-            !print *, "Análisis sintáctico correcto"
-        !end if
+
     
     end subroutine inicio
     
@@ -712,9 +723,7 @@ module globales
             call validoControl()
             if (controlValido) then
                 controlValido=.false.
-    
-                !print *, terminales(1,cuentaConsumo)
-                call Control()
+                    call Control()
     
                 call ControlLista()
             else
@@ -1447,8 +1456,6 @@ module globales
                             objetos(14,k)=trim(tokens(1,i+4))
                         end if
     
-                        !print *, trim(objetos(3,k)),trim(objetos(4,k)),trim(objetos(5,k)),trim(objetos(6,k)),trim(objetos(7,k)),trim(objetos(8,k)),trim(objetos(9,k)),trim(objetos(10,k))
-                        !print *, "Propiedad",trim(objetos(1,k)),trim(objetos(2,k)),trim(objetos(3,k)),trim(objetos(4,k)),trim(objetos(5,k)),trim(objetos(6,k)),trim(objetos(7,k)),trim(objetos(8,k)),trim(objetos(9,k)),trim(objetos(10,k)),trim(objetos(11,k)),trim(objetos(12,k)),trim(objetos(13,k)),trim(objetos(14,k)),trim(objetos(15,k)),trim(objetos(16,k))
                     end if
                     k=k+1
                 end do
@@ -1494,8 +1501,6 @@ module globales
                                 p=p+1
                             end do
                         end if
-                        !print *, trim(objetos(17,k)),trim(objetos(18,k)),trim(objetos(19,k))
-                        !print *, "Colocacion",trim(objetos(1,k)),trim(objetos(2,k)),trim(objetos(3,k)),trim(objetos(4,k)),trim(objetos(5,k)),trim(objetos(6,k)),trim(objetos(7,k)),trim(objetos(8,k)),trim(objetos(9,k)),trim(objetos(10,k)),trim(objetos(11,k)),trim(objetos(12,k)),trim(objetos(13,k)),trim(objetos(14,k)),trim(objetos(15,k)),trim(objetos(16,k)),trim(objetos(17,k)),trim(objetos(18,k)),trim(objetos(19,k)),trim(objetos(20,k)),trim(objetos(20,k)),trim(objetos(21,k)), trim(objetos(22,k)),trim(objetos(23,k))
                     end if
                     k=k+1
                 end do
@@ -1515,7 +1520,6 @@ module globales
                                 p=p+1
                             end do
                         end if
-                        !print *, trim(objetos(19,k))
                     end if
                     k=k+1
                 end do
@@ -1612,7 +1616,6 @@ module globales
             write(unit, '(A)') '}'
             i = i + 1
         end do
-        !print *, objetos(17,1), objetos(18,1), objetos(19,1)
         
         !Copio el arreglo que contiene los objetos
         do i=1,50
@@ -1622,7 +1625,6 @@ module globales
         end do
         close (unit)
     
-        !print *, copiaObjetos(11,5)
     
     end subroutine crearCSS
     !Fin Creación de CSS -----------------------------------------------------------------------------------------------------------------------------------
@@ -1664,7 +1666,6 @@ module globales
                     copiaObjetos(1,i)=" "
                     texto=trim(texto)//'<body>'
                     do while (trim(copiaObjetos(20+k,i)) /= " ")
-                        !print *, "aqui va un ADD"
                         previous=trim(copiaObjetos(20+k,i))
                         call div(previous)
                         k=k+1
@@ -1686,14 +1687,12 @@ module globales
             do while (i<=sizeObjetos)
             !Caso de donde viene de this
                 if (trim(copiaObjetos(1,i))==trim(previous)) then
-                    !print *, copiaObjetos(2,i),i
                     !Si lo que se encontró es un contenedor
                     if(trim(copiaObjetos(2,i))=="Contenedor") then
                         texto=trim(texto)//'<div id="'//trim(copiaObjetos(1,i)) // '">'
                         copiaObjetos(1,i)=" "
                         k=0
                         do while (trim(copiaObjetos(20+k,i)) /= " ")
-                            !print *, "Aquí hay un add de un div"
                             previous=trim(copiaObjetos(20+k,i))
                             
                             call div(previous)
@@ -1794,7 +1793,6 @@ module globales
                         copiaObjetos(1,i)=" "
                         k=3
                         do while (k<20)
-                            !print *, "Entre a la clave"
                             if (k==11) then
                                 texto=trim(texto)//' value="'//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k,i))-1))//'"'
                             end if
