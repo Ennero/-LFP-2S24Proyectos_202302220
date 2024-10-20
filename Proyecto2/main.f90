@@ -46,18 +46,18 @@ program proceso
 
     call leer() !Llamo a la subrutina leer
 
-    call analizar ()
+    call analizar()
 
     !Genero los dos HTML
 
     call html_bueno()
 
-    !call iniciarAnalisisSintactico() !Llamo a la subrutina iniciarAnalisisSintactico
-    !call crearObjetos()
+    call iniciarAnalisisSintactico() !Llamo a la subrutina iniciarAnalisisSintactico
+    call crearObjetos()
 
     !Subrutinas para crear el CSS y el HTML
-    !call crearCSS()
-    !call crearHTML()
+    call crearCSS()
+    call crearHTML()
     !Fin de la creación de los archivos
 
     call html_malo()
@@ -460,22 +460,27 @@ subroutine html_bueno() !Subrutina que genera el html con los tokens encontrados
     integer :: unit,i
     character(len=4) :: cuento
     unit=2024 !Se asigna un numero de unidad
-    open(unit, file='tablaTokens.html', status='unknown', action='write') !Se abre el archivo para escribir
+    open(unit, file='tablaTokens.html', status='unknown', action='write', encoding='UTF-8')
     write(unit, '(A)') "<!DOCTYPE html>"
     write(unit, '(A)') "<html>"
     write(unit, '(A)') "<head>"
+    write(unit, '(A)') '<meta charset="UTF-8">'
     write(unit, '(A)') "<title>Tabla de Tokens</title>"
     write(unit, '(A)') "<style>"
-    write(unit, '(A)') "table {width: 50%; border-collapse: collapse;}"
-    write(unit, '(A)') "th, td {border: 1px solid black; padding: 8px; text-align: left;}"
-    write(unit, '(A)') "th {background-color: #1fc738;}"
+    write(unit, '(A)') "body {font-family: Arial, sans-serif; margin: 20px;}"
+    write(unit, '(A)') "table {width: 70%; border-collapse: collapse; margin: 20px 0;}"
+    write(unit, '(A)') "th, td {border: 1px solid black; padding: 10px; text-align: left;}"
+    write(unit, '(A)') "th {background-color: #4CAF50; color: white;}"
+    write(unit, '(A)') "tr:nth-child(even) {background-color: #f2f2f2;}"
     write(unit, '(A)') "</style>"
     write(unit, '(A)') "</head>"
     write(unit, '(A)') "<body>"
     write(unit, '(A)') "<h2>Tabla de Tokens</h2>"
     write(unit, '(A)') "<table>"
     write(unit, '(A)') "<tr><th>Número de Token</th><th>Lexema</th><th>Tipo</th><th>Fila</th><th>Columna</th></tr>"
+
     do i=1,cuentaT
+        
         write(cuento,'(I3)') i 
         write(unit, '(A)') "<tr>"
         write(unit, '(A)') "<td>"//trim(cuento)//"</td>"
@@ -660,16 +665,16 @@ subroutine inicio()
     call Block1()
 
     !Llamo a las subrutinas que contienen Propiedades
-    !call block2()
+    call block2()
 
     !Llamo a las subrutinas que contienen Colocacion
-    !call block3()
+    call block3()
 
-    if (eSintactico) then
-        print *, "Error sintáctico"
-    else
-        print *, "Análisis sintáctico correcto"
-    end if
+    !if (eSintactico) then
+        !print *, "Error sintáctico"
+    !else
+        !print *, "Análisis sintáctico correcto"
+    !end if
 
 end subroutine inicio
 
@@ -708,7 +713,7 @@ end subroutine inicio
         if (controlValido) then
             controlValido=.false.
 
-            print *, terminales(1,cuentaConsumo)
+            !print *, terminales(1,cuentaConsumo)
             call Control()
 
             call ControlLista()
@@ -1298,8 +1303,8 @@ subroutine panico(esperado)
     character(len=200), intent(in) :: esperado
 
 
-    print *, cuentaConsumo
-    print *, terminales(1,cuentaConsumo-1)
+    !print *, cuentaConsumo
+    !print *, terminales(1,cuentaConsumo-1)
 
     if ((terminales(1,cuentaConsumo-1)/=";" .or. terminales(1,cuentaConsumo-1)/="-->" ) .and. cuentaConsumo<=cuentaT) then
 
@@ -1307,18 +1312,18 @@ subroutine panico(esperado)
         !Genero el error :)
         call agregarSintactico(trim(esperado)//repeat(' ', 200 - len_trim(esperado)), "Se encontro un " // terminales(1,cuentaConsumo) // repeat(' ', 200-len_trim(esperado)-len_trim(terminales(1,cuentaConsumo))-len_trim("se encontro un ")), &
         tokens(3,cuentaConsumo)//repeat(' ', 200 -len_trim(tokens(3,cuentaConsumo))) , tokens(4,cuentaConsumo)//repeat(' ', 200 -len_trim(tokens(4,cuentaConsumo))))
-        print *, "entroooooooooooooooooooooooooooooooooooooooooooooo"
+        !print *, "entroooooooooooooooooooooooooooooooooooooooooooooo"
 
         recuperado=.false.
 
         !Avanzo hasta encontrar un token que sea ;
         do while (cuentaConsumo<=cuentaCT)
             if (trim(terminales(1,cuentaConsumo)) == ";" .or. trim(terminales(1,cuentaConsumo))=="-->" ) then
-                print *, terminales(1,cuentaConsumo)
+                !print *, terminales(1,cuentaConsumo)
                 !Salgo del bucle porque encontre el símbolo de sincronización
                 exit 
 
-                print *, "Buscando ; o -->"
+                !print *, "Buscando ; o -->"
             end if
             cuentaConsumo=cuentaConsumo+1
         end do
@@ -1326,15 +1331,15 @@ subroutine panico(esperado)
         !Ya me encuentro en las posición del token ;
         !Ahora voy una posición adelante de este
         if (cuentaConsumo<=cuentaCT) then
-            print *, "Token de sincronización encontrado en la posición ", cuentaConsumo
+            !print *, "Token de sincronización encontrado en la posición ", cuentaConsumo
             cuentaConsumo=cuentaConsumo+1
         else
-            print *, "Se nos acabaron los tokens xd"
+            !print *, "Se nos acabaron los tokens xd"
             
         end if
 
     else
-        print *, "Ya se encuentra en la posición correcta"
+        !print *, "Ya se encuentra en la posición correcta"
     end if
 
 end subroutine panico
@@ -1594,7 +1599,7 @@ subroutine crearCSS()
         if(trim(objetos(16,i)) == ' ' .and. trim(objetos(2,i))== 'AreaTexto') then
             write(unit, '(A)') 'height: 150px;'
         else if(trim(objetos(16,i)) == ' ') then
-            write(unit, '(A)') 'height: 25px;'
+            write(unit, '(A)') 'height: 20px;'
         end if  
 
         if (trim(objetos(12,i)) == ' ' .and. (trim(objetos(2,i))=='Boton' .or. trim(objetos(2,i))=='Texto' .or. trim(objetos(2,i))=='Clave')) then
@@ -1617,8 +1622,7 @@ subroutine crearCSS()
     end do
     close (unit)
 
-    print *,"sdfjaskdfjskldfjaklsdjfjsadjfajsdklfjasdf"
-    print *, copiaObjetos(11,5)
+    !print *, copiaObjetos(11,5)
 
 end subroutine crearCSS
 !Fin Creación de CSS -----------------------------------------------------------------------------------------------------------------------------------
@@ -1660,7 +1664,7 @@ end subroutine crearCSS
                 copiaObjetos(1,i)=" "
                 texto=trim(texto)//'<body>'
                 do while (trim(copiaObjetos(20+k,i)) /= " ")
-                    print *, "aqui va un ADD"
+                    !print *, "aqui va un ADD"
                     previous=trim(copiaObjetos(20+k,i))
                     call div(previous)
                     k=k+1
@@ -1677,20 +1681,19 @@ end subroutine crearCSS
         integer :: i,j,k
         character(len=200) :: previous
 
-        print *, previous
         i=1
         j=1
         do while (i<=sizeObjetos)
         !Caso de donde viene de this
             if (trim(copiaObjetos(1,i))==trim(previous)) then
-                print *, copiaObjetos(2,i),i
+                !print *, copiaObjetos(2,i),i
                 !Si lo que se encontró es un contenedor
                 if(trim(copiaObjetos(2,i))=="Contenedor") then
                     texto=trim(texto)//'<div id="'//trim(copiaObjetos(1,i)) // '">'
                     copiaObjetos(1,i)=" "
                     k=0
                     do while (trim(copiaObjetos(20+k,i)) /= " ")
-                        print *, "Aquí hay un add de un div"
+                        !print *, "Aquí hay un add de un div"
                         previous=trim(copiaObjetos(20+k,i))
                         
                         call div(previous)
@@ -1791,7 +1794,7 @@ end subroutine crearCSS
                     copiaObjetos(1,i)=" "
                     k=3
                     do while (k<20)
-                        print *, "Entre a la clave"
+                        !print *, "Entre a la clave"
                         if (k==11) then
                             texto=trim(texto)//' value="'//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k,i))-1))//'"'
                         end if

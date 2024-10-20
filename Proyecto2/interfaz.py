@@ -15,7 +15,6 @@ erroresLexicos=[]
 analizado=False
 
 
-
 # Función para analizar el texto
 def analizar():
     global analizado
@@ -32,13 +31,16 @@ def analizar():
         resultado=subprocess.run(['./main.exe'],input=datos, stdout=subprocess.PIPE,text=True)
         salida=resultado.stdout.strip() #Aquí obtengo la salida del análisis
         print(salida)
+        print("+++++++++++++++++++++++++++++++++++++++++++++++++++++")
         #Aquí coloco todo lo demás del análisis
         if (salida=="Bien"):
             messagebox.showinfo("Análisis", "El análisis se realizó correctamente.")
             info.config(text="Análisis correcto", foreground="green") #Mensaje de éxito
             analizado=True
-
-
+            
+            #limpio la tabla de errores
+            for i in arbol.get_children():
+                arbol.delete(i)
 
         else:
             messagebox.showerror("Error", "Error durante el análisis")
@@ -62,10 +64,7 @@ def analizar():
                 arbol.insert("", "end", values=fila)
             
             
-        
 
-def actualizarTabla(): #Función para actualizar la tabla de errores
-    pass
 
 def insertarDatos(tabla):
     for indice, row in tabla.iterrows():
@@ -95,14 +94,13 @@ def posicion(event):
     x, y = event.x, event.y
     pos.config(text=f"x={x}, y={y}")
 
-
 def abro(): #Función para abrir un archivo
     global ruta, guardado,preguntar #Uso las variables globales
     info.config(text="Abriendo archivo...", foreground="black") #Mensaje que dice el proceso
     ruta=filedialog.askopenfilename(title="Abrir archivo",filetypes=(("Archivos .LFP", "*.LFP"),)) #Solo acepta archivos .LFP
     if ruta != "": #Si la ruta no está vacía
         guardado=True #Cambio el estado de guardado
-        preguntar=False
+        preguntar=True
         try:
             with open(ruta, "r", encoding="utf-8") as archivo: #Abro el archivo
                 cuerpo=archivo.read() #Leo el archivo
@@ -117,10 +115,11 @@ def abro(): #Función para abrir un archivo
         info.config(text="No se seleccionó ningún archivo", foreground="red") #Mensaje de error
 
 def guardar(): #Función para guardar el archivo
-    global ruta, guardado #Uso las variables globales
+    global ruta, guardado, preguntar #Uso las variables globales
     info.config(text="Guardando archivo...", foreground="black") #Mensaje que dice el proceso
     if guardado:
         try:
+            preguntar=True
             with open(ruta,"w", encoding="utf-8") as archivo: #Abro el archivo
                 archivo.write(entrada.get("1.0", tk.END)) #Escribo el contenido del editor de texto en el archivo
             info.config(text="Se guardó el archivo correctamente", foreground="green") #Mensaje de éxito
@@ -144,7 +143,7 @@ def guardarComo(): #Función para guardar el archivo como
 
 def pregunta(): #Función para preguntar si se quiere guardar
     global guardado, ruta, preguntar #Uso las variables globales
-    preguntando=messagebox.askyesno("Guardar", "¿Desea guardar los cambios?") #Pregunta si se quiere guardar
+    preguntando=messagebox.askyesno("Guardar", "¿Desea guardar antes de abrir un nuevo archivo?") #Pregunta si se quiere guardar
     if preguntando: #Si se quiere guardar
         guardar() #Llamo a la función guardar
     else: #Si no se quiere guardar
@@ -161,6 +160,10 @@ def nuevar(): #Función para empezar un archivo nuevo
     guardado=False #El estado de guardado se vuelve falso
     entrada.delete("1.0", tk.END) #Borro el contenido del editor de texto
     info.config(text="Nuevo archivo creado", foreground="green") #Mensaje de éxito
+
+    #limpio la tabla de errores
+    for i in arbol.get_children():
+        arbol.delete(i)
 
 # Creo la ventana principal
 ventana = tk.Tk()
@@ -270,8 +273,6 @@ arbol.heading("Linea", text="Linea")
 arbol.heading("Columna", text="Columna")
 arbol.heading("Token", text="Token")
 arbol.heading("Descripción", text="Descripción")
-
-
 
 #Las scrollbar de la tabla
 barraX=tk.Scrollbar(frame2, orient="vertical", command=arbol.yview)
