@@ -1,0 +1,1 @@
+Esto es una prueba con ASCII extendido: áéíóú ñ ü ç

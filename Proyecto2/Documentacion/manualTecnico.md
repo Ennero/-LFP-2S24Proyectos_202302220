@@ -23,7 +23,11 @@ Se pretende propiciar el conocimiento requerido para que se pueda replicar el co
 - Compilador de Fortran (GNU Fortran, Intel Fortran Compiles, etc)
 ## Lógica y descripción de la solución
 ### Calculo del Autómata
-Antes de realizar el cálculo del autómata, se creó una expresión regular que se replicaría en el aútomata finito determinsta.
+Antes de realizar el cálculo del autómata una tabla contodos los lexemas que querríamos leer mediante mediante el analizador léxico.
+
+![Expresión Regular](./img/tokens.png)
+
+Una vez con la tabla, se creó una expresión regular que se replicaría en el aútomata finito determinsta.
 
 ![Expresión Regular](./img/expresion.png)
 
@@ -611,8 +615,54 @@ Así como este bloque, todos los demás están estructurados de forma similar a 
 
 Para manejar los errores con el analizador sintáctico, se creó una subrutina que se llamaría cuando se encuentre un error en donde no se encuentra el token que se espera.
 El modo pánico consume tokens hasta encontrar uno con el que se pueda encontrar un token de sincronización para poder seguir con el análisis.
+ 
+ ```fortran
+ !Subrutina que se llama cuando hay un error sintáctico
+    subroutine panico(esperado)
+        use globales
+        implicit none
+        character(len=200), intent(in) :: esperado
+        character(len=200) :: x, y
+        integer :: i, limite
 
+        y=trim(tokens(3,cuentaConsumo))
+        x=trim(tokens(4,cuentaConsumo))
+        i=cuentaConsumo
+        limite=50
 
+        !Desactivo el flag de error sintáctico
+        eSintactico = .false.
+
+        if(reset .and. loco) then
+
+            reset=.false.
+
+            call agregarSintactico(trim(esperado)//repeat(' ', 200 - len_trim(esperado)), "Se encontro " // trim(terminales(1,i))//' [ '//trim(tokens(1,i))//' ]'//repeat(' ',200-len_trim(tokens(1,i))-len_trim(terminales(1,i))-len_trim("Se    encontro ::")), &
+                    tokens(3,i)//repeat(' ', 200 -len_trim(tokens(3,i))) , tokens(4,i)//repeat(' ', 200 -len_trim(tokens(4,i))))      
+            
+            do while (cuentaConsumo <= cuentaCT)
+                ! Consumo el siguiente token
+                cuentaConsumo = cuentaConsumo + 1
+        
+                ! Verifica si se ha alcanzado un delimitador seguro
+                if (trim(terminales(1, cuentaConsumo)) == trim(";")) then
+
+                    !Añado uno más para que se tenga el valor posterior al ;
+                    cuentaConsumo = cuentaConsumo + 1
+                    
+                    exit
+                end if
+        
+                ! Si se alcanza el final del archivo, salir del ciclo
+                if (cuentaConsumo > cuentaCT) then
+                    !print *, "No se pudo recuperar, fin del archivo."
+                    loco=.false.
+                    exit
+                end if
+            end do
+        end if
+    end subroutine panico
+```
 
 
 **Creación de los archivos CSS y HTML**

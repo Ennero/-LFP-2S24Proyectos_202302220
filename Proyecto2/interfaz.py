@@ -101,6 +101,11 @@ def posicion(event):
 
 def abro(): #Función para abrir un archivo
     global ruta, guardado,preguntar #Uso las variables globales
+
+    #limpio la tabla de errores
+    for i in arbol.get_children():
+        arbol.delete(i)
+
     info.config(text="Abriendo archivo...", foreground="black") #Mensaje que dice el proceso
     ruta=filedialog.askopenfilename(title="Abrir archivo",filetypes=(("Archivos .LFP", "*.LFP"),)) #Solo acepta archivos .LFP
     if ruta != "": #Si la ruta no está vacía
@@ -274,7 +279,7 @@ arbol.pack(side="left") #Lo empaqueto en el frame2
 #Encabezados
 arbol.heading("No. Error", text="No. Error")
 arbol.heading("Tipo", text="Tipo")
-arbol.heading("Token/Token Esperado", text="Token/Token Esperado")
+arbol.heading("Token/Token Esperado", text="Token/Lexema Esperado")
 arbol.heading("Descripción", text="Descripción")
 arbol.heading("Linea", text="Linea")
 arbol.heading("Columna", text="Columna")

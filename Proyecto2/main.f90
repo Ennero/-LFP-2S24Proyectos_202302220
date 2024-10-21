@@ -18,10 +18,8 @@
         implicit none
         integer::ta,tata,tio,herberth
 
-
         entrada = '' !Inicializo la variable entrada
 
-    
         !Inicializando variables
         cuentaT=0
         cuentaN=0
@@ -44,7 +42,6 @@
         end do
         !-----------------------------------
     
-    
         call leer() !Llamo a la subrutina leer
     
         call analizar()
@@ -54,11 +51,6 @@
         call html_bueno()
     
         call iniciarAnalisisSintactico() !Llamo a la subrutina iniciarAnalisisSintactico
-
-
-
-    
-        !call html_malo()
     
         if (bien) then
             call crearObjetos()
@@ -82,9 +74,6 @@
                 print *, 'Error Sintactico',char(10),trim(erroresSintacticos(1,herberth)),char(10),trim(erroresSintacticos(2,herberth)), char(10),trim(erroresSintacticos(3,herberth)), char(10),trim(erroresSintacticos(4,herberth))
                 herberth=herberth+1
             end do
-    
-    
-    
         end if
     end program proceso
     
@@ -502,66 +491,6 @@
         end do
         close(unit) !Se cierra el archivo
     end subroutine html_bueno
-    
-    subroutine html_malo () !Subrutina que genera el html con los errores encontrados
-        use globales
-        implicit none
-        !Asigno las variables
-        integer :: unit,i,j
-        character(len=4) :: cuento
-        unit=254 !Se asigna un numero de unidad
-        open(unit, file='tablaErrores.html', status='unknown', action='write') !Se abre el archivo para escribir
-        write(unit, '(A)') "<!DOCTYPE html>"
-        write(unit, '(A)') "<html>"
-        write(unit, '(A)') "<head>"
-        write(unit, '(A)') "<title>Tabla de Errores</title>"
-        write(unit, '(A)') "<style>"
-        write(unit, '(A)') "table {width: 50%; border-collapse: collapse;}"
-        write(unit, '(A)') "th, td {border: 1px solid black; padding: 8px; text-align: left;}"
-        write(unit, '(A)') "th {background-color: #f84545;}"
-        write(unit, '(A)') "</style>"
-        write(unit, '(A)') "</head>"
-        write(unit, '(A)') "<body>"
-        write(unit, '(A)') "<h2>Tabla de Errores</h2>"
-        write(unit, '(A)') "<table>"
-        write(unit, '(A)') "<tr><th>Numero de Error</th><th>Tipo de Error</th><th>Token/Componente Esperado</th><th>Descripcion</th><th>Fila</th><th>Columna</th></tr>"
-        do i=1,cuentaE
-            write(cuento,'(I3)') i
-            write(unit, '(A)') "<tr>"
-            write(unit, '(A)') "<td>"//trim(cuento)//"</td>"
-            write(unit, '(A)') "<td>Error Lexico</td>"
-            if (trim(erroresLexicos(1,i))=="-->") then
-                write(unit, '(A)') "<td>--&gt;</td>"
-            else if (trim(erroresLexicos(1,i))=="<!--") then
-                write(unit, '(A)') "<td>&lt;!--</td>"
-            else
-                write(unit, '(A)') "<td>"//trim(erroresLexicos(1,i))//"</td>"
-            end if
-            write(unit, '(A)') "<td>"//trim(erroresLexicos(2,i))//"</td>"
-            write(unit, '(A)') "<td>"//trim(erroresLexicos(3,i))//"</td>"
-            write(unit, '(A)') "<td>"//trim(erroresLexicos(4,i))//"</td>"
-            write(unit, '(A)') "</tr>"
-        end do
-        do j=1, cuentaES
-            write(cuento,'(I3)') i
-            write(unit, '(A)') "<tr>"
-            write(unit, '(A)') "<td>"//trim(cuento)//"</td>"
-            write(unit, '(A)') "<td>Error Sintactico</td>"
-            if (trim(erroresSintacticos(1,j))=="-->") then
-                write(unit, '(A)') "<td>--&gt;</td>"
-            else if (trim(erroresSintacticos(1,j))=="<!--") then
-                write(unit, '(A)') "<td>&lt;!--</td>"
-            else
-                write(unit, '(A)') "<td>"//trim(erroresSintacticos(1,i))//"</td>"
-            end if
-            write(unit, '(A)') "<td>"//trim(erroresSintacticos(2,j))//"</td>"
-            write(unit, '(A)') "<td>"//trim(erroresSintacticos(3,j))//"</td>"
-            write(unit, '(A)') "<td>"//trim(erroresSintacticos(4,j))//"</td>"
-            write(unit, '(A)') "</tr>"
-            i=i+1
-        end do
-        close(unit) !Se cierra el archivo
-    end subroutine html_malo
     
     subroutine leer() !Lee el archivo de entrada enviado por phyton
         use globales
@@ -1311,7 +1240,6 @@
     
     !Fin Lectura de Colocacion ------------------------------------------------------------------------------------------------------------
     
-    
     !Subrutina que se llama cuando hay un error sintáctico
     subroutine panico(esperado)
         use globales
@@ -1332,7 +1260,7 @@
 
             reset=.false.
 
-            call agregarSintactico(trim(esperado)//repeat(' ', 200 - len_trim(esperado)), "Se encontro un " // terminales(1,i) // repeat(' ', 200-len_trim(terminales(1,i))-len_trim("Se encontro un ")), &
+            call agregarSintactico(trim(esperado)//repeat(' ', 200 - len_trim(esperado)), "Se encontro " // trim(terminales(1,i))//' [ '//trim(tokens(1,i))//' ]'//repeat(' ',200-len_trim(tokens(1,i))-len_trim(terminales(1,i))-len_trim("Se    encontro ::")), &
                     tokens(3,i)//repeat(' ', 200 -len_trim(tokens(3,i))) , tokens(4,i)//repeat(' ', 200 -len_trim(tokens(4,i))))      
             
             do while (cuentaConsumo <= cuentaCT)
@@ -1341,7 +1269,6 @@
         
                 ! Verifica si se ha alcanzado un delimitador seguro
                 if (trim(terminales(1, cuentaConsumo)) == trim(";")) then
-
 
                     !Añado uno más para que se tenga el valor posterior al ;
                     cuentaConsumo = cuentaConsumo + 1
@@ -1357,7 +1284,6 @@
                 end if
             end do
         end if
-        
     end subroutine panico
     
     !Subrutina que contiene las propiedades y recorre los tokens conforme se van consumiendo

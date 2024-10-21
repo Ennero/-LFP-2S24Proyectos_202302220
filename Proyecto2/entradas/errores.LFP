@@ -4,18 +4,24 @@
     Boton cmdIngresar; 
     Clave pswClave; 
     Etiqueta passw; 
+    }
     Etiqueta ; // Error sintactico: Se esperaba el token IDENTIFICADOR, pero se encontro PUNTOYCOMA.
     Texto JTextField0; 
     Contenedor contlogo2; 
     Contenedor ContLogo1; 
     Contenedor ContBody; 
+    contenedor Controles
 Controles ¡--> // Error lexico: '¡' no pertenece al lenguaje
-
+115
++
+--*
 <!--Propiedades 
     /* 
     Definicion de propiedades 
     */ 
 
+    ¡
+    ¿
     //#$inicio de contlogin 
     contlogin.setAncho(290); 
     contlogin.setAlto(150); 
@@ -76,11 +82,12 @@ Propiedades -->
     */ 
     contFondo.setPosicion(25,330); 
     this.add(contFondo); 
-    contlogin.setPosicion(586,110);
+    contlogin.setPosicion(586,110); JUANITO
 
     ContBody.add(contlogin); 
     passw.setPosicion(11,62);
 
+    pedrito echeverria
     contlogin.add(passw); 
     cmdIngresar.setPosicion(40,100); 
     pswClave.setPosicion(67,55);
