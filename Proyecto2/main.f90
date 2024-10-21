@@ -1,10 +1,10 @@
-module globales
+    module globales
     !Aquí ando declarando las variables globales que usaré
         character(len=15000)::entrada,texto
         integer::cuentaT, cuentaN, cuentaE, cuentaCT, cuentaConsumo, cuentaES,sizeObjetos,temporal
         character(len=200), dimension(4,2000)::tokens,erroresLexicos,copiaTokens,erroresSintacticos
         character(len=200), dimension(1,2000)::terminales
-        logical::eLexico, eSintactico, controlValido, propiedadValida, colocacionValida, ErrorValidado, exepcion1, recuperado,bien
+        logical::eLexico, eSintactico, controlValido, propiedadValida, colocacionValida, ErrorValidado, exepcion1, recuperado,bien, reset, loco
     
         !Arreglo para almacenar los objetos con la siguiente estructura
         !   1     2          3       4   5   6        7       8   9  10    11         12         13        14     15      16       17     18   19  20...
@@ -18,21 +18,9 @@ module globales
         implicit none
         integer::ta,tata,tio,herberth
 
-            !-----------------------------------
-            integer::ios
-            character(len=200)::linea
-            !-----------------------------------
 
         entrada = '' !Inicializo la variable entrada
 
-            !PROBANDOOOOOOO
-            open(10, file='entradas/calificacion.LFP', status='old', action='read') !Abro el archivo de entrada
-            do
-            read(10, '(A)', iostat = ios) linea
-            if (ios /= 0) exit   ! Se alcanzo el fin del archivo
-            entrada = trim(entrada) // trim(linea) // char(10) ! Concatenar la línea leida al valor de entrada y agregar un salto de línea
-            end do
-            !PROBANDOOOOOOO
     
         !Inicializando variables
         cuentaT=0
@@ -44,9 +32,6 @@ module globales
         ta=1
         tata=1
         bien=.true.
-    
-    
-
     
         !Inicializo la cosa de los objetos
         do while (ta<=50)
@@ -60,7 +45,7 @@ module globales
         !-----------------------------------
     
     
-        !call leer() !Llamo a la subrutina leer
+        call leer() !Llamo a la subrutina leer
     
         call analizar()
     
@@ -69,16 +54,19 @@ module globales
         call html_bueno()
     
         call iniciarAnalisisSintactico() !Llamo a la subrutina iniciarAnalisisSintactico
-        call crearObjetos()
+
+
+
     
-        !Subrutinas para crear el CSS y el HTML
-        call crearCSS()
-        call crearHTML()
-        !Fin de la creación de los archivos
-    
-        call html_malo()
+        !call html_malo()
     
         if (bien) then
+            call crearObjetos()
+        
+            !Subrutinas para crear el CSS y el HTML
+            call crearCSS()
+            call crearHTML()
+            !Fin de la creación de los archivos
             print *, "Bien"
         else
             !Ciclo para escribir los errores léxicos
@@ -666,6 +654,8 @@ module globales
         ErrorValidado=.false.
         exepcion1=.false.
         recuperado=.true.
+        reset=.true.
+        loco=.true.
     
         call inicio() !Llamo a la subrutina inicio
     
@@ -676,17 +666,35 @@ module globales
     subroutine inicio()
         use globales
         implicit none
-    
+
+        !Lo mismo de los comentarios cochinos
+        do while (terminales(1,cuentaConsumo)=="Comentario")
+            cuentaConsumo=cuentaConsumo+1
+        end do    
+
         !Llamo a las subrutinas que contienen Controles
         call Block1()
-    
+
+        !Cosa de los comentarios que el aux dijo que no estaba PERO SI ESTÁ!
+        do while (terminales(1,cuentaConsumo)=="Comentario")
+            cuentaConsumo=cuentaConsumo+1
+        end do    
+        
         !Llamo a las subrutinas que contienen Propiedades
         call block2()
+
+        !Cosa de los comentarios que el aux dijo que no estaba PERO SI ESTÁ!
+        do while (terminales(1,cuentaConsumo)=="Comentario")
+            cuentaConsumo=cuentaConsumo+1
+        end do    
     
         !Llamo a las subrutinas que contienen Colocacion
         call block3()
 
-    
+        !Lo mismo de los comentarios cochinos
+        do while (terminales(1,cuentaConsumo)=="Comentario")
+            cuentaConsumo=cuentaConsumo+1
+        end do    
     end subroutine inicio
     
     !Lectura de Controles ----------------------------------------------------------------------------------------------------------------------------
@@ -718,7 +726,10 @@ module globales
         recursive subroutine ControlLista()
             use globales
             implicit none
-    
+
+            !Aqui coloco el reset
+            reset=.true.
+
             !Valido si es un control valido xd
             call validoControl()
             if (controlValido) then
@@ -743,7 +754,6 @@ module globales
     
                 !Llamo la subroutina para verificar la validez del token
                 call TIPO_Control()
-    
                 
                 !Consumo el token ID
                 call consumirToken(trim("ID")//repeat(" ",200-len_trim("ID")))
@@ -763,41 +773,32 @@ module globales
     
             if(trim(terminales(1,cuentaConsumo))=="Etiqueta") then
                 call consumirToken(trim("Etiqueta")//repeat(" ",200-len_trim("Etiqueta")))
-                eSintactico=.false.
                 return
             else if(trim(terminales(1,cuentaConsumo))=="Boton") then
                 call consumirToken(trim("Boton")//repeat(" ",200-len_trim("Boton")))
-                eSintactico=.false.
                 return
             else if(trim(terminales(1,cuentaConsumo))=="Check") then
                 call consumirToken(trim("Check")//repeat(" ",200-len_trim("Check")))
-                eSintactico=.false.
                 return
             else if(trim(terminales(1,cuentaConsumo))=="RadioBoton") then
                 call consumirToken(trim("RadioBoton")//repeat(" ",200-len_trim("RadioBoton")))
-                eSintactico=.false.
                 return
             else if(trim(terminales(1,cuentaConsumo))=="Texto") then
                 call consumirToken(trim("Texto")//repeat(" ",200-len_trim("Texto")))
-                eSintactico=.false.
                 return
             else if(trim(terminales(1,cuentaConsumo))=="AreaTexto") then
                 call consumirToken(trim("AreaTexto")//repeat(" ",200-len_trim("AreaTexto")))
-                eSintactico=.false.
                 return
             else if(trim(terminales(1,cuentaConsumo))=="Clave") then
                 call consumirToken(trim("Clave")//repeat(" ",200-len_trim("Clave")))
-                eSintactico=.false.
                 return
             else if(trim(terminales(1,cuentaConsumo))=="Contenedor") then
                 call consumirToken(trim("Contenedor")//repeat(" ",200-len_trim("Contenedor")))
-                eSintactico=.false.
                 return
             else !Si no es ninguno de los anteriores, entonces hay un error sintáctico
                 eSintactico=.true.
                 call panico(trim("un tipo de control")//repeat(" ",200-len_trim("un tipo de control")))
             end if
-    
         end subroutine TIPO_Control
     
         !Función que valida si son los controles válidos
@@ -858,6 +859,9 @@ module globales
         recursive subroutine PropiedadesLista()
             use globales
             implicit none
+
+            !Aqui coloco el reset
+            reset=.true.
     
             !Valido si es una propiedad válida xd
             call validoPropiedad()
@@ -1158,7 +1162,10 @@ module globales
         recursive subroutine ColocacionLista()
             use globales
             implicit none
-    
+            
+            !Aqui coloco el reset
+            reset=.true.
+            
             !Valido si es una colocación válida xd
             call validoColocacion()
     
@@ -1310,47 +1317,47 @@ module globales
         use globales
         implicit none
         character(len=200), intent(in) :: esperado
-    
-    
-        !print *, cuentaConsumo
-        !print *, terminales(1,cuentaConsumo-1)
-    
-        if ((terminales(1,cuentaConsumo-1)/=";" .or. terminales(1,cuentaConsumo-1)/="-->" ) .and. cuentaConsumo<=cuentaT) then
-    
-            !exepcion1=.false.
-            !Genero el error :)
-            call agregarSintactico(trim(esperado)//repeat(' ', 200 - len_trim(esperado)), "Se encontro un " // terminales(1,cuentaConsumo) // repeat(' ', 200-len_trim(esperado)-len_trim(terminales(1,cuentaConsumo))-len_trim("se encontro un ")), &
-            tokens(3,cuentaConsumo)//repeat(' ', 200 -len_trim(tokens(3,cuentaConsumo))) , tokens(4,cuentaConsumo)//repeat(' ', 200 -len_trim(tokens(4,cuentaConsumo))))
-            !print *, "entroooooooooooooooooooooooooooooooooooooooooooooo"
-    
-            recuperado=.false.
-    
-            !Avanzo hasta encontrar un token que sea ;
-            do while (cuentaConsumo<=cuentaCT)
-                if (trim(terminales(1,cuentaConsumo)) == ";" .or. trim(terminales(1,cuentaConsumo))=="-->" ) then
-                    !print *, terminales(1,cuentaConsumo)
-                    !Salgo del bucle porque encontre el símbolo de sincronización
-                    exit 
-    
-                    !print *, "Buscando ; o -->"
+        character(len=200) :: x, y
+        integer :: i, limite
+
+        y=trim(tokens(3,cuentaConsumo))
+        x=trim(tokens(4,cuentaConsumo))
+        i=cuentaConsumo
+        limite=50
+
+        !Desactivo el flag de error sintáctico
+        eSintactico = .false.
+
+        if(reset .and. loco) then
+
+            reset=.false.
+
+            call agregarSintactico(trim(esperado)//repeat(' ', 200 - len_trim(esperado)), "Se encontro un " // terminales(1,i) // repeat(' ', 200-len_trim(terminales(1,i))-len_trim("Se encontro un ")), &
+                    tokens(3,i)//repeat(' ', 200 -len_trim(tokens(3,i))) , tokens(4,i)//repeat(' ', 200 -len_trim(tokens(4,i))))      
+            
+            do while (cuentaConsumo <= cuentaCT)
+                ! Consumo el siguiente token
+                cuentaConsumo = cuentaConsumo + 1
+        
+                ! Verifica si se ha alcanzado un delimitador seguro
+                if (trim(terminales(1, cuentaConsumo)) == trim(";")) then
+
+
+                    !Añado uno más para que se tenga el valor posterior al ;
+                    cuentaConsumo = cuentaConsumo + 1
+                    
+                    exit
                 end if
-                cuentaConsumo=cuentaConsumo+1
+        
+                ! Si se alcanza el final del archivo, salir del ciclo
+                if (cuentaConsumo > cuentaCT) then
+                    !print *, "No se pudo recuperar, fin del archivo."
+                    loco=.false.
+                    exit
+                end if
             end do
-    
-            !Ya me encuentro en las posición del token ;
-            !Ahora voy una posición adelante de este
-            if (cuentaConsumo<=cuentaCT) then
-                !print *, "Token de sincronización encontrado en la posición ", cuentaConsumo
-                cuentaConsumo=cuentaConsumo+1
-            else
-                !print *, "Se nos acabaron los tokens xd"
-                
-            end if
-    
-        else
-            !print *, "Ya se encuentra en la posición correcta"
         end if
-    
+        
     end subroutine panico
     
     !Subrutina que contiene las propiedades y recorre los tokens conforme se van consumiendo

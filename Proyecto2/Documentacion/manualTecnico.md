@@ -398,12 +398,219 @@ subroutine html_bueno() !Subrutina que genera el html con los tokens encontrados
     close(unit) !Se cierra el archivo
 end subroutine html_bueno
 
-```
+``` 
+
 
 
 **Análisis Sintáctico**
 
+Previamente, en el proyecto 1 ya se había realizado un analizado léxico utilizando tokens y el método del arbol para crear el arbol sobre el cual se crearian los estados para el autómata que se programaría y que sería capaz de leer los tokens. Ahora, para crear el analizador sintáctico, se usó la gramática que se muestra previamente y a partir de esta se fueron creando cada una de las subrutinas que permitirían la verificación del orden en que se mostraría cada token.
 
+**Subrutinas para la verificación del orden léxico**
+
+Todo el análisis sintáctio comienza con una subrutina que da inicio a esta y sus variables.
+
+```fortran 
+subroutine iniciarAnalisisSintactico()
+        use globales
+        implicit none
+        
+        !Inicializo la variable que indica la posición del token dentro de la lista de tokens
+        cuentaConsumo=1
+    
+        eSintactico=.false.
+        ErrorValidado=.false.
+        exepcion1=.false.
+        recuperado=.true.
+    
+        call inicio() !Llamo a la subrutina inicio
+    
+    
+    end subroutine iniciarAnalisisSintactico
+```
+
+Cuando se llama inicio(), se llama la subrutina con la estructura general de toda el archivo, el cual está conformado por tres bloques de información.
+
+```fortran
+    !Estado inicial del analisis sintáctico (parte 2)
+    subroutine inicio()
+        use globales
+        implicit none
+    
+        !Llamo a las subrutinas que contienen Controles
+        call Block1()
+    
+        !Llamo a las subrutinas que contienen Propiedades
+        call block2()
+    
+        !Llamo a las subrutinas que contienen Colocacion
+        call block3()
+
+    
+    end subroutine inicio
+```
+En el primer bloque se esperaria que se encontrará el token inicial para el primer bloque, en caso de que no estuviera se llamaria al modo pánico. Se estaría esperando cada token en su orden como en la gramática.
+
+```fortran
+subroutine Block1()
+            use globales
+            implicit none
+    
+    
+            !Consumo el token <!--
+            call consumirToken(trim("<!--")//repeat(" ",200-len_trim("<!--")))
+            if (eSintactico) call panico(trim("<!--")//repeat(" ",200-len_trim("<!--")))
+    
+            !Consumo el token Controles
+            call consumirToken(trim("Controles")//repeat(" ",200-len_trim("Controles")))
+            if (eSintactico) call panico(trim("Controles")//repeat(" ",200-len_trim("Controles")))
+    
+            call ControlLista() !Llamo a la subrutina que contiene la lista de controles
+    
+            !Consumo el token Controles
+            call consumirToken(trim("Controles")//repeat(" ",200-len_trim("Controles")))
+            if (eSintactico) call panico(trim("Controles")//repeat(" ",200-len_trim("Controles")))
+    
+            !Consumo el token -->
+            call consumirToken(trim("-->")//repeat(" ",200-len_trim("-->")))
+            if (eSintactico) call panico(trim("-->")//repeat(" ",200-len_trim("-->")))
+    
+        end subroutine Block1
+```
+
+Esta misma estructura de Block1 se encuentra en cada uno de los bloques, y en el noTerminal, que seria controlLista(), se llamaria a la subsiguiente subrutina que sería capaz de leer lo que se contiene dentro del bloque. Esta subrutina seria recursiva debido a que representaria de cierta forma, cada línea que contendría el bloque, por lo tanto, después de cada una, podrian venir más, haciendo que se llame nuevamente la subrutina hasta no encontrar ninguna, lo que significaria que se llego al final del bloque y que se esperarían los tokens que muestran que se está cerrando el bloque.
+
+```fortran
+    recursive subroutine ControlLista()
+            use globales
+            implicit none
+    
+            !Valido si es un control valido xd
+            call validoControl()
+            if (controlValido) then
+                controlValido=.false.
+                    call Control()
+    
+                call ControlLista()
+            else
+    
+                !No hago nada xd
+            end if
+    end subroutine ControlLista 
+
+    !Función que valida si son los controles válidos
+    subroutine validoControl()
+            use globales
+            implicit none
+    
+            !Si el token es igual a un control
+            if (trim(terminales(1,cuentaConsumo))=="Etiqueta") then
+                controlValido=.true.
+            else if (trim(terminales(1,cuentaConsumo))=="Boton") then
+                controlValido=.true.
+            else if (trim(terminales(1,cuentaConsumo))=="Check") then
+                controlValido=.true.
+            else if (trim(terminales(1,cuentaConsumo))=="RadioBoton") then
+                controlValido=.true.
+            else if (trim(terminales(1,cuentaConsumo))=="Texto") then
+                controlValido=.true.
+            else if (trim(terminales(1,cuentaConsumo))=="AreaTexto") then
+                controlValido=.true.
+            else if (trim(terminales(1,cuentaConsumo))=="Clave") then
+                controlValido=.true.
+            else if (trim(terminales(1,cuentaConsumo))=="Contenedor") then
+                controlValido=.true.
+            else if (trim(terminales(1,cuentaConsumo))=="Comentario") then
+                controlValido=.true.
+            else !Si no es ninguno de los anteriores, entonces no es un control válido
+                controlValido=.false.
+            end if
+    end subroutine validoControl
+```
+
+Por último, dentro de control lista, se encontraria, de igual forma que anteriormente, el no terminal de la gramática creada, que esperaría la sintaxis de la linea en sí.
+
+``` fortran
+subroutine Control()
+            use globales
+            implicit none
+    
+            if(trim(terminales(1,cuentaConsumo))=="Comentario") then
+                call consumirToken(trim("Comentario")//repeat(" ",200-len_trim("Comentario")))
+                return
+            else
+    
+                !Llamo la subroutina para verificar la validez del token
+                call TIPO_Control()
+    
+                
+                !Consumo el token ID
+                call consumirToken(trim("ID")//repeat(" ",200-len_trim("ID")))
+                if (eSintactico) call panico(trim("ID")//repeat(" ",200-len_trim("ID")))
+    
+                !Consumo el token ;
+                call consumirToken(trim(";")//repeat(" ",200-len_trim(";")))
+                if (eSintactico) call panico(trim(";")//repeat(" ",200-len_trim(";")))
+                
+            end if
+    
+        end subroutine Control
+```
+
+Por último, dado a que pueden haber muchos controles, se tiene el No Terminal que identificaría el tipo de control aceptado.
+
+```fortran 
+subroutine TIPO_Control()
+            use globales
+            implicit none
+    
+            if(trim(terminales(1,cuentaConsumo))=="Etiqueta") then
+                call consumirToken(trim("Etiqueta")//repeat(" ",200-len_trim("Etiqueta")))
+                eSintactico=.false.
+                return
+            else if(trim(terminales(1,cuentaConsumo))=="Boton") then
+                call consumirToken(trim("Boton")//repeat(" ",200-len_trim("Boton")))
+                eSintactico=.false.
+                return
+            else if(trim(terminales(1,cuentaConsumo))=="Check") then
+                call consumirToken(trim("Check")//repeat(" ",200-len_trim("Check")))
+                eSintactico=.false.
+                return
+            else if(trim(terminales(1,cuentaConsumo))=="RadioBoton") then
+                call consumirToken(trim("RadioBoton")//repeat(" ",200-len_trim("RadioBoton")))
+                eSintactico=.false.
+                return
+            else if(trim(terminales(1,cuentaConsumo))=="Texto") then
+                call consumirToken(trim("Texto")//repeat(" ",200-len_trim("Texto")))
+                eSintactico=.false.
+                return
+            else if(trim(terminales(1,cuentaConsumo))=="AreaTexto") then
+                call consumirToken(trim("AreaTexto")//repeat(" ",200-len_trim("AreaTexto")))
+                eSintactico=.false.
+                return
+            else if(trim(terminales(1,cuentaConsumo))=="Clave") then
+                call consumirToken(trim("Clave")//repeat(" ",200-len_trim("Clave")))
+                eSintactico=.false.
+                return
+            else if(trim(terminales(1,cuentaConsumo))=="Contenedor") then
+                call consumirToken(trim("Contenedor")//repeat(" ",200-len_trim("Contenedor")))
+                eSintactico=.false.
+                return
+            else !Si no es ninguno de los anteriores, entonces hay un error sintáctico
+                eSintactico=.true.
+                call panico(trim("un tipo de control")//repeat(" ",200-len_trim("un tipo de control")))
+            end if
+end subroutine TIPO_Control
+```
+
+Finalmente, como todo es recursivo y está dentro de cada una de las subrutinas, de revisaría todo en orden.
+
+Así como este bloque, todos los demás están estructurados de forma similar a este mostrado, con la diferencia de que se estructura de acuerdo a la gramática creada para cada uno.
+
+**Manejo de errores con el modo pánico**
+
+Para manejar los errores con el analizador sintáctico, se creó una subrutina que se llamaría cuando se encuentre un error en donde no se encuentra el token que se espera.
+El modo pánico consume tokens hasta encontrar uno con el que se pueda encontrar un token de sincronización para poder seguir con el análisis.
 
 
 

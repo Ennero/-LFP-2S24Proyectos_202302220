@@ -18,6 +18,11 @@ analizado=False
 # Función para analizar el texto
 def analizar():
     global analizado
+
+    #limpio la tabla de errores
+    for i in arbol.get_children():
+        arbol.delete(i)
+
     cuerpo=entrada.get("1.0", tk.END) #Obtengo el contenido del editor de texto
     lineas=cuerpo.splitlines() #Divido el contenido del editor de texto por líneas
     todasVacias=all(linea=="" or linea.isspace() for linea in lineas) #Verifico si todas las líneas estan vacias
@@ -264,15 +269,16 @@ salir.config(background="white", foreground="red", font=("Arial", 13, "bold"))
 
 
 #Creación de la tabla de errores ----------------------------------------------
-arbol=tkk.Treeview(frame2, columns=("No. Error","Tipo","Linea","Columna","Token","Descripción"), show="headings")
+arbol=tkk.Treeview(frame2, columns=("No. Error","Tipo","Token/Token Esperado","Descripción","Linea","Columna"), show="headings")
 arbol.pack(side="left") #Lo empaqueto en el frame2
 #Encabezados
 arbol.heading("No. Error", text="No. Error")
 arbol.heading("Tipo", text="Tipo")
+arbol.heading("Token/Token Esperado", text="Token/Token Esperado")
+arbol.heading("Descripción", text="Descripción")
 arbol.heading("Linea", text="Linea")
 arbol.heading("Columna", text="Columna")
-arbol.heading("Token", text="Token")
-arbol.heading("Descripción", text="Descripción")
+
 
 #Las scrollbar de la tabla
 barraX=tk.Scrollbar(frame2, orient="vertical", command=arbol.yview)

@@ -66,7 +66,7 @@ S ::= Block1 Block2 Block3
 -----------------------------------------------------------------------------------------------------------------------------------
 Block1 ::= '<!--' 'Controles' ControlLista 'Controles' '-->'
 
-ControlLista ::= Control ControlLista | ε
+ControlLista ::= Control ControlLista | ε | COMENTARIO
 
 Control ::= TIPO_Control ID ';' | COMENTARIO
 
@@ -76,7 +76,7 @@ TIPO_Control ::= 'Etiqueta' | 'Boton' | 'Check'
 -----------------------------------------------------------------------------------------------------------------------------------
 Block2 ::= '<!--' 'Propiedades' PropiedadesLista 'Propiedades' '-->'
 
-PropiedadesLista ::= Propiedad PropiedadesLista | ε
+PropiedadesLista ::= Propiedad PropiedadesLista | ε | COMENTARIO
 
 Propiedad ::= ID '.' Funcion ';' | COMENTARIO
 
@@ -95,7 +95,7 @@ Booleano ::= 'true' | 'false'
 -----------------------------------------------------------------------------------------------------------------------------------
 Block3 ::= '<!--' 'Colocacion' colocacionLista 'Colocacion' '-->'
 
-colocacionLista ::= Colocacion colocacionLista | ε
+colocacionLista ::= Colocacion colocacionLista | ε | COMENTARIO
 
 Colocacion ::= ID '.' Colocar ';'
     | 'this' '.' '(' ID ')' ';'
