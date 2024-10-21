@@ -8,7 +8,7 @@
     
         !Arreglo para almacenar los objetos con la siguiente estructura
         !   1     2          3       4   5   6        7       8   9  10    11         12         13        14     15      16       17     18   19  20...
-        ! | ID | Tipo | ColorLetra | 0 | 0 | 0 | ColorFondo | 0 | 0 | 0 | Texto | Alineacion | Marcado | Grupo | Ancho | Alto | Posicion | x | y | Add
+        ! | ID | Tipo | ColorLetra | 0 | 0 | 0 | ColorFondo | 0 | 0 | 0 | Texto | Alineacion | Marcada | Grupo | Ancho | Alto | Posicion | x | y | Add
         
         character(len=200), dimension(50,200)::objetos,copiaObjetos
     end module globales
@@ -19,7 +19,7 @@
         integer::ta,tata,tio,herberth
 
         entrada = '' !Inicializo la variable entrada
-
+        
         !Inicializando variables
         cuentaT=0
         cuentaN=0
@@ -49,15 +49,17 @@
         !Genero los dos HTML
     
         call html_bueno()
-    
+
         call iniciarAnalisisSintactico() !Llamo a la subrutina iniciarAnalisisSintactico
-    
+        
         if (bien) then
             call crearObjetos()
-        
-            !Subrutinas para crear el CSS y el HTML
+
             call crearCSS()
             call crearHTML()
+        
+            !Subrutinas para crear el CSS y el HTML
+            
             !Fin de la creación de los archivos
             print *, "Bien"
         else
@@ -107,6 +109,7 @@
             i=i+1 !Aumento la posición del caracter
             posC=posC+1 !Aumento la posición de la columna
             c=entrada(i:i) !Tomo el caracter de la posición
+
     
             !Comienzo con el automata
             select case (estado)
@@ -219,7 +222,7 @@
                     else if (trim(lexema)=='setAlineacion') then
                         call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
                         call agregarTerminal(trim(lexema)// repeat(' ', 200 - len_trim(lexema)))
-                    else if ( trim(lexema)=='setMarcado' ) then
+                    else if ( trim(lexema)=='setMarcada' ) then
                         call agregarToken(trim(lexema)// repeat(' ', 200 - len_trim(lexema)), "Palabra reservada" // repeat(' ', 200-len_trim("Palabra reservada")), posF, posC-len_trim(lexema))
                         call agregarTerminal(trim(lexema)// repeat(' ', 200 - len_trim(lexema)))
                     else if (trim(lexema)=='setGrupo') then
@@ -319,8 +322,17 @@
                     i=i-1
                     posC=posC-1
                 else
+
+                    !Si hay un espacio para que no lo elimine con el trim
+                    if(c==' ' .or. c==char(9)) then
+                        VEspacio=VEspacio+1 !Si hay un espacio, lo agrego en el siguiente
     
-                    lexema=trim(lexema)//c !Concateno cualquier cosa que no sea comillas
+                    else
+    
+                        lexema=trim(lexema)//repeat(char(32),VEspacio)//c !Concateno el espacio al lexema
+                        VEspacio=0
+                    end if
+    
                 end if
     
         !Estado de lectura de apertura de control (parte 1) 6->10
@@ -445,6 +457,7 @@
     
     
     end subroutine analizar
+
     
     subroutine html_bueno() !Subrutina que genera el html con los tokens encontrados
         use globales
@@ -551,6 +564,8 @@
         cuentaCT=cuentaCT+1
         terminales(1,cuentaCT)=terminal
     end subroutine agregarTerminal
+
+    
     !Analisis léxico --------------------------------------------------------------------------------------------------------------------------------   
     
     !subrutina para agregar errores sintácticos
@@ -558,13 +573,14 @@
         use globales !Se usa el modulo globales
         implicit none
         character(len=200) :: esperado, descrip,linea, columna
+
+        !La verdad quiero quitar esta variable pero ya sirve y tengo miedo :(
         eLexico=.true. !Se cambia el valor de error a true (porque ya hay un error xd)
+        bien=.false.
         cuentaES=cuentaES+1
         erroresSintacticos(1,cuentaES)=(esperado)
         erroresSintacticos(2,cuentaES)=(descrip)
-    
-        !write(linea2,'(I0)') linea !Probar nuevamente la forma en la que escribo estas cosas porque ODIO FORTRAAAAAN
-        !write(columna2,'(I0)') columna !Lo paso a string el int
+        
         erroresSintacticos(3,cuentaES)=trim(linea)
         erroresSintacticos(4,cuentaES)=trim(columna)
     end subroutine agregarSintactico
@@ -975,11 +991,11 @@
                 call consumirToken(trim(")")//repeat(" ",200-len_trim(")")))
                 if (eSintactico) call panico(trim(")")//repeat(" ",200-len_trim(")")))
     
-            else if (trim(terminales(1,cuentaConsumo))=="setMarcado") then
+            else if (trim(terminales(1,cuentaConsumo))=="setMarcada") then
     
-                !Consumo el token setMarcado
-                call consumirToken(trim("setMarcado")//repeat(" ",200-len_trim("setMarcado")))
-                if (eSintactico) call panico(trim("setMarcado")//repeat(" ",200-len_trim("setMarcado")))
+                !Consumo el token setMarcada
+                call consumirToken(trim("setMarcada")//repeat(" ",200-len_trim("setMarcada")))
+                if (eSintactico) call panico(trim("setMarcada")//repeat(" ",200-len_trim("setMarcada")))
     
                 !Consumo el token (
                 call consumirToken(trim("(")//repeat(" ",200-len_trim("(")))
@@ -1007,7 +1023,7 @@
     
             else !Si no es ninguna de las anteriores, entonces hay un error sintáctico
                 eSintactico=.true.
-                call panico(trim("una propiedad")//repeat(" ",200-len_trim("una propiedad")))
+                call panico(trim("Una propiedad")//repeat(" ",200-len_trim("una propiedad")))
             end if
         end subroutine Funcion
     
@@ -1278,7 +1294,6 @@
         
                 ! Si se alcanza el final del archivo, salir del ciclo
                 if (cuentaConsumo > cuentaCT) then
-                    !print *, "No se pudo recuperar, fin del archivo."
                     loco=.false.
                     exit
                 end if
@@ -1336,6 +1351,7 @@
             .or. trim(tokens(1,i))=="Clave" .or. trim(tokens(1,i))=="Contenedor") then
                 objetos(1,j)=tokens(1,i+1)
                 objetos(2,j)=trim(tokens(1,i))
+
                 j=j+1
             end if
         end do
@@ -1361,11 +1377,15 @@
             !Si es un ID, entonces es una propiedad
             if (trim(terminales(1,i))=="ID") then
     
+
                 k=1 !Reinicio la k
                 !Reviso dentro de cada objeto
                 do while (k<j)
+
+                    
                     if (trim(objetos(1,k))==trim(tokens(1,i))) then
                         if (trim(tokens(1,i+2))=="setColorLetra") then
+
                             objetos(3,k)=trim(tokens(1,i+2))
                             objetos(4,k)=trim(tokens(1,i+4))
                             objetos(5,k)=trim(tokens(1,i+6))
@@ -1383,12 +1403,11 @@
                             objetos(10,k)=trim(tokens(1,i+8))
                         else if (trim(tokens(1,i+2))=="setAlineacion") then
                             objetos(12,k)=trim(tokens(1,i+4))
-                        else if (trim(tokens(1,i+2))=="setMarcado") then
+                        else if (trim(tokens(1,i+2))=="setMarcada") then
                             objetos(13,k)=trim(tokens(1,i+4))
                         else if (trim(tokens(1,i+2))=="setGrupo") then
                             objetos(14,k)=trim(tokens(1,i+4))
-                        end if
-    
+                        end if    
                     end if
                     k=k+1
                 end do
@@ -1424,7 +1443,7 @@
                             objetos(19,k)=trim(tokens(1,i+6))
                         else if (trim(tokens(1,i+2))=="add") then
     
-                            p=20 !Reinicio la ñ
+                            p=20 !Reinicio la p
                             !Reviso cada Add si ya tiene o no
                             do while (p<=50)
                                 if (trim(objetos(p,k))==" ") then
@@ -1453,6 +1472,7 @@
                                 p=p+1
                             end do
                         end if
+
                     end if
                     k=k+1
                 end do
@@ -1652,7 +1672,7 @@
     
                     !Si lo que se encontró es un check
                     else if (trim(copiaObjetos(2,i))=="Check") then
-                        texto=trim(texto)//'<input type="checkbox" id="'//trim(copiaObjetos(k,i))
+                        texto=trim(texto)//'<input type="checkbox" id="'//trim(copiaObjetos(1,i))//'"'
                         copiaObjetos(1,i)=" "
                         k=3
                         do while (k<20)
@@ -1678,7 +1698,7 @@
                         do while (k<20)
                             
                             if (k==11) then
-                                texto=trim(texto)//' value="'//trim(copiaObjetos(k,i))//'"'
+                                texto=trim(texto)//' value="'//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k,i))-1))//'"'
                             else if (k==13) then
                                 texto=trim(texto)//' checked'
                             else if (k==14) then
@@ -1693,6 +1713,7 @@
                     !Si lo que se encontró es una etiqueta
                     else if(trim(copiaObjetos(2,i))=="Etiqueta") then
                         texto=trim(texto)//'<label id="'//trim(copiaObjetos(1,i))//'">'
+                        
                         copiaObjetos(1,i)=" "
                         k=3
                         do while (k<20)
@@ -1707,13 +1728,13 @@
     
                     !Si lo que se encontró es un area de texto
                     else if (trim(copiaObjetos(2,i))=="AreaTexto") then
-                        texto=trim(texto)//'<textarea id="'//trim(copiaObjetos(1,i))//'>'
+                        texto=trim(texto)//'<textarea id="'//trim(copiaObjetos(1,i))//'">'
                         copiaObjetos(1,i)=" "
                         k=3
                         do while (k<20)
                             
                             if (k==11) then
-                                texto=trim(texto)//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k+1,i))-1))
+                                texto=trim(texto)//trim(copiaObjetos(k,i)(2:len_trim(copiaObjetos(k,i))-1))
                             end if
     
                             k=k+1

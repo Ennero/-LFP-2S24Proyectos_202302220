@@ -8,7 +8,6 @@ import copy
 
 
 
-
 #Declarando unas variables globales
 errores=[]
 erroresLexicos=[]
