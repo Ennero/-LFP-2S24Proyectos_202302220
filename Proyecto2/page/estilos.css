@@ -18,7 +18,7 @@ font-size: 12px;
 }
 #cmdIngresar{
 position: absolute;
-left: 40px;
+left: 100px;
 top: 130px;
 width: 100px;
 height: 20px;
@@ -80,7 +80,7 @@ text-align: left;
 font-size: 12px;
 }
 #contlogo2{
-background-color: rgb(255,218,185);
+background-color: rgb(235,118,185);
 width: 150px;
 height: 50px;
 position: absolute;
@@ -89,7 +89,7 @@ top: 25px;
 font-size: 12px;
 }
 #ContLogo1{
-background-color: rgb(255,182,193);
+background-color: rgb(255,182,13);
 width: 50px;
 height: 50px;
 position: absolute;
@@ -98,7 +98,7 @@ top: 25px;
 font-size: 12px;
 }
 #ContBody{
-background-color: rgb(240,255,240);
+background-color: rgb(140,255,240);
 width: 800px;
 height: 300px;
 position: absolute;

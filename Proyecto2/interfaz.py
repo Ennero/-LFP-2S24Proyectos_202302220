@@ -67,8 +67,6 @@ def analizar():
                 temporadita+=1
                 arbol.insert("", "end", values=fila)
             
-            
-
 
 def insertarDatos(tabla):
     for indice, row in tabla.iterrows():

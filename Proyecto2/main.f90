@@ -625,6 +625,7 @@
             cuentaConsumo=cuentaConsumo+1
         end do    
         
+        
         !Llamo a las subrutinas que contienen Propiedades
         call block2()
 
